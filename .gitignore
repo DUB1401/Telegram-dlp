@@ -1,0 +1,15 @@
+# Data files.
+Data/Account.session-journal
+Data/Account.session
+Data/Users
+
+# Visual Studio project files.
+Telegram-dlp.pyproj
+Telegram-dlp.sln
+.vs
+
+# Python cache.
+__pycache__
+
+# Downloaded videos.
+Files
