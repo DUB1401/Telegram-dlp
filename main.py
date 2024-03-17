@@ -113,6 +113,8 @@ else:
 	def Command(Message: types.Message):
 		# Авторизация пользователя.
 		User = UsersManagerObject.auth(Message.from_user)
+		# Изменение статуса загрузки.
+		UsersManagerObject.set_user_value(User.id, "downloading", False)
 		# Отправка сообщения: приветствие.
 		Bot.send_message(
 			chat_id = Message.chat.id,
