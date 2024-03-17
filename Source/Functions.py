@@ -1,4 +1,4 @@
-﻿from telebot.types import KeyboardButton, ReplyKeyboardMarkup, User
+from telebot.types import KeyboardButton, ReplyKeyboardMarkup, User
 from dublib.Methods import WriteJSON
 from Source.Users import UserData
 

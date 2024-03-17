@@ -6,44 +6,51 @@ import os
 class VideoManager:
 	
 	def download(self, link: str, user_id: int | str) -> dict | None:
-		# Результат выполнения.
+		# Р РµР·СѓР»СЊС‚Р°С‚ РІС‹РїРѕР»РЅРµРЅРёСЏ.
 		Result = None
+		# Р•СЃР»Рё РєР°С‚Р°Р»РѕРі РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚, СЃРѕР·РґР°С‚СЊ РµРіРѕ.
 		if not os.path.exists(f"Files/{user_id}"): os.makedirs(f"Files/{user_id}")
-		# Определения исполняемых команд.
+		# РћРїСЂРµРґРµР»РµРЅРёСЏ РёСЃРїРѕР»РЅСЏРµРјС‹С… РєРѕРјР°РЅРґ.
 		Execs = {
-			 "linux": f"yt-dlp/yt-dlp {link} -o Files/{user_id}/%(title)s.%(ext)s --dump-json --quiet --no-warnings",
-			 "win32": f"yt-dlp\\yt-dlp.exe {link} -o Files\\{user_id}\\%(title)s.%(ext)s --dump-json --quiet --no-warnings"
+			 "linux": "python3." + str(sys.version_info[1]) +  f" yt-dlp/yt-dlp {link} -o \"Files/{user_id}/%(title)s.%(ext)s\" --dump-json --quiet --no-warnings",
+			 "win32": f"yt-dlp\\yt-dlp.exe {link} -o \"Files\\{user_id}\\%(title)s.%(ext)s\" --dump-json --quiet --no-warnings"
 		}
-		# Скачивание видео.
+		# РЎРєР°С‡РёРІР°РЅРёРµ РІРёРґРµРѕ.
 		Result = subprocess.getoutput(Execs[sys.platform])
-		# Если нет ошибки скачивания, спарсить дамп видео.
-		if Result.startswith("ERROR") == False: Result = json.loads(Result)
-		# Выполнение скачивания.
-		ExitCode = os.system(Execs[sys.platform].replace("--dump-json ", ""))
-		# Если скачивание неуспешно, обнулить дампирование.
-		if ExitCode != 0: Result = None
+		
+		try:
+			# Р•СЃР»Рё РЅРµС‚ РѕС€РёР±РєРё СЃРєР°С‡РёРІР°РЅРёСЏ, СЃРїР°СЂСЃРёС‚СЊ РґР°РјРї РІРёРґРµРѕ.
+			if not Result.startswith("ERROR"): Result = json.loads(Result)
+			# Р’С‹РїРѕР»РЅРµРЅРёРµ СЃРєР°С‡РёРІР°РЅРёСЏ.
+			ExitCode = os.system(Execs[sys.platform].replace("--dump-json ", ""))
+			# Р•СЃР»Рё СЃРєР°С‡РёРІР°РЅРёРµ РЅРµСѓСЃРїРµС€РЅРѕ, РѕР±РЅСѓР»РёС‚СЊ РґР°РјРїРёСЂРѕРІР°РЅРёРµ.
+			if ExitCode != 0: Result = None
+		
+		except:
+			# РћР±РЅСѓР»РµРЅРёРµ СЂРµР·СѓР»СЊС‚Р°С‚Р°.
+			Result = None
 		
 		return Result
 	
 	def dump(self, filename: str, user_id: str, compression: bool, premium: bool = False) -> int:
-		# Определения исполняемых команд.
+		# РћРїСЂРµРґРµР»РµРЅРёСЏ РёСЃРїРѕР»РЅСЏРµРјС‹С… РєРѕРјР°РЅРґ.
 		Execs = {
 			 "linux": "python3." + str(sys.version_info[1]) + f" main.py dump \"{filename}\" {user_id}",
 			 "win32": f"python main.py dump \"{filename}\" {user_id}"
 		}
-		# Расчёт лимита.
+		# Р Р°СЃС‡С‘С‚ Р»РёРјРёС‚Р°.
 		Limit = 3800000000 if premium else 1900000000
 		
-		# Если размер файла позволительный.
+		# Р•СЃР»Рё СЂР°Р·РјРµСЂ С„Р°Р№Р»Р° РїРѕР·РІРѕР»РёС‚РµР»СЊРЅС‹Р№.
 		if os.path.getsize(filename) < Limit:
-			# Выполнение загрузки.
+			# Р’С‹РїРѕР»РЅРµРЅРёРµ Р·Р°РіСЂСѓР·РєРё.
 			ExitCode = os.system(Execs[sys.platform] + (" -compress" if compression else ""))
 		
 		else:
-			# Изменение кода.
+			# РР·РјРµРЅРµРЅРёРµ РєРѕРґР°.
 			ExitCode = -1
 
-		# Удаление файла.
+		# РЈРґР°Р»РµРЅРёРµ С„Р°Р№Р»Р°.
 		if os.path.exists(filename): os.remove(filename)
 		
 		return ExitCode
