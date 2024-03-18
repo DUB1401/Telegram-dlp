@@ -118,7 +118,7 @@ else:
 		# Отправка сообщения: приветствие.
 		Bot.send_message(
 			chat_id = Message.chat.id,
-			text = "Здравствуйте\!\n\nЯ бот, помогающий скачивать видео\. Со списокм поддерживаемых источиков можно ознакомиться [здесь](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)\.\n\nОтправьте мне ссылку на видео для начала работы\.",
+			text = "Здравствуйте\!\n\nЯ бот, помогающий скачивать видео\. Со списком поддерживаемых источиков можно ознакомиться [здесь](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)\.\n\nОтправьте мне ссылку на видео для начала работы\.",
 			parse_mode = "MarkdownV2",
 			disable_web_page_preview = True,
 			reply_markup = BuildMenu(User)
@@ -170,7 +170,7 @@ else:
 					# Блокировка загрузки.
 					UsersManagerObject.set_user_value(User.id, "downloading", True)
 					# Загрузка видео.
-					ExitCode = VideoManagerObject.download(Message.text, Message.from_user.id)
+					ExitCode = VideoManagerObject.download(Message.text, Message.from_user.id, Settings["original-filenames"])
 				
 					# Если скачивание успешно.
 					if ExitCode != None:
@@ -181,8 +181,10 @@ else:
 							message_id = MessageID,
 							parse_mode = "MarkdownV2"
 						)
+						# Выбор имени файла: оригинальное или ID.
+						Filename = ExitCode["title"].strip() if Settings["original-filenames"] else ExitCode["id"]
 						# Загрузка видео на сервера Telegram.
-						ExitCode = VideoManagerObject.dump(ExitCode["filename"].strip(), Message.from_user.id, User.compression, premium = Settings["premium"])
+						ExitCode = VideoManagerObject.dump(Filename, Message.from_user.id, User.compression, premium = Settings["premium"])
 				
 						# Если загрузка успешна.
 						if ExitCode == 0:
@@ -208,7 +210,7 @@ else:
 						else:
 							# Редактирование сообщения: не удалось загрузить видео.
 							Bot.edit_message_text(
-								text = "*❗  Ошибка*\n\nМне не удалось загрузить ваше видео на сервера Telegram\.",
+								text = "*❗  Ошибка*\n\nМне не удалось загрузить ваше видео на сервер Telegram\.",
 								chat_id = Message.chat.id,
 								message_id = MessageID,
 								parse_mode = "MarkdownV2"

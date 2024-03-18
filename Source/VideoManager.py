@@ -5,15 +5,15 @@ import os
 
 class VideoManager:
 	
-	def download(self, link: str, user_id: int | str) -> dict | None:
+	def download(self, link: str, user_id: int | str, original_filename: bool) -> dict | None:
 		# Результат выполнения.
 		Result = None
 		# Если каталог пользователя отсутствует, создать его.
 		if not os.path.exists(f"Files/{user_id}"): os.makedirs(f"Files/{user_id}")
 		# Определения исполняемых команд.
 		Execs = {
-			 "linux": "python3." + str(sys.version_info[1]) +  f" yt-dlp/yt-dlp {link} -o \"Files/{user_id}/%(title)s.%(ext)s\" --dump-json --quiet --no-warnings",
-			 "win32": f"yt-dlp\\yt-dlp.exe {link} -o \"Files\\{user_id}\\%(title)s.%(ext)s\" --dump-json --quiet --no-warnings"
+			 "linux": "python3." + str(sys.version_info[1]) +  f" yt-dlp/yt-dlp {link} --dump-json --quiet --no-warnings --recode-video mp4",
+			 "win32": f"yt-dlp\\yt-dlp.exe {link} --dump-json --quiet --no-warnings --recode-video mp4"
 		}
 		# Скачивание видео.
 		Result = subprocess.getoutput(Execs[sys.platform])
@@ -21,8 +21,10 @@ class VideoManager:
 		try:
 			# Если нет ошибки скачивания, спарсить дамп видео.
 			if not Result.startswith("ERROR"): Result = json.loads(Result)
+			# Выбор имени файла: оригинальное или ID.
+			Filename = Result["title"].strip() if original_filename else Result["id"]
 			# Выполнение скачивания.
-			ExitCode = os.system(Execs[sys.platform].replace("--dump-json ", ""))
+			ExitCode = os.system(Execs[sys.platform].replace("--dump-json ", "") + f" -o \"Files/{user_id}/{Filename}.mp4\"")
 			# Если скачивание неуспешно, обнулить дампирование.
 			if ExitCode != 0: Result = None
 		
@@ -35,22 +37,28 @@ class VideoManager:
 	def dump(self, filename: str, user_id: str, compression: bool, premium: bool = False) -> int:
 		# Определения исполняемых команд.
 		Execs = {
-			 "linux": "python3." + str(sys.version_info[1]) + f" main.py dump \"{filename}\" {user_id}",
-			 "win32": f"python main.py dump \"{filename}\" {user_id}"
+			 "linux": "python3." + str(sys.version_info[1]) + f" main.py dump \"Files/{user_id}/{filename}.mp4\" {user_id}",
+			 "win32": f"python main.py dump \"Files\\{user_id}\\{filename}.mp4\" {user_id}"
 		}
 		# Расчёт лимита.
 		Limit = 3800000000 if premium else 1900000000
+		# Код завершения.
+		ExitCode = 1
 		
-		# Если размер файла позволительный.
-		if os.path.getsize(filename) < Limit:
-			# Выполнение загрузки.
-			ExitCode = os.system(Execs[sys.platform] + (" -compress" if compression else ""))
+		try:
+			
+			# Если размер файла позволительный.
+			if os.path.getsize(f"Files/{user_id}/{filename}.mp4") < Limit:
+				# Выполнение загрузки.
+				ExitCode = os.system(Execs[sys.platform] + (" -compress" if compression else ""))
 		
-		else:
-			# Изменение кода.
-			ExitCode = -1
+			else:
+				# Изменение кода.
+				ExitCode = -1
 
-		# Удаление файла.
-		if os.path.exists(filename): os.remove(filename)
+			# Удаление файла.
+			if os.path.exists(f"Files/{user_id}/{filename}.mp4"): os.remove(f"Files/{user_id}/{filename}.mp4")
+			
+		except: pass
 		
 		return ExitCode
