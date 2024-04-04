@@ -1,10 +1,13 @@
 from telebot.types import KeyboardButton, ReplyKeyboardMarkup, User
+from Source.MessageBox import MessageBox
 from dublib.Methods import WriteJSON
 from Source.Users import UserData
 
-def BuildMenu(User: UserData) -> ReplyKeyboardMarkup:
+def BuildMenu(User: UserData, Text: MessageBox) -> ReplyKeyboardMarkup:
+	# Модификация ключа текста кнопки.
+	CompressionStatus = "on" if User.compression else "off"
 	# Текст кнопки: компрессия.
-	Compression = "🔴 Отключить сжатие" if User.compression else "🟢 Включить сжатие"
+	Compression = Text.get(f"button-compression-{CompressionStatus}", language = User.language)
 	# Меню.
 	Menu = ReplyKeyboardMarkup(resize_keyboard = True)
 	# Генерация кнопок.

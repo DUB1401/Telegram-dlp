@@ -4,9 +4,10 @@
 ## Порядок установки и использования
 1. Загрузить последний релиз скрипта. Распаковать.
 2. Установить Python версии не старше 3.10. Рекомендуется добавить в PATH.
-3. В среду исполнения установить следующие пакеты: [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI), [dublib](https://github.com/DUB1401/dublib).
+3. В среду исполнения установить следующие пакеты: [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI), [Telethon](https://github.com/LonamiWebs/Telethon), [dublib](https://github.com/DUB1401/dublib).
 ```
 pip install pyTelegramBotAPI
+pip install Telethon
 pip install dublib
 ```
 Либо установить сразу все пакеты при помощи следующей команды, выполненной из директории скрипта.
@@ -55,6 +56,12 @@ ___
 "original-filenames": false
 ```
 Если включено, в качестве названия файла будет использоваться оригинальная подпись вместо идентификатора, что на некоторых системах может привести к ошибкам кодировки.
+___
+
+```JSON
+"proxy": ""
+```
+Здесь указывается прокси для обхода региональных ограничений в формате `http://login:password@host:port`.
 
 # Благодарность
 * [@yt-dlp](https://github.com/yt-dlp) – библиотека загрузки потокового видео.

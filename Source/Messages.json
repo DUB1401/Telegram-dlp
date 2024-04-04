@@ -37,7 +37,7 @@
 	"headers": {
 		"ru": {
 			"settings": "⚙️  Настройки",
-			"downloading": "⏳  Загрузка*",
+			"downloading": "⏳  Загрузка",
 			"error": "❗  Ошибка"
 		},
 		"en": {
