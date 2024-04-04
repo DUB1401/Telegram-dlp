@@ -4,17 +4,23 @@ import sys
 import os
 
 class VideoManager:
+
+	def __init__(self, Settings: dict):
+		self.__Settings = Settings.copy()
 	
 	def download(self, link: str, user_id: int | str, original_filename: bool) -> dict | None:
 		# Результат выполнения.
 		Result = None
+		# Установка прокси.
+		Proxy = " --proxy " + self.__Settings["proxy"] if self.__Settings["proxy"] else ""
 		# Если каталог пользователя отсутствует, создать его.
 		if not os.path.exists(f"Files/{user_id}"): os.makedirs(f"Files/{user_id}")
 		# Определения исполняемых команд.
 		Execs = {
-			 "linux": "python3." + str(sys.version_info[1]) +  f" yt-dlp/yt-dlp {link} --dump-json --quiet --no-warnings --recode-video mp4",
-			 "win32": f"yt-dlp\\yt-dlp.exe {link} --dump-json --quiet --no-warnings --recode-video mp4"
+			 "linux": "python3." + str(sys.version_info[1]) +  f" yt-dlp/yt-dlp \"{link}\" --dump-json --quiet --no-warnings --recode-video mp4{Proxy}",
+			 "win32": f"yt-dlp\\yt-dlp.exe {link} --dump-json --quiet --no-warnings --recode-video mp4{Proxy}"
 		}
+		
 		# Скачивание видео.
 		Result = subprocess.getoutput(Execs[sys.platform])
 		
@@ -24,6 +30,7 @@ class VideoManager:
 			# Выбор имени файла: оригинальное или ID.
 			Filename = Result["title"].strip() if original_filename else Result["id"]
 			# Выполнение скачивания.
+			print(Execs[sys.platform].replace("--dump-json ", "") + f" -o \"Files/{user_id}/{Filename}.mp4\"")
 			ExitCode = os.system(Execs[sys.platform].replace("--dump-json ", "") + f" -o \"Files/{user_id}/{Filename}.mp4\"")
 			# Если скачивание неуспешно, обнулить дампирование.
 			if ExitCode != 0: Result = None
