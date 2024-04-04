@@ -29,6 +29,12 @@ class UserData:
 		return self.__UserID
 
 	@property
+	def language(self) -> str:
+		"""Код используемого клиентом языка по стандарту ISO 639-1."""
+
+		return self.__Data["language"]
+
+	@property
 	def premium(self) -> bool:
 		"""Состояние: есть ли Premium-подписка у пользователя."""
 
@@ -55,19 +61,20 @@ class UsersManager:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __CreateUser(self, UserID: int, Premium: bool) -> UserData:
+	def __CreateUser(self, UserInfo: User) -> UserData:
 		"""Создаёт пользователя."""
-
+		
 		# Запись пользовательских данных.
-		self.__Users[UserID] = {
-			"premium": Premium,
+		self.__Users[UserInfo.id] = {
+			"premium": bool(UserInfo.is_premium),
+			"language": UserInfo.language_code.split("_")[0], 
 			"compression": True,
 			"downloading": False
 		}
 		# Сохранение файла.
-		self.__SaveUser(UserID)
+		self.__SaveUser(UserInfo.id)
 
-		return UserData(UserID, self.__Users[UserID])
+		return UserData(UserInfo.id, self.__Users[UserInfo.id])
 
 	def __LoadUsers(self):
 		"""Загружает данные пользователей."""
@@ -117,7 +124,7 @@ class UsersManager:
 		# Если пользователь не идентифицирован.
 		if User == None:
 			# Создание нового пользователя.
-			User = self.__CreateUser(user.id, bool(user.is_premium))
+			User = self.__CreateUser(user)
 
 		else:
 			# Обновление Premium-статуса пользователя.
