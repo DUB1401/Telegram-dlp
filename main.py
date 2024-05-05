@@ -1,13 +1,13 @@
 from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON
+from Source.Functions import BuildMenu, BuildResolutions, UpdatePremium, UploadFile
 from dublib.Terminalyzer import ArgumentsTypes, Command, Terminalyzer
 from dublib.StyledPrinter import StyledPrinter, Styles
-from Source.Functions import BuildMenu, UpdatePremium
-from Source.VideoManager import VideoManager
+from dublib.TelebotUtils import UsersManager
 from Source.Registrator import Registrator
 from Source.MessageBox import MessageBox
 from Source.MediaCore import MediaCore
-from Source.Users import UsersManager
 from urllib.parse import urlparse
+from Source.YtDlp import YtDlp
 from telebot import types
 
 import telebot
@@ -93,8 +93,8 @@ else:
 	# Токен для работы определенного бота телегамм.
 	Bot = telebot.TeleBot(Settings["token"])
 	# Инициализация интерфейсов.
-	VideoManagerObject = VideoManager(Settings)
-	UsersManagerObject = UsersManager()
+	VideoManagerObject = YtDlp("yt-dlp", proxy = Settings["proxy"] if Settings["proxy"] else None)
+	UsersManagerObject = UsersManager("Data/Users")
 	MessageBoxObject = MessageBox()
 	
 	# Обработка команды: about.
@@ -105,7 +105,7 @@ else:
 		# Отправка сообщения: информация о проекте.
 		Bot.send_message(
 			chat_id = Message.chat.id,
-			text = MessageBoxObject.get("about", language = None),
+			text = MessageBoxObject.get("about", language = User.language),
 			parse_mode = "MarkdownV2",
 			disable_web_page_preview = True
 		)
@@ -115,8 +115,8 @@ else:
 	def Command(Message: types.Message):
 		# Авторизация пользователя.
 		User = UsersManagerObject.auth(Message.from_user)
-		# Изменение статуса загрузки.
-		UsersManagerObject.set_user_value(User.id, "downloading", False)
+		User.create_property("compression", False)
+		User.set_property("video", None)
 		# Отправка сообщения: приветствие.
 		Bot.send_message(
 			chat_id = Message.chat.id,
@@ -135,7 +135,7 @@ else:
 		# Обработка кнопки: отключение сжатия.
 		if Message.text == MessageBoxObject.get("button-compression-on", language = User.language):
 			# Отключение компрессии.
-			UsersManagerObject.set_user_value(User.id, "compression", False)
+			User.set_property("compression", False)
 			# Отправка сообщения: сжатие видео отключено.
 			Bot.send_message(
 				chat_id = Message.chat.id,
@@ -147,7 +147,7 @@ else:
 		# Обработка кнопки: включение сжатия.
 		elif Message.text == MessageBoxObject.get("button-compression-off", language = User.language):
 			# Включение компрессии.
-			UsersManagerObject.set_user_value(User.id, "compression", True)
+			User.set_property("compression", True)
 			# Отправка сообщения: сжатие видео отключено.
 			Bot.send_message(
 				chat_id = Message.chat.id,
@@ -156,96 +156,139 @@ else:
 				reply_markup = BuildMenu(User, MessageBoxObject)
 			)
 			
-		else:
-		
-			# Если сообщение является ссылкой.
-			if urlparse(Message.text).scheme:
+		# Если сообщение является ссылкой.
+		elif urlparse(Message.text).scheme:
 				
-				# Если пользователь в данный момент не загружает файл.
-				if UsersManagerObject.get_user(Message.from_user.id).downloading == False:
-					# Отправка сообщения: видео скачивается.
+			# Если пользователь в данный момент не загружает файл.
+			if not User.get_property("video"):
+				# Отправка сообщения: получение данных о видео.
+				MessageID = Bot.send_message(
+					chat_id = Message.chat.id,
+					text = MessageBoxObject.get("dumping", "downloading", language = User.language),
+					parse_mode = "MarkdownV2"
+				).id
+				# Получение данных.
+				Dump = VideoManagerObject.get_info(Message.text)
+
+				# Если получение описания успешно.
+				if Dump != None:
+					# Удаление сообщения: получение данных о видео.
+					Bot.delete_message(Message.chat.id, MessageID)
+					# Получение словаря разрешений.
+					Resolutions = VideoManagerObject.get_resolutions(Dump)
+					ResolutionsList = list(Resolutions.keys())
+					ResolutionsList.reverse()
+					# Блокировка загрузки.
+					User.set_property("video", {"link": Message.text, "name": Dump["id"], "formats": Resolutions})
+					# Отправка сообщения: список разрешений.
 					MessageID = Bot.send_message(
 						chat_id = Message.chat.id,
-						text = MessageBoxObject.get("downloading", "downloading", language = User.language),
-						parse_mode = "MarkdownV2"
+						text = MessageBoxObject.get("choose-resolution", language = User.language),
+						parse_mode = "MarkdownV2",
+						reply_markup = BuildResolutions(ResolutionsList)
 					).id
-					# Блокировка загрузки.
-					UsersManagerObject.set_user_value(User.id, "downloading", True)
-					# Загрузка видео.
-					ExitCode = VideoManagerObject.download(Message.text, Message.from_user.id, Settings["original-filenames"])
-				
-					# Если скачивание успешно.py
-					if ExitCode != None:
-						# Редактирование сообщения: видео загружается на сервер.
-						Bot.edit_message_text(
-							text = MessageBoxObject.get("uploading", "downloading", language = User.language),
-							chat_id = Message.chat.id,
-							message_id = MessageID,
-							parse_mode = "MarkdownV2"
-						)
-						# Выбор имени файла: оригинальное или ID.
-						Filename = ExitCode["title"].strip() if Settings["original-filenames"] else ExitCode["id"]
-						# Загрузка видео на сервера Telegram.
-						ExitCode = VideoManagerObject.dump(Filename, Message.from_user.id, User.compression, premium = Settings["premium"])
-				
-						# Если загрузка успешна.
-						if ExitCode == 0:
-							# Редактирование сообщения: видео загружено на сервер.
-							Bot.edit_message_text(
-								text = MessageBoxObject.get("sending", "downloading", language = User.language),
-								chat_id = Message.chat.id,
-								message_id = MessageID,
-								parse_mode = "MarkdownV2"
-							)
-					
-						elif ExitCode == -1:
-							# Расчёт лимита.
-							Limit = 4 if Settings["premium"] else 2
-							# Редактирование сообщения: видео превышает лимит.
-							Bot.edit_message_text(
-								text = MessageBoxObject.get("too-large", "error", {"limit": Limit}, language = User.language),
-								chat_id = Message.chat.id,
-								message_id = MessageID,
-								parse_mode = "MarkdownV2"
-							)
-					
-						else:
-							# Редактирование сообщения: не удалось загрузить видео.
-							Bot.edit_message_text(
-								text = MessageBoxObject.get("unable-upload", "error", language = User.language),
-								chat_id = Message.chat.id,
-								message_id = MessageID,
-								parse_mode = "MarkdownV2"
-							)
-		
-					else:
-						# Редактирование сообщения: не удалось скачать видео.
-						Bot.edit_message_text(
-							text = MessageBoxObject.get("unable-download", "error", language = User.language),
-							chat_id = Message.chat.id,
-							message_id = MessageID,
-							parse_mode = "MarkdownV2"
-						)
-					
-					# Разблокировка загрузки.
-					UsersManagerObject.set_user_value(User.id, "downloading", False)
 					
 				else:
-					# Отправка сообщения: пользователь уже скачивает видео.
-					Bot.send_message(
+					# Редактирование сообщения: не удалось получить данные.
+					Bot.edit_message_text(
+						text = MessageBoxObject.get("bad-dumping", "error", language = User.language),
 						chat_id = Message.chat.id,
-						text = MessageBoxObject.get("already-downloading", "error", language = User.language),
+						message_id = MessageID,
+						parse_mode = "MarkdownV2"
+					)				
+	
+			else:
+				# Отправка сообщения: пользователь уже скачивает видео.
+				Bot.send_message(
+					chat_id = Message.chat.id,
+					text = MessageBoxObject.get("already-downloading", "error", language = User.language),
+					parse_mode = "MarkdownV2"
+				)
+
+		# Если выбрано разрешение.
+		elif Message.text.replace("x", "").lstrip("🎬 🎵").isdigit():
+			# Отправка сообщения: выбрано разрешение.
+			MessageID = Bot.send_message(
+				chat_id = Message.chat.id,
+				text = "",
+				parse_mode = "MarkdownV2",
+				reply_markup = BuildMenu(User, MessageBoxObject)
+			).id
+			# Отправка сообщения: начато скачивание.
+			MessageID = Bot.send_message(
+				chat_id = Message.chat.id,
+				text = MessageBoxObject.get("downloading", "downloading", language = User.language),
+				parse_mode = "MarkdownV2"
+			).id
+			# Выбранное разрешение.
+			Resolution = Message.text.strip("🎬 🎵")
+			# Получение данных видео.
+			Video = User.get_property("video")
+			# Старт скачивания.
+			IsDownloaded = VideoManagerObject.download_video(Video["link"], f"Files/{User.id}", "Video.mp4", Video["formats"][Resolution])
+
+			# Если скачивание успешно.
+			if IsDownloaded:
+				# Редактирование сообщения: видео загружается на сервер.
+				Bot.edit_message_text(
+					text = MessageBoxObject.get("uploading", "downloading", language = User.language),
+					chat_id = Message.chat.id,
+					message_id = MessageID,
+					parse_mode = "MarkdownV2"
+				)
+				# Загрузка видео на сервера Telegram.
+				ExitCode = VideoManagerObject.dump("Video", Message.from_user.id, User.get_property("compression") , premium = Settings["premium"])
+				
+				# Если загрузка успешна.
+				if ExitCode == 0:
+					# Редактирование сообщения: видео загружено на сервер.
+					Bot.edit_message_text(
+						text = MessageBoxObject.get("sending", "downloading", language = User.language),
+						chat_id = Message.chat.id,
+						message_id = MessageID,
 						parse_mode = "MarkdownV2"
 					)
 			
+				elif ExitCode == -1:
+					# Расчёт лимита.
+					Limit = 4 if Settings["premium"] else 2
+					# Редактирование сообщения: видео превышает лимит.
+					Bot.edit_message_text(
+						text = MessageBoxObject.get("too-large", "error", {"limit": Limit}, language = User.language),
+						chat_id = Message.chat.id,
+						message_id = MessageID,
+						parse_mode = "MarkdownV2"
+					)
+			
+				else:
+					# Редактирование сообщения: не удалось загрузить видео.
+					Bot.edit_message_text(
+						text = MessageBoxObject.get("unable-upload", "error", language = User.language),
+						chat_id = Message.chat.id,
+						message_id = MessageID,
+						parse_mode = "MarkdownV2"
+					)
+
 			else:
-				# Отправка сообщения: не удалось найти ссылку.
-				Bot.send_message(
+				# Редактирование сообщения: не удалось скачать видео.
+				Bot.edit_message_text(
+					text = MessageBoxObject.get("unable-download", "error", language = User.language),
 					chat_id = Message.chat.id,
-					text = MessageBoxObject.get("no-link", "error", language = User.language),
-					parse_mode = "MarkdownV2",
-					reply_markup = BuildMenu(User, MessageBoxObject)
+					message_id = MessageID,
+					parse_mode = "MarkdownV2"
 				)
+			
+			# Разблокировка загрузки.
+			User.set_property("video", None)
+		
+		else:
+			# Отправка сообщения: не удалось найти ссылку.
+			Bot.send_message(
+				chat_id = Message.chat.id,
+				text = MessageBoxObject.get("uploading", "downloading", language = User.language),
+				parse_mode = "MarkdownV2",
+				reply_markup = BuildMenu(User, MessageBoxObject)
+			)
 	
 	# Обработка видео (со сжатием и без сжатия).					
 	@Bot.message_handler(content_types=["document", "video"])

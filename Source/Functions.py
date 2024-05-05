@@ -1,11 +1,13 @@
 from telebot.types import KeyboardButton, ReplyKeyboardMarkup, User
 from Source.MessageBox import MessageBox
+from dublib.TelebotUtils import UserData
 from dublib.Methods import WriteJSON
-from Source.Users import UserData
+
+import telebot
 
 def BuildMenu(User: UserData, Text: MessageBox) -> ReplyKeyboardMarkup:
 	# Модификация ключа текста кнопки.
-	CompressionStatus = "on" if User.compression else "off"
+	CompressionStatus = "on" if User.get_property("compression") else "off"
 	# Текст кнопки: компрессия.
 	Compression = Text.get(f"button-compression-{CompressionStatus}", language = User.language)
 	# Меню.
@@ -17,8 +19,24 @@ def BuildMenu(User: UserData, Text: MessageBox) -> ReplyKeyboardMarkup:
 	
 	return Menu
 
+def BuildResolutions(Resolutions: list[str]) -> ReplyKeyboardMarkup:
+	# Список разрешений.
+	ResolutionsMenu = ReplyKeyboardMarkup(resize_keyboard = True)
+	# Для каждого разрешения создать кнопку.
+	for Resolution in Resolutions: ResolutionsMenu.add("🎬 " + Resolution)
+	
+	return ResolutionsMenu
+
 def UpdatePremium(Settings: dict, UserData: User):
 	# Обновление статуса.
 	Settings["premium"] = bool(UserData.is_premium)
 	# Сохранение статуса.
 	WriteJSON("Settings.json", Settings)
+
+def UploadFile(Bot: telebot.TeleBot) -> int:
+	# Состояние: успешна ли выгрузка.
+	IsSuccess = False
+
+
+
+	return IsSuccess
