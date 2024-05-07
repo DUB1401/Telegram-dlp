@@ -71,9 +71,7 @@ class YtDlp:
 		self.__Proxy = f"--proxy {proxy}" if proxy else ""
 	
 	def download_video(self, link: str, save_dir: str, filename: str, format_id: str) -> bool:
-		"""
-		Загружает видео.
-		"""
+		"""Скачивает видео."""
 
 		# Состояние: успешна ли загрузка.
 		IsSuccess = False
@@ -84,13 +82,14 @@ class YtDlp:
 		# Определения исполняемых команд.
 		Commands = {
 			 "linux": "python3." + str(sys.version_info[1]) +  f" yt-dlp/yt-dlp \"{link}\" --format {format_id}+bestaudio -S vcodec:h264,res,acodec:m4a {self.__Proxy} -o {save_dir}{filename}",
-			 "win32": f"yt-dlp\\yt-dlp.exe {link} --format mp4 {self.__Proxy}" + save_dir
+			 "win32": f"yt-dlp\\yt-dlp.exe {link} --format {format_id}+bestaudio -S vcodec:h264,res,acodec:m4a {self.__Proxy} -o {save_dir}{filename}"
 		}
 		
 		try:
+
 			# Если скачивание успешно, переключить статус.
-			print(os.system(Commands[sys.platform])) 
-			IsSuccess = True
+			if os.system(Commands[sys.platform]) == 0: IsSuccess = True
+
 		except: pass
 		
 		return IsSuccess
@@ -139,32 +138,3 @@ class YtDlp:
 			if Format["resolution"] not in Resolutions.values(): Resolutions[Format["resolution"]] = Format["format_id"]
 
 		return Resolutions
-
-	def dump(self, filename: str, user_id: str, compression: bool, premium: bool = False) -> int:
-		# Определения исполняемых команд.
-		Execs = {
-			 "linux": "python3." + str(sys.version_info[1]) + f" main.py dump \"Files/{user_id}/{filename}.mp4\" {user_id}",
-			 "win32": f"python main.py dump \"Files\\{user_id}\\{filename}.mp4\" {user_id}"
-		}
-		# Расчёт лимита.
-		Limit = 3800000000 if premium else 1900000000
-		# Код завершения.
-		ExitCode = 1
-		
-		try:
-			
-			# Если размер файла позволительный.
-			if os.path.getsize(f"Files/{user_id}/{filename}.mp4") < Limit:
-				# Выполнение загрузки.
-				ExitCode = os.system(Execs[sys.platform] + (" -compress" if compression else ""))
-		
-			else:
-				# Изменение кода.
-				ExitCode = -1
-
-			# Удаление файла.
-			if os.path.exists(f"Files/{user_id}/{filename}.mp4"): os.remove(f"Files/{user_id}/{filename}.mp4")
-			
-		except: pass
-		
-		return ExitCode
