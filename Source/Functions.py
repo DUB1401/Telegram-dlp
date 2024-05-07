@@ -7,7 +7,7 @@ import telebot
 
 def BuildMenu(User: UserData, Text: MessageBox) -> ReplyKeyboardMarkup:
 	# Модификация ключа текста кнопки.
-	CompressionStatus = "on" if User.get_property("compression") else "off"
+	CompressionStatus = "off" if User.get_property("compression") else "on"
 	# Текст кнопки: компрессия.
 	Compression = Text.get(f"button-compression-{CompressionStatus}", language = User.language)
 	# Меню.
@@ -32,11 +32,3 @@ def UpdatePremium(Settings: dict, UserData: User):
 	Settings["premium"] = bool(UserData.is_premium)
 	# Сохранение статуса.
 	WriteJSON("Settings.json", Settings)
-
-def UploadFile(Bot: telebot.TeleBot) -> int:
-	# Состояние: успешна ли выгрузка.
-	IsSuccess = False
-
-
-
-	return IsSuccess
