@@ -52,7 +52,7 @@ class MediaCore:
 		# Чтение данных сессии.
 		SessionData = ReadJSON(self.__DataPath + "/Session.json")
 		# Инициализция и подключение клиента.
-		self.__Client = TelegramClient(self.__DataPath + "/Account.session", SessionData["api-id"], SessionData["api-hash"], system_version = "4.16.30-vxCUSTOM")
+		self.__Client = TelegramClient(self.__DataPath + "/Account.session", SessionData["api-id"], SessionData["api-hash"], system_version = "4.16.30-vxCUSTOM", lang_code = "ru")
 		self.__Client.connect()
 		
 	def check_file_on_storage(self, domain: str, file_id: str, resolution: str, compression: bool) -> int | None:

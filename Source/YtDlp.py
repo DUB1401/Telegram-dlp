@@ -70,6 +70,29 @@ class YtDlp:
 		# Ключ с прокси.
 		self.__Proxy = f"--proxy {proxy}" if proxy else ""
 	
+	def download_audio(self, link: str, save_dir: str, filename: str) -> bool:
+		"""Скачивает аудиодорожку."""
+
+		# Состояние: успешна ли загрузка.
+		IsSuccess = False
+		# Нормализация каталога для ОС.
+		save_dir = self.__NormalizeDirectory(save_dir)
+		# Очистка целевой директории.
+		RemoveFolderContent(save_dir)
+		# Определения исполняемых команд.
+		Commands = {
+			 "linux": "python3." + str(sys.version_info[1]) +  f" yt-dlp/yt-dlp \"{link}\" -f 140 --audio-format mp3 {self.__Proxy} -o {save_dir}{filename}.mp3",
+			 "win32": f"yt-dlp\\yt-dlp.exe {link} -f 140 --audio-format mp3 {self.__Proxy} -o {save_dir}{filename}.mp3"
+		}
+		
+		try:
+			# Если скачивание успешно, переключить статус.
+			if os.system(Commands[sys.platform]) == 0: IsSuccess = True
+
+		except: pass
+		
+		return IsSuccess
+
 	def download_video(self, link: str, save_dir: str, filename: str, format_id: str) -> bool:
 		"""Скачивает видео."""
 
@@ -81,14 +104,18 @@ class YtDlp:
 		RemoveFolderContent(save_dir)
 		# Определения исполняемых команд.
 		Commands = {
-			 "linux": "python3." + str(sys.version_info[1]) +  f" yt-dlp/yt-dlp \"{link}\" --format {format_id}+bestaudio -S vcodec:h264,res,acodec:m4a {self.__Proxy} -o {save_dir}{filename}",
-			 "win32": f"yt-dlp\\yt-dlp.exe {link} --format {format_id}+bestaudio -S vcodec:h264,res,acodec:m4a {self.__Proxy} -o {save_dir}{filename}"
+			 "linux": "python3." + str(sys.version_info[1]) +  f" yt-dlp/yt-dlp \"{link}\" --format {format_id}+bestaudio --recode mp4 {self.__Proxy} -o {save_dir}{filename}.mp4",
+			 "win32": f"yt-dlp\\yt-dlp.exe {link} --format {format_id}+bestaudio --recode mp4 {self.__Proxy} -o {save_dir}{filename}.mp4"
 		}
 		
 		try:
-
 			# Если скачивание успешно, переключить статус.
 			if os.system(Commands[sys.platform]) == 0: IsSuccess = True
+
+			# Если скачивание неуспешно.
+			if not IsSuccess: 
+				# Если скачивание без фильтра аудио успешно, переключить статус.
+				if os.system(Commands[sys.platform].replace("+bestaudio", "")) == 0: IsSuccess = True
 
 		except: pass
 		

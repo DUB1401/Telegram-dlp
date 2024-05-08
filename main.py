@@ -1,4 +1,4 @@
-from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON, WriteJSON
+from dublib.Methods import CheckPythonMinimalVersion, MakeRootDirectories, ReadJSON, RemoveFolderContent, WriteJSON
 from Source.Functions import BuildMenu, BuildResolutions, UpdatePremium
 from dublib.Terminalyzer import ArgumentsTypes, Command, Terminalyzer
 from dublib.StyledPrinter import StyledPrinter, Styles
@@ -206,7 +206,7 @@ else:
 				)
 
 		# Если выбрано разрешение.
-		elif Message.text.replace("x", "").lstrip("🎬 🎵").isdigit():
+		elif Message.text.replace("x", "").lstrip("🎬 🎵").isdigit() or "audio only" in Message.text:
 			# Отправка сообщения: выбрано разрешение.
 			MessageID = Bot.send_message(
 				chat_id = Message.chat.id,
@@ -231,10 +231,22 @@ else:
 			if FileOnServerID:
 				# Пересылка сообщения с видео. 
 				Bot.copy_message(Message.chat.id, Settings["trusted-source-id"], FileOnServerID, caption = "")
+				# Удаление сообщения: загрузка файла.
+				Bot.delete_message(Message.chat.id, MessageID)
 
 			else:
-				# Старт скачивания.
-				IsDownloaded = VideoManagerObject.download_video(Video["link"], f"Files/{User.id}", Video["id"], Video["formats"][Resolution])
+				# Состояние: успешна ли загрузка.
+				IsDownloaded = None
+
+				# Если запрошена только аудиодорожка.
+				if "audio only" in Message.text:
+					print(111)
+					# Старт скачивания аудидорожки.
+					IsDownloaded = VideoManagerObject.download_audio(Video["link"], f"Files/{User.id}", Video["id"])
+
+				else:
+					# Старт скачивания видео.
+					IsDownloaded = VideoManagerObject.download_video(Video["link"], f"Files/{User.id}", Video["id"], Video["formats"][Resolution])
 
 				# Если скачивание успешно.
 				if IsDownloaded:
@@ -301,8 +313,30 @@ else:
 				reply_markup = BuildMenu(User, MessageBoxObject)
 			)
 	
+	# Обработка аудио.					
+	@Bot.message_handler(content_types=["audio"])
+	def Video(Message: types.Message):
+		
+		# Если доверенный аккаунт прислал видео.
+		if Message.from_user.id == Settings["trusted-source-id"]: 
+			# Обновление данных о Premium-статусе.
+			UpdatePremium(Settings, Message.from_user)
+			# Аргументы видео.
+			Args = Message.caption.split("\n")
+			# Чтение файла определений.
+			StorageData = ReadJSON("Data/Storage/" + Args[1] + "/" + Args[2] + ".json")
+			# Внесение в реестр ID от лица бота.
+			StorageData["compressed"][Args[3]] = Message.id
+			StorageData["not-compressed"][Args[3]] = Message.id
+			# Запись данных в хранилище.
+			WriteJSON("Data/Storage/" + Args[1] + "/" + Args[2] + ".json", StorageData)
+			# Пересылка сообщения.
+			Bot.copy_message(Args[0], Message.chat.id, Message.id, caption = "")
+			# Очитска буферной директории.
+			RemoveFolderContent("Files/" + Args[0])
+
 	# Обработка видео (со сжатием и без сжатия).					
-	@Bot.message_handler(content_types=["document", "video"])
+	@Bot.message_handler(content_types=["audio", "document", "video"])
 	def Video(Message: types.Message):
 		
 		# Если доверенный аккаунт прислал видео.
@@ -321,6 +355,8 @@ else:
 			WriteJSON("Data/Storage/" + Args[1] + "/" + Args[2] + ".json", StorageData)
 			# Пересылка сообщения.
 			Bot.copy_message(Args[0], Message.chat.id, Message.id, caption = "")
+			# Очитска буферной директории.
+			RemoveFolderContent("Files/" + Args[0])
 		
 	# Запуск обработки запросов Telegram.
 	Bot.infinity_polling()
