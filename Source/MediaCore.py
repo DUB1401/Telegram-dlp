@@ -113,12 +113,6 @@ class MediaCore:
 		Description = ReadJSON(f"Files/{user_id}/description.json")
 		# Если каталога домена не существует, создать.
 		if not os.path.exists("Data/Storage/" + Description["domain"]): os.makedirs("Data/Storage/" + Description["domain"])
-
-		# Если файла определений не существует.
-		if not os.path.exists("Data/Storage/" + Description["domain"] + "/" + Description["id"] + ".json"):
-			# Создание файла определений.
-			WriteJSON("Data/Storage/" + Description["domain"] + "/" + Description["id"] + ".json", {"compressed": {}, "not-compressed": {}})
-
 		# Чтение файла определений.
 		StorageData = ReadJSON("Data/Storage/" + Description["domain"] + "/" + Description["id"] + ".json")
 		# Выбор ключа доступа.

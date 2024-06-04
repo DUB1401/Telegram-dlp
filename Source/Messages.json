@@ -6,17 +6,17 @@
 			"hello": "Здравствуйте\\!\n\nЯ бот, помогающий скачивать видео\\. Со списком поддерживаемых источиков можно ознакомиться [здесь](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)\\.\n\nОтправьте мне ссылку на видео для начала работы\\.",
 			"compression-off": "Сжатие видео отключено\\.",
 			"compression-on": "Сжатие видео включено\\.",
-			"dumping": "Получение данных видеоролика…",
-			"bad-dumping": "Не удалось получить данные видео\\.",
-			"choose-resolution": "Выберите желаемое разрешение видеоролика\\.",
-			"preparing": "Видео в выбранном качестве будет скачано, обработано и отправлено вам через некоторое время\\.",
-			"downloading": "Видео скачивается…",
-			"uploading": "Видео загружается на сервер Telegram…",
-			"sending": "Видео загружено\\. Идёт отправка…",
-			"too-large": "Видео слишком большое для загрузки на сервер\\. Telegram устанавливает лимит в {limit} GB.",
-			"unable-upload": "Мне не удалось загрузить ваше видео на сервер Telegram\\.",
-			"unable-download": "Мне не удалось скачать ваше видео\\.",
-			"already-downloading": "Вы уже загружаете одно видео\\.",
+			"dumping": "⏳ Получение данных видеоролика…",
+			"bad-dumping": "❌ Не удалось получить данные видео\\.",
+			"choose-resolution": "Выберите желаемое разрешение видеоролика или нажмите /start для отмены\\.",
+			"preparing": "Видео в выбранном качестве будет скачано, обработано и отправлено вам\\.",
+			"downloading": "⏳ Скачивание…",
+			"uploading": "✅ Скачивание завершено\\.\n⏳ Видео загружается в Telegram…",
+			"sended": "✅ Скачивание завершено\\.\n✅ Видео загружено в Telegram\\.\n✅ Отправлено\\.",
+			"too-large": "✅ Скачивание завершено\\.\n❌ Видео слишком большое для загрузки на сервер\\. Telegram устанавливает лимит в {limit} GB.",
+			"unable-upload": "✅ Скачивание завершено\\.\n❌ Не удалось загрузить видео в Telegram\\.",
+			"unable-download": "❌ Не удалось скачать видео\\.",
+			"already-downloading": "Вы уже загружаете видео\\. Если это не так, нажмите /start, и я всё проверю\\.",
 			"no-link": "Мне не удалось найти ссылку в вашем сообщении\\.",
 			"button-compression-off": "🔴 Отключить сжатие",
 			"button-compression-on": "🟢 Включить сжатие"
@@ -26,32 +26,32 @@
 			"hello": "Hello\\!\n\nI'm a bot that helps download videos\\. The list of supported sources can be found [here](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)\\.\n\nSend me a link to the video to get started\\.",
 			"compression-off": "Compression disabled\\.",
 			"compression-on": "Compression enabled\\.",
-			"dumping": "Dumping…",
-			"bad-dumping": "Unable to dump.",
-			"choose-resolution": "Choose video resolution\\.",
-			"preparing": "The video in the selected quality will be downloaded, processed and sent to you after a while\\.",
-			"downloading": "Downloading…",
-			"uploading": "Uploading to Telegram…",
-			"sending": "Downloaded\\. Sending…",
-			"too-large": "Video is too large for uploading\\. Telegram has limit in {limit} GB.",
+			"dumping": "⏳ Dumping…",
+			"bad-dumping": "❌ Unable to dump.",
+			"choose-resolution": "Choose video resolution or press /start to cancel\\.\\.",
+			"preparing": "The video in the selected quality will be downloaded, processed and sent to you\\.",
+			"downloading": "⏳ Downloading…",
+			"uploading": "✅ Downloaded\\.\n⏳ Uploading to Telegram…",
+			"sended": "✅ Downloaded\\.\n⏳ Uploaded to Telegram\\.\n✅ Sended\\.",
+			"too-large": "✅ Downloaded\\.\n❌ Video is too large for uploading\\. Telegram has limit in {limit} GB.",
 			"unable-upload": "Unable to upload video to Telegram\\.",
-			"unable-download": "Unable to download video\\.",
-			"already-downloading": "You are already downloading one video\\.",
+			"unable-download": "❌ Unable to download video\\.",
+			"already-downloading": "You are already downloading one video\\. If this is not the case, press /start and I will check everything\\.",
 			"no-link": "I couldn't find the link in your message\\.",
-			"button-compression-off": "🔴 Enable compression",
-			"button-compression-on": "🟢 Disable compression"
+			"button-compression-off": "🔴 Disable compression",
+			"button-compression-on": "🟢 Enable compression"
 		}
 	},
 	"headers": {
 		"ru": {
-			"settings": "⚙️  Настройки",
-			"downloading": "⏳  Загрузка",
-			"error": "❗  Ошибка"
+			"settings": "⚙️ Настройки",
+			"downloading": "🤖 Обработка",
+			"error": "❗ Ошибка"
 		},
 		"en": {
-			"settings": "⚙️  Settings",
-			"downloading": "⏳  Downloading",
-			"error": "❗  Error"
+			"settings": "⚙️ Settings",
+			"downloading": "🤖 Processing",
+			"error": "❗ Error"
 		}
 	}
 }

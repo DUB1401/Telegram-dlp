@@ -9,8 +9,10 @@ from Source.MediaCore import MediaCore
 from urllib.parse import urlparse
 from Source.YtDlp import YtDlp
 from telebot import types
+from time import sleep
 
 import telebot
+import os
 
 #==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ СКРИПТА <<<<< #
@@ -116,7 +118,7 @@ else:
 		# Авторизация пользователя.
 		User = UsersManagerObject.auth(Message.from_user)
 		User.create_property("compression", True)
-		User.set_property("video", None)
+		User.create_property("video", None, True)
 		# Отправка сообщения: приветствие.
 		Bot.send_message(
 			chat_id = Message.chat.id,
@@ -179,7 +181,7 @@ else:
 					ResolutionsList = list(Resolutions.keys())
 					ResolutionsList.reverse()
 					# Блокировка загрузки.
-					User.set_property("video", {"link": Message.text, "id": Dump["id"], "formats": Resolutions, "domain": Dump["webpage_url_domain"]})
+					User.set_property("video", {"link": Message.text, "id": Dump["id"], "formats": Resolutions, "domain": Dump["webpage_url_domain"], "dump": Dump})
 					# Отправка сообщения: список разрешений.
 					MessageID = Bot.send_message(
 						chat_id = Message.chat.id,
@@ -240,7 +242,6 @@ else:
 
 				# Если запрошена только аудиодорожка.
 				if "audio only" in Message.text:
-					print(111)
 					# Старт скачивания аудидорожки.
 					IsDownloaded = VideoManagerObject.download_audio(Video["link"], f"Files/{User.id}", Video["id"])
 
@@ -259,6 +260,16 @@ else:
 						message_id = MessageID,
 						parse_mode = "MarkdownV2"
 					)
+					# Данные видео.
+					Dump = User.get_property("video")["dump"]
+					# Если папка источника не создана, создать её.
+					if not os.path.exists("Data/Storage/" + Dump["webpage_url_domain"]): os.makedirs("Data/Storage/" + Dump["webpage_url_domain"])
+
+					# Если файла определений не существует.
+					if not os.path.exists("Data/Storage/" + Dump["webpage_url_domain"] + "/" + Dump["id"] + ".json"):
+						# Создание файла определений.
+						WriteJSON("Data/Storage/" + Dump["webpage_url_domain"] + "/" + Dump["id"] + ".json", {"compressed": {}, "not-compressed": {}, "dump": Dump})
+
 					# Загрузка видео на сервера Telegram.
 					ExitCode = MediaCoreObject.dump(Message.from_user.id, User.get_property("compression"))
 					
@@ -266,7 +277,7 @@ else:
 					if ExitCode == 0:
 						# Редактирование сообщения: видео загружено на сервер.
 						Bot.edit_message_text(
-							text = MessageBoxObject.get("sending", "downloading", language = User.language),
+							text = MessageBoxObject.get("sended", "downloading", language = User.language),
 							chat_id = Message.chat.id,
 							message_id = MessageID,
 							parse_mode = "MarkdownV2"
@@ -323,8 +334,18 @@ else:
 			UpdatePremium(Settings, Message.from_user)
 			# Аргументы видео.
 			Args = Message.caption.split("\n")
-			# Чтение файла определений.
-			StorageData = ReadJSON("Data/Storage/" + Args[1] + "/" + Args[2] + ".json")
+			# Файл определений.
+			StorageData = None
+
+			# Пока файл не прочитан.
+			while not StorageData:
+
+				try:
+					# Чтение файла.
+					StorageData = ReadJSON("Data/Storage/" + Args[1] + "/" + Args[2] + ".json")
+
+				except: sleep(1)
+
 			# Внесение в реестр ID от лица бота.
 			StorageData["compressed"][Args[3]] = Message.id
 			StorageData["not-compressed"][Args[3]] = Message.id
@@ -347,8 +368,18 @@ else:
 			Args = Message.caption.split("\n")
 			# Выбор ключа доступа.
 			CompressionKey = "compressed" if UsersManagerObject.get_user(Args[0]).get_property("compression") else "not-compressed"
-			# Чтение файла определений.
-			StorageData = ReadJSON("Data/Storage/" + Args[1] + "/" + Args[2] + ".json")
+			# Файл определений.
+			StorageData = None
+
+			# Пока файл не прочитан.
+			while not StorageData:
+
+				try:
+					# Чтение файла.
+					StorageData = ReadJSON("Data/Storage/" + Args[1] + "/" + Args[2] + ".json")
+
+				except: sleep(1)
+				
 			# Внесение в реестр ID от лица бота.
 			StorageData[CompressionKey][Args[3]] = Message.id
 			# Запись данных в хранилище.

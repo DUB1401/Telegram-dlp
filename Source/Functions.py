@@ -20,6 +20,8 @@ def BuildMenu(User: UserData, Text: MessageBox) -> ReplyKeyboardMarkup:
 	return Menu
 
 def BuildResolutions(Resolutions: list[str]) -> ReplyKeyboardMarkup:
+	# Если нет варианта загрузки звука, добавить его.
+	if "audio only" not in Resolutions: Resolutions.append("audio only")
 	# Список разрешений.
 	ResolutionsMenu = ReplyKeyboardMarkup(resize_keyboard = True)
 	# Для каждого разрешения создать кнопку.
