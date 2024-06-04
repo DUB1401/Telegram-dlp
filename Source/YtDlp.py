@@ -1,4 +1,5 @@
-from dublib.Methods import RemoveFolderContent, WriteJSON
+from dublib.Methods import ReadJSON, RemoveFolderContent, WriteJSON
+from urllib.parse import urlparse, parse_qs
 
 import subprocess
 import json
@@ -56,6 +57,33 @@ class YtDlp:
 
 		return path
 
+	def __ProcessLink(self, link: str) -> dict | None:
+		"""
+		Обрабатывает ссылку в попытке получить сохранённые данные видео.
+			link – ссылка.
+		"""
+
+		# Данные видео.
+		Dump = None
+
+		# Если ссылка относится к YouTube.
+		if "youtube.com" in link:
+			# Парсинг ссылки.
+			ParsedLink = urlparse(link)
+			Query = parse_qs(ParsedLink.query)
+			VideoID = str(Query["v"][0])
+			# Если локальное описание существует, подгрузить его.
+			if "v" in Query.keys() and os.path.exists(f"Data/Storage/youtube.com/{VideoID}.json"): Dump = ReadJSON(f"Data/Storage/youtube.com/{VideoID}.json")["dump"]
+
+		# Если ссылка относится к TikTok.
+		if "tiktok.com" in link:
+			# Парсинг ссылки.
+			VideoID = link.split("?")[0].split("/")[-1]
+			# Если локальное описание существует, подгрузить его.
+			if os.path.exists(f"Data/Storage/tiktok.com/{VideoID}.json"): Dump = ReadJSON(f"Data/Storage/tiktok.com/{VideoID}.json")["dump"]
+
+		return Dump
+
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
@@ -81,8 +109,8 @@ class YtDlp:
 		RemoveFolderContent(save_dir)
 		# Определения исполняемых команд.
 		Commands = {
-			 "linux": "python3." + str(sys.version_info[1]) +  f" yt-dlp/yt-dlp \"{link}\" -f 140 --audio-format mp3 {self.__Proxy} -o {save_dir}{filename}.mp3",
-			 "win32": f"yt-dlp\\yt-dlp.exe {link} -f 140 --audio-format mp3 {self.__Proxy} -o {save_dir}{filename}.mp3"
+			 "linux": "python3." + str(sys.version_info[1]) +  f" yt-dlp/yt-dlp \"{link}\" {self.__Proxy} -o {save_dir}{filename} --extract-audio --recode m4a",
+			 "win32": f"yt-dlp\\yt-dlp.exe {link} {self.__Proxy} -o {save_dir}{filename} --extract-audio --recode m4a"
 		}
 		
 		try:
@@ -127,26 +155,28 @@ class YtDlp:
 			link – ссылка на страницу с видео;
 			file – имя файла, в который будет записан результат.
 		"""
-
-		# Описание.
-		Dump = None
-		# Определения исполняемых команд.
-		Commands = {
-			 "linux": "python3." + str(sys.version_info[1]) +  f" {self.__LibDirectory}yt-dlp \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy}",
-			 "win32": f"{self.__LibDirectory}yt-dlp.exe {link} --dump-json --quiet --no-warnings --skip-download {self.__Proxy}"
-		}
-		# Получение дампа с информацией о видео.
-		Dump = subprocess.getoutput(Commands[sys.platform])
 		
-		#try:
-		# Если нет ошибки дампирования, спарсить дамп в словарь.
-		if not Dump.startswith("ERROR"): Dump = json.loads(Dump)
-		# Фильтрация форматов.
-		Dump = self.__FilterDump(Dump)
-		# Запись результата в файл.
-		if file: WriteJSON(file, Dump)
+		# Обработка ссылки для получение локального дампа.
+		Dump = self.__ProcessLink(link)
 		
-		#except: pass
+		if not Dump:
+			# Определения исполняемых команд.
+			Commands = {
+				 "linux": "python3." + str(sys.version_info[1]) +  f" {self.__LibDirectory}yt-dlp \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy}",
+				 "win32": f"{self.__LibDirectory}yt-dlp.exe {link} --dump-json --quiet --no-warnings --skip-download {self.__Proxy}"
+			}
+			# Получение дампа с информацией о видео.
+			Dump = subprocess.getoutput(Commands[sys.platform])
+			
+			try:
+				# Если нет ошибки дампирования, спарсить дамп в словарь.
+				if not Dump.startswith("ERROR"): Dump = json.loads(Dump)
+				# Фильтрация форматов.
+				Dump = self.__FilterDump(Dump)
+				# Запись результата в файл.
+				if file: WriteJSON(file, Dump)
+		
+			except: pass
 		
 		return Dump
 	
