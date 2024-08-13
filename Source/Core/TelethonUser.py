@@ -21,35 +21,23 @@ class TelethonUser:
 	# >>>>> МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, settings: dict):
+	def __init__(self, bot_name: dict):
 		"""
 		Имитатор пользователя.
-			settings – глобальные настройки.
+			bot_name – текстовый идентификатор бота.
 		"""
 		
 		#---> Генерация динамических свойств.
 		#==========================================================================================#
-		# Пользовательский клиент.
 		self.__Client = None
-		# Глобальные настройки.
-		self.__Settings = settings.copy()
+		self.__BotName = bot_name
 
-	def initialize(self, logging: bool = True) -> TelegramClient | None:
-		"""
-		Инициализирует пользователя.
-			logging – указывает, следует ли выводить в консоль дополнительные данные.
-		"""
+	def initialize(self) -> TelegramClient:
+		"""Инициализирует пользователя."""
 
-		try:
-			# Чтение данных сессии.
-			SessionData = ReadJSON("Data/Account.json")
-			# Инициализция и подключение клиента.
-			self.__Client = TelegramClient("Data/Account.session", SessionData["api_id"], SessionData["api_hash"], system_version = "4.16.30-vxCUSTOM")
-			self.__Client.connect()
-
-		except Exception as ExceptionData:
-			# Если включён вывод в консоль, вывести ошибку.
-			if logging: StyledPrinter(f"ERROR: {ExceptionData}", text_color = Styles.Colors.Red)
+		SessionData = ReadJSON("Data/Account.json")
+		self.__Client = TelegramClient("Data/Account.session", SessionData["api_id"], SessionData["api_hash"], system_version = "4.16.30-vxCUSTOM")
+		self.__Client.connect()
 
 		return self.__Client
 
@@ -62,76 +50,55 @@ class TelethonUser:
 			logging – указывает, следует ли выводить в консоль дополнительные данные.
 		"""
 
-		# Временный клиент для регистрации.
 		Client = None
-		# Хеш авторизации клиента.
 		Hash = None
-		# Состояние: успешна ли авторизация.
 		IsSucess = False
 
 		try:
-			# Преобразование типов.
 			api_id = int(api_id)
-			# Инициализация клиента и подключение.
 			Client = TelegramClient("Account", api_id, api_hash, system_version = "4.16.30-vxCUSTOM")
 			Client.connect()
 			
-			# Если аккаунт не авторизован.
 			if not Client.is_user_authorized():
-				# Отправка кода 2FA.
 				Hash = Client.sign_in(phone_number).phone_code_hash
-				# Запрос кода у пользователя.
 				Code = input("Enter protection code from Telegram application: ")
-				# Вход с кодом.
 				Client.sign_in(phone_number, Code, phone_code_hash = Hash)
 				
-			# Если клиент авторизован.
 			if Client.is_user_authorized():
-				# Отключение и обнуление клиента и хеша.
 				Client.disconnect()
 				Client = None
 				Hash = None
-				# Перемещение файла сессии для сохранности.
 				os.replace("Account.session", "Data/Account.session")
-				# Сохранение данных сессии.
 				WriteJSON("Data/Account.json", {"phone_number": phone_number, "api_id": api_id, "api_hash": api_hash})
-				# Переключение состояния.
 				IsSucess = True
-				# Если включён вывод в консоль, вывести сообщение об успешном входе.
 				if logging: StyledPrinter("Authorization successful.", text_color = Styles.Colors.Green)
 			
 		except Exception as ExceptionData:
-			# Если включён вывод в консоль, вывести ошибку.
 			if logging: StyledPrinter(f"ERROR: {ExceptionData}", text_color = Styles.Colors.Red)
 			
 		return IsSucess
 	
-	def upload_file(self, user_id: int, site: str, filename: str, quality: str, compression: bool) -> bool:
+	def upload_file(self, user_id: int, site: str, filename: str, quality: str, compression: bool, watermarked: bool) -> bool:
 		"""
 		Выгружает файл в Telegram.
 			user_id – идентификатор пользователя;
 			site – название сайта;
 			filename – название файла;
 			quality – качество видео;
-			compression – указывает, нужно ли использовать сжатие.
+			compression – указывает, нужно ли использовать сжатие;
+			watermarked – указывает, имеет ли видео водяной знак.
 		"""
 
-		# Состояние: отправлен ли файл.
 		IsSuccess = False
 		
 		try:
-			# Идентификатор видео.
 			VideoID = filename[:-4]
-			# Приведение компрессии из логики в строку.
 			Compression = "compression: on" if compression else "compression: off"
-			# Подпись сообщения.
-			Caption = f"{site}\n{VideoID}\n{quality}\n{Compression}"
-			# Отправка файла.
-			self.__Client.send_message(self.__Settings["bot_name"], message = Caption, file = f"Temp/{user_id}/{filename}", force_document = not compression)
-			# Удаление файлов и директории пользователя.
+			Watermarked = "watermarked: on" if watermarked else "watermarked: off"
+			Caption = f"{site}\n{VideoID}\n{quality}\n{Compression}\n{Watermarked}"
+			self.__Client.send_message(self.__BotName, message = Caption, file = f"Temp/{user_id}/{filename}", force_document = not compression)
 			RemoveDirectoryContent(f"Temp/{user_id}")
 			os.rmdir(f"Temp/{user_id}")
-			# Переключение состояния.
 			IsSuccess = True
 
 		except Exception as ExceptionData: print(ExceptionData)

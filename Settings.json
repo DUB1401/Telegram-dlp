@@ -1,7 +1,10 @@
 {
 	"token": "",
-	"bot-name": "",
-	"trusted-source-id": null,
+	"bot_name": "",
+	"trusted_sources_id": [],
+	"password": "1234",
 	"premium": false,
-	"proxy": ""
+	"quality_improvement": true,
+	"proxy": "",
+	"venv": true
 }
