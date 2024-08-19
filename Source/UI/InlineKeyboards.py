@@ -56,6 +56,7 @@ class InlineKeyboards:
 
 		if "title" in info.keys() and info["title"]:
 			if len(info["title"]) > 64: Title = info["title"][:64] + "..."
+			else: Title = info["title"]
 			Title = "*" +  Markdown(Title).escaped_text + "*\n"
 
 		if "view_count" in info.keys() and info["view_count"]:
