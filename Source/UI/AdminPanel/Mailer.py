@@ -73,7 +73,7 @@ class Mailer:
 				break
 
 			try:
-				self.send_message(admin, targets[Index].id)
+				if not targets[Index].is_chat_forbidden: self.send_message(admin, targets[Index])
 
 			except: Errors += 1
 
@@ -110,11 +110,11 @@ class Mailer:
 		self.__Bot = bot
 		self.__MailingThread = None
 
-	def send_message(self, admin: UserData, user_id: int):
+	def send_message(self, admin: UserData, user: UserData):
 		"""
 		Отправляет сообщение пользователю.
 			admin – администратор;\n
-			user_id – идентификатор пользователя.
+			user – целевой пользователь.
 		"""
 
 		Text = admin.get_property("mailing_caption")
@@ -128,37 +128,40 @@ class Mailer:
 			"document": self.__Bot.send_document
 		}
 
-		if len(Files) > 1:
-			self.__Bot.send_media_group(
-				chat_id = user_id,
-				media = self.__BuildMediaGroup(Text, Files)
-			)
+		try:
+			if len(Files) > 1:
+				self.__Bot.send_media_group(
+					chat_id = user.id,
+					media = self.__BuildMediaGroup(Text, Files)
+				)
 
-		elif len(Files) == 1:
-			FileType = Files[0]["type"]
-			FileID = Files[0]["file_id"]
-			SendMethods[FileType](
-				user_id,
-				FileID,
-				caption = Text,
-				parse_mode = "HTML",
-				reply_markup = self.__BuildButton(ButtonLabel, ButtonLink)
-			)
-			
-		else:
-			self.__Bot.send_message(
-				chat_id = user_id,
-				text = Text,
-				parse_mode = "HTML",
-				disable_web_page_preview = True,
-				reply_markup = self.__BuildButton(ButtonLabel, ButtonLink)
-			)
+			elif len(Files) == 1:
+				FileType = Files[0]["type"]
+				FileID = Files[0]["file_id"]
+				SendMethods[FileType](
+					user.id,
+					FileID,
+					caption = Text,
+					parse_mode = "HTML",
+					reply_markup = self.__BuildButton(ButtonLabel, ButtonLink)
+				)
+				
+			else:
+				self.__Bot.send_message(
+					chat_id = user.id,
+					text = Text,
+					parse_mode = "HTML",
+					disable_web_page_preview = True,
+					reply_markup = self.__BuildButton(ButtonLabel, ButtonLink)
+				)
+
+		except: user.set_chat_forbidden(True)
 
 	def start_mailing(self, admin: UserData, users_manager: UsersManager):
 		"""
 		Отправляет сообщение пользователю.
 			admin – администратор;\n
-			users_manager – объект управления пользователями.
+			users_manager – менеджер управления пользователями.
 		"""
 
 		Sampling = admin.get_property("sampling")
@@ -169,8 +172,7 @@ class Mailer:
 			try:
 				Targets = random.sample(users_manager.users, Sampling)
 			
-			except ValueError:
-				Targets = users_manager.users
+			except ValueError: Targets = users_manager.users
 
 		elif Sampling == None:
 			Targets = users_manager.users

@@ -44,14 +44,14 @@ class Decorators:
 				if MessageWords[1] == password:
 					bot.send_message(
 						chat_id = Message.chat.id,
-						text = "Пароль принят. Доступ разрешён."
+						text = "Пароль принят. Доступ разрешён.",
+						reply_markup = ReplyKeyboards().admin()
 					)
 
 				else:
 					bot.send_message(
 						chat_id = Message.chat.id,
-						text = "Неверный пароль.",
-						reply_markup = ReplyKeyboards().admin()
+						text = "Неверный пароль."
 					)
 
 			else:
@@ -218,7 +218,7 @@ class Decorators:
 				)
 
 			else:
-				Mailer(bot).send_message(User, User.id)
+				Mailer(bot).send_message(User, User)
 
 		@bot.message_handler(content_types = ["text"], regexp = "👤 Рассылка")
 		def Button(Message: types.Message):
@@ -250,9 +250,14 @@ class Decorators:
 			User = users.auth(Message.from_user)
 			PremiumUsersCount = len(users.premium_users)
 			UsersCount = len(users.users)
+			BlockedUsersCount = 0
+
+			for user in users.users:
+				if user.is_chat_forbidden: BlockedUsersCount += 1
+
 			bot.send_message(
 				chat_id = Message.chat.id,
-				text = f"*📊 Статистика*\n\n👤 Всего пользователей: {UsersCount}\n⭐ С Premium\\-подпиской: {PremiumUsersCount}",
+				text = f"*📊 Статистика*\n\n👤 Всего пользователей: {UsersCount}\n⭐ Из них Premium: {PremiumUsersCount}\n⛔ Заблокировали: {BlockedUsersCount}",
 				parse_mode = "MarkdownV2"
 			)
 

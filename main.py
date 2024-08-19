@@ -82,7 +82,7 @@ elif ParsedCommand and ParsedCommand.name == "login":
 else:
 	Bot = TeleBot(Settings["token"])
 	Users = UsersManager("Data/Users")
-	Downloader = YtDlp("yt-dlp/yt-dlp")
+	Downloader = YtDlp("yt-dlp/yt-dlp", Settings["proxy"])
 	StorageBox = Storage("Storage", Settings["venv"])
 	AdminPanel = Panel()
 
@@ -124,7 +124,7 @@ else:
 	def CommandStart(Message: types.Message):
 		User = Users.auth(Message.from_user)
 		User.set_property("compression", True, force = False)
-		User.set_property("is_downloading", False)
+		User.set_property("is_downloading", False)		
 		Bot.send_message(
 			chat_id = Message.chat.id,
 			text = "👋 Привет!\n\nЯ бот, помогающий скачивать видео и извлекать из них аудио. У меня очень широкий список поддерживаемых источников. Отправьте мне ссылку для начала работы."
@@ -211,7 +211,8 @@ else:
 		else:
 			SendedMessage = Bot.send_message(
 				chat_id = Call.message.chat.id,
-				text = "⏳ Скачиваю аудио..."
+				text = "⏳ Скачиваю аудио\\.\\.\\.",
+				parse_mode = "MarkdownV2" 
 			)
 			Result = Downloader.download_audio(Link, f"Temp/{User.id}/", f"{VideoID}.m4a")
 
@@ -219,7 +220,8 @@ else:
 				Bot.edit_message_text(
 					chat_id = Call.message.chat.id,
 					message_id = SendedMessage.id,
-					text = "✅ Аудио скачано.\n⏳ Выгружаю аудио в Telegram..."
+					text = "✅ Аудио скачано.\n⏳ Выгружаю аудио в Telegram\\.\\.\\.",
+					parse_mode = "MarkdownV2" 
 				)
 				Result = StorageBox.upload_file(User.id, Site, f"{VideoID}.m4a", Quality, Compression)
 
@@ -227,7 +229,8 @@ else:
 					Bot.edit_message_text(
 						chat_id = Call.message.chat.id,
 						message_id = SendedMessage.id,
-						text = "✅ Аудио скачано.\n✅ Аудио загружено в Telegram.\n⏳ Отправляю..."
+						text = "✅ Аудио скачано\\.\n✅ Аудио загружено в Telegram\\.\n⏳ Отправляю\\.\\.\\.",
+						parse_mode = "MarkdownV2" 
 					)
 					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression)
 
@@ -236,28 +239,32 @@ else:
 						Bot.edit_message_text(
 							chat_id = Call.message.chat.id,
 							message_id = SendedMessage.id,
-							text = "✅ Аудио скачано.\n✅ Аудио загружено в Telegram.\n✅ Отправлено."
+							text = "✅ Аудио скачано\\.\n✅ Аудио загружено в Telegram\\.\n✅ Отправлено\\.",
+							parse_mode = "MarkdownV2" 
 						)
 
 					else:
 						Bot.edit_message_text(
 							chat_id = Call.message.chat.id,
 							message_id = SendedMessage.id,
-							text = "✅ Аудио скачано.\n✅ Аудио загружено в Telegram.\n❌ Не удалось отправить аудио."
+							text = "✅ Аудио скачано\\.\n✅ Аудио загружено в Telegram\\.\n❌ Не удалось отправить аудио\\.",
+						parse_mode = "MarkdownV2" 
 						)
 
 				else:
 					Bot.edit_message_text(
 						chat_id = Call.message.chat.id,
 						message_id = SendedMessage.id,
-						text = "✅ Аудио скачано.\n❌ Не удалось загрузить аудио в Telegram."
+						text = "✅ Аудио скачано\\.\n❌ Не удалось загрузить аудио в Telegram\\.",
+						parse_mode = "MarkdownV2" 
 					)
 
 			else:
 				Bot.edit_message_text(
 					chat_id = Call.message.chat.id,
 					message_id = SendedMessage.id,
-					text = "❌ Не удалось скачать аудио."
+					text = "❌ Не удалось скачать аудио\\.",
+					parse_mode = "MarkdownV2" 
 				)
 
 		User.set_property("is_downloading", False)
@@ -281,8 +288,8 @@ else:
 		QualityImprovementReady = ""
 
 		if Settings["quality_improvement"]:
-			QualityImprovementGo = "⏳ Улучшаю качество..." 
-			QualityImprovementReady = "✅ Качество улучшено.\n"
+			QualityImprovementGo = "⏳ Улучшаю качество\\.\\.\\." 
+			QualityImprovementReady = "✅ Качество улучшено\\.\n"
 
 		if FileMessageID[0]:
 			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "")
@@ -290,7 +297,8 @@ else:
 		else:
 			SendedMessage = Bot.send_message(
 				chat_id = Call.message.chat.id,
-				text = "⏳ Скачиваю видео..."
+				text = "⏳ Скачиваю видео\\.\\.\\.",
+				parse_mode = "MarkdownV2"
 			)
 			Result = Downloader.download_video(Link, f"Temp/{User.id}/", f"{VideoID}.mp4", FormatID)
 
@@ -300,14 +308,16 @@ else:
 					Bot.edit_message_text(
 						chat_id = Call.message.chat.id,
 						message_id = SendedMessage.id,
-						text = "✅ Видео скачано.\n" + QualityImprovementGo
+						text = "✅ Видео скачано\\.\n" + QualityImprovementGo,
+						parse_mode = "MarkdownV2"
 					)
-					sleep(2)
+					sleep(4)
 
 				Bot.edit_message_text(
 					chat_id = Call.message.chat.id,
 					message_id = SendedMessage.id,
-					text = f"✅ Видео скачано.\n{QualityImprovementReady}⏳ Выгружаю видео в Telegram..."
+					text = f"✅ Видео скачано\\.\n{QualityImprovementReady}⏳ Выгружаю видео в Telegram\\.\\.\\.",
+					parse_mode = "MarkdownV2"
 				)
 				Result = StorageBox.upload_file(User.id, Site, f"{VideoID}.mp4", Quality, Compression)
 
@@ -315,7 +325,8 @@ else:
 					Bot.edit_message_text(
 						chat_id = Call.message.chat.id,
 						message_id = SendedMessage.id,
-						text = f"✅ Видео скачано.\n{QualityImprovementReady}✅ Видео загружено в Telegram.\n⏳ Отправляю..."
+						text = f"✅ Видео скачано\\.\n{QualityImprovementReady}✅ Видео загружено в Telegram\\.\n⏳ Отправляю\\.\\.\\.",
+						parse_mode = "MarkdownV2"
 					)
 					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression)
 
@@ -324,28 +335,32 @@ else:
 						Bot.edit_message_text(
 							chat_id = Call.message.chat.id,
 							message_id = SendedMessage.id,
-							text = f"✅ Видео скачано.\n{QualityImprovementReady}✅ Видео загружено в Telegram.\n✅ Отправлено."
+							text = f"✅ Видео скачано\\.\n{QualityImprovementReady}✅ Видео загружено в Telegram\\.\n✅ Отправлено\\.",
+							parse_mode = "MarkdownV2"
 						)
 
 					else:
 						Bot.edit_message_text(
 							chat_id = Call.message.chat.id,
 							message_id = SendedMessage.id,
-							text = f"✅ Видео скачано.\n{QualityImprovementReady}✅ Видео загружено в Telegram.\n❌ Не удалось отправить видео."
+							text = f"✅ Видео скачано\\.\n{QualityImprovementReady}✅ Видео загружено в Telegram\\.\n❌ Не удалось отправить видео\\.",
+							parse_mode = "MarkdownV2"
 						)
 
 				else:
 					Bot.edit_message_text(
 						chat_id = Call.message.chat.id,
 						message_id = SendedMessage.id,
-						text = f"✅ Видео скачано.\n{QualityImprovementReady}❌ Не удалось загрузить видео в Telegram."
+						text = f"✅ Видео скачано\\.\n{QualityImprovementReady}❌ Не удалось загрузить видео в Telegram\\.",
+						parse_mode = "MarkdownV2"
 					)
 
 			else:
 				Bot.edit_message_text(
 					chat_id = Call.message.chat.id,
 					message_id = SendedMessage.id,
-					text = "❌ Не удалось скачать видео."
+					text = "❌ Не удалось скачать видео\\.",
+					parse_mode = "MarkdownV2"
 				)
 
 		User.set_property("is_downloading", False)
@@ -370,8 +385,8 @@ else:
 		QualityImprovementReady = ""
 
 		if Settings["quality_improvement"]:
-			QualityImprovementGo = "⏳ Улучшаю качество..." 
-			QualityImprovementReady = "✅ Качество улучшено.\n"
+			QualityImprovementGo = "⏳ Улучшаю качество\\.\\.\\." 
+			QualityImprovementReady = "✅ Качество улучшено\\.\n"
 
 		if FileMessageID[0]:
 			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "")
@@ -379,7 +394,8 @@ else:
 		else:
 			SendedMessage = Bot.send_message(
 				chat_id = Call.message.chat.id,
-				text = "⏳ Скачиваю видео..."
+				text = "⏳ Скачиваю видео\\.\\.\\.",
+				parse_mode = "MarkdownV2"
 			)
 			Result = Downloader.download_video(Link, f"Temp/{User.id}/", f"{VideoID}.mp4", FormatID)
 
@@ -389,14 +405,16 @@ else:
 					Bot.edit_message_text(
 						chat_id = Call.message.chat.id,
 						message_id = SendedMessage.id,
-						text = "✅ Видео скачано.\n" + QualityImprovementGo
+						text = "✅ Видео скачано\\.\n" + QualityImprovementGo,
+						parse_mode = "MarkdownV2"
 					)
 					sleep(2)
 
 				Bot.edit_message_text(
 					chat_id = Call.message.chat.id,
 					message_id = SendedMessage.id,
-					text = f"✅ Видео скачано.\n{QualityImprovementReady}⏳ Выгружаю видео в Telegram..."
+					text = f"✅ Видео скачано\\.\n{QualityImprovementReady}⏳ Выгружаю видео в Telegram\\.\\.\\.",
+					parse_mode = "MarkdownV2"
 				)
 				Result = StorageBox.upload_file(User.id, Site, f"{VideoID}.mp4", Quality, Compression, watermarked = True)
 
@@ -404,7 +422,8 @@ else:
 					Bot.edit_message_text(
 						chat_id = Call.message.chat.id,
 						message_id = SendedMessage.id,
-						text = f"✅ Видео скачано.\n{QualityImprovementReady}✅ Видео загружено в Telegram.\n⏳ Отправляю..."
+						text = f"✅ Видео скачано\\.\n{QualityImprovementReady}✅ Видео загружено в Telegram\\.\n⏳ Отправляю\\.\\.\\.",
+						parse_mode = "MarkdownV2"
 					)
 					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression, watermarked = True)
 
@@ -413,28 +432,32 @@ else:
 						Bot.edit_message_text(
 							chat_id = Call.message.chat.id,
 							message_id = SendedMessage.id,
-							text = f"✅ Видео скачано.\n{QualityImprovementReady}✅ Видео загружено в Telegram.\n✅ Отправлено."
+							text = f"✅ Видео скачано\\.\n{QualityImprovementReady}✅ Видео загружено в Telegram\\.\n✅ Отправлено\\.",
+							parse_mode = "MarkdownV2"
 						)
 
 					else:
 						Bot.edit_message_text(
 							chat_id = Call.message.chat.id,
 							message_id = SendedMessage.id,
-							text = f"✅ Видео скачано.\n{QualityImprovementReady}✅ Видео загружено в Telegram.\n❌ Не удалось отправить видео."
+							text = f"✅ Видео скачано\\.\n{QualityImprovementReady}✅ Видео загружено в Telegram\\.\n❌ Не удалось отправить видео\\.",
+							parse_mode = "MarkdownV2"
 						)
 
 				else:
 					Bot.edit_message_text(
 						chat_id = Call.message.chat.id,
 						message_id = SendedMessage.id,
-						text = f"✅ Видео скачано.\n{QualityImprovementReady}❌ Не удалось загрузить видео в Telegram."
+						text = f"✅ Видео скачано\\.\n{QualityImprovementReady}❌ Не удалось загрузить видео в Telegram\\.",
+						parse_mode = "MarkdownV2"
 					)
 
 			else:
 				Bot.edit_message_text(
 					chat_id = Call.message.chat.id,
 					message_id = SendedMessage.id,
-					text = "❌ Не удалось скачать видео."
+					text = "❌ Не удалось скачать видео\\.",
+					parse_mode = "MarkdownV2"
 				)
 
 		User.set_property("is_downloading", False)

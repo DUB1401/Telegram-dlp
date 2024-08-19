@@ -1,6 +1,3 @@
-from urllib.parse import urlparse, parse_qs
-from dublib.Methods.JSON import ReadJSON
-
 import subprocess
 import json
 import sys
@@ -42,37 +39,13 @@ class YtDlp:
 
 		return Buffer
 
-	def __ProcessLink(self, link: str) -> dict | None:
-		"""
-		Обрабатывает ссылку в попытке получить сохранённые данные видео.
-			link – ссылка.
-		"""
-
-		Dump = None
-
-		if "youtu.be" in link:
-			VideoID = link.split("/")[-1]
-			if os.path.exists(f"Data/Storage/youtube.com/{VideoID}.json"): Dump = ReadJSON(f"Data/Storage/youtube.com/{VideoID}.json")["dump"]
-
-		if "youtube.com" in link:
-			ParsedLink = urlparse(link)
-			Query = parse_qs(ParsedLink.query)
-			if "v" in Query.keys(): VideoID = str(Query["v"][0])
-			if "v" in Query.keys() and os.path.exists(f"Data/Storage/youtube.com/{VideoID}.json"): Dump = ReadJSON(f"Data/Storage/youtube.com/{VideoID}.json")["dump"]
-
-		if "tiktok.com" in link:
-			VideoID = link.split("?")[0].split("/")[-1]
-			if os.path.exists(f"Data/Storage/tiktok.com/{VideoID}.json"): Dump = ReadJSON(f"Data/Storage/tiktok.com/{VideoID}.json")["dump"]
-
-		return Dump
-
 	def __PrettyFormatName(self, name: str, watermarked: bool = False) -> str:
 		"""
 		Делает название формата более привлекательным и округляет.
 			name – название формата.
 		"""
 
-		SupportedResolutions = [144, 240, 360, 480, 720, 1080, 2560, 3840]
+		SupportedResolutions = [144, 240, 360, 480, 720, 1080, 2560, 3840, 7680]
 
 		if name != "audio only":
 
@@ -83,6 +56,7 @@ class YtDlp:
 				elif Width == 1080: name = "Full HD"
 				elif Width == 2560: name = "2K"
 				elif Width == 3840: name = "4K"
+				elif Width == 7680: name = "8K"
 				else: name = f"{Width}p"
 
 			else: name = "null"
@@ -95,6 +69,21 @@ class YtDlp:
 
 		return name
 
+	def __SortResolutions(self, resolutions: dict) -> dict:
+		"""
+		Сортирует разрешения в определённом порядке.
+			resolutions – словарь разрешений.
+		"""
+		
+		Order = ["144p", "240p", "360p", "480p", "HD", "Full HD", "2K", "4K", "8K"]
+		BaseResolutions = [Key for Key in resolutions if Key in Order]
+		ExtraResolutions = [Key for Key in resolutions if Key not in Order]
+		BaseResolutions = sorted(BaseResolutions, key = lambda Resolution: Order.index(Resolution))
+		Resolutions = BaseResolutions + ExtraResolutions
+		resolutions = {Key: resolutions[Key] for Key in Resolutions}
+		
+		return resolutions
+	
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
@@ -125,7 +114,7 @@ class YtDlp:
 		try:
 			Cookies = ""
 			if "instagram.com" in link: Cookies = "--cookies yt-dlp/instagram.cookies"
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" {self.__Proxy} {Cookies} -o {directory}{filename} --extract-audio --recode m4a"
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" {Cookies} -o {directory}{filename} --extract-audio --recode m4a {self.__Proxy}"
 			if os.system(Command) == 0: IsSuccess = True
 
 		except Exception as ExceptionData: print(ExceptionData)
@@ -196,5 +185,7 @@ class YtDlp:
 					Name = Format["resolution"]
 					if pretty: Name = self.__PrettyFormatName(Name, Watermarked)
 					if Name != None: Resolutions[Name] = Format["format_id"]
+
+		Resolutions = self.__SortResolutions(Resolutions)
 
 		return Resolutions

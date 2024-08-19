@@ -124,7 +124,7 @@ class Storage:
 		if site == "instagram.com":
 
 			if "/reel/" in link:
-				VideoID = link.rstrip("/").split("/")[-1]
+				VideoID = link.split("?")[0].rstrip("/").split("/")[-1]
 
 		if site == "youtube.com":
 
