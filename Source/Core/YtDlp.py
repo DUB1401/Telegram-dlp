@@ -21,7 +21,7 @@ class YtDlp:
 
 		if domain == "tiktok.com":
 
-			if format["format_note"] == "watermarked": IsWatermarked = True
+			if format["format_id"] == "download": IsWatermarked = True
 
 		return IsWatermarked
 
