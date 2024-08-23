@@ -139,7 +139,7 @@ class YtDlp:
 			if "youtube.com" in link or "youtu.be" in link or "instagram.com" in link: Bestaudio = "+bestaudio"
 			if "instagram.com" in link: Cookies = "--cookies yt-dlp/instagram.cookies"
 			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}{Bestaudio} --recode mp4 {self.__Proxy} {Cookies} -o {directory}{filename}"
-			if os.system(Command) == 0: IsSuccess = True
+			if os.system(Command) in [0, 256]: IsSuccess = True
 
 		except Exception as ExceptionData: print(ExceptionData)
 		
@@ -160,6 +160,7 @@ class YtDlp:
 			Dump = subprocess.getoutput(Command)
 
 			if not Dump.startswith("ERROR"):
+				if "\n" in Dump: Dump = Dump.split("\n")[0]
 				Info = json.loads(Dump)
 				self.__FilterInfo(Info)
 	

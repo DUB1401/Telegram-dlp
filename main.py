@@ -206,7 +206,7 @@ else:
 		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression)
 
 		if FileMessageID[0]:
-			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "")
+			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Settings["bot_name"])
 
 		else:
 			SendedMessage = Bot.send_message(
@@ -235,7 +235,7 @@ else:
 					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression)
 
 					if Result.code == 0:
-						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "")
+						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
 						Bot.edit_message_text(
 							chat_id = Call.message.chat.id,
 							message_id = SendedMessage.id,
@@ -331,7 +331,7 @@ else:
 					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression)
 
 					if Result.code == 0:
-						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "")
+						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
 						Bot.edit_message_text(
 							chat_id = Call.message.chat.id,
 							message_id = SendedMessage.id,
@@ -389,7 +389,7 @@ else:
 			QualityImprovementReady = "✅ Качество улучшено\\.\n"
 
 		if FileMessageID[0]:
-			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "")
+			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Settings["bot_name"])
 
 		else:
 			SendedMessage = Bot.send_message(
@@ -428,7 +428,7 @@ else:
 					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression, watermarked = True)
 
 					if Result.code == 0:
-						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "")
+						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
 						Bot.edit_message_text(
 							chat_id = Call.message.chat.id,
 							message_id = SendedMessage.id,
