@@ -55,9 +55,15 @@ class InlineKeyboards:
 		#==========================================================================================#
 
 		if "title" in info.keys() and info["title"]:
-			if len(info["title"]) > 64: Title = info["title"][:64] + "..."
-			else: Title = info["title"]
-			Title = "*" +  Markdown(Title).escaped_text + "*\n"
+			Title = info["title"]
+
+			if "video by" in Title.lower() and "description" in info.keys(): Title = info["description"]
+			elif "video by none" in Title.lower() and "playlist_title" in info.keys(): Title = info["playlist_title"]
+
+			if len(Title):
+				if len(Title) > 64: Title = Title[:64] + "..."
+				else: Title = Title
+				Title = "*" +  Markdown(Title).escaped_text + "*\n"
 
 		if "view_count" in info.keys() and info["view_count"]:
 			ViewsCount = info["view_count"]
@@ -113,10 +119,31 @@ class InlineKeyboards:
 
 		if Likes or Views or Duration: Newline = "\n"
 
+		#---> Частные обработчики сервисов.
+		#==========================================================================================#
+
+		if info["webpage_url_domain"] == "instagram.com":
+
+			if Title.startswith("*Video by"):
+				Title = "*Story" + Title[6:]
+
+			if "uploader" in info.keys() and info["uploader"] and "channel" in info.keys() and info["channel"]:
+				Uploader = "[@" + Markdown(info["uploader"].strip()).escaped_text + "](" + "https://www.instagram.com/" + info["channel"] + ")\n"
+
+			elif info["extractor"] == "instagram:story" and "playlist" in info.keys() and info["playlist"]:
+				User = info["playlist"].split()[-1]
+				Uploader = "[@" + Markdown(User).escaped_text + "](" + f"https://www.instagram.com/{User})\n"
+
 		#---> Отправка сообщения.
 		#==========================================================================================#
+		IsThumbnail = False
+
+		try:
+			if requests.get(info["thumbnail"], timeout = 5).status_code == 200: IsThumbnail = True
+
+		except: pass
 		
-		if "thumbnail" in info.keys() and info["thumbnail"] and requests.get(info["thumbnail"]).status_code == 200:
+		if IsThumbnail:
 			bot.send_photo(
 				chat_id = chat_id,
 				photo = info["thumbnail"],
@@ -128,7 +155,7 @@ class InlineKeyboards:
 		else:
 			bot.send_message(
 				chat_id = chat_id,
-				text = f"{Title}{Views}{Likes}{Duration}{Newline}{Uploader}\n\nВыберите формат загрузки:",
+				text = f"{Title}{Views}{Likes}{Duration}{Newline}{Uploader}\nВыберите формат загрузки:",
 				parse_mode = "MarkdownV2",
 				disable_web_page_preview = True,
 				reply_markup = Menu
