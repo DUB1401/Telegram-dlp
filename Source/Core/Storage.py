@@ -3,6 +3,7 @@ from dublib.Methods.JSON import ReadJSON, WriteJSON
 from urllib.parse import urlparse, parse_qs
 from time import sleep
 
+import base64
 import sys
 import os
 
@@ -48,6 +49,23 @@ class Storage:
 		#==========================================================================================#
 		self.__StorageDirectory = directory
 		self.__Venv = venv
+
+	def check_link(self, link: str) -> str:
+		"""
+		Проверяет, нужно ли ссылке преобразования для корректной загрузке и выполняет эту процедуру.
+			link – ссылка.
+		"""
+
+		
+		if "instagram.com" in link:
+
+			if "/s/" in link:
+				Buffer = link.split("?")[0].split("/")[-1]
+				
+				if not Buffer.isdigit():
+					link = "https://www.instagram.com/stories/highlights/" + str(base64.b64decode(Buffer)).split(":")[-1].rstrip("'")
+
+		return link
 
 	def get_file_message_id(self, site: str, id: str, quality: str, compression: bool, watermarked: bool = False) -> list[int, None]:
 		"""
@@ -141,8 +159,15 @@ class Storage:
 			if Buffer.isdigit(): VideoID = Buffer
 
 		if site == "vk.com":
-			VideoID = link.split("?")[0].split("video")[-1]
-		
+			
+			if "video" in link:
+				Query = urlparse(link).query
+				Query = parse_qs(Query)
+				if "z" in Query.keys(): VideoID = Query["z"][0].replace("video", "").split("/")[0]
+
+			elif "clip" in link:
+				VideoID = link.split("?")[0].split("/")[-1].replace("clip", "")
+			
 		return VideoID
 
 	def register_file(self, site: str, id: str, quality: str | None, compression: bool, watermarked: bool, message_id: int, chat_id: int):

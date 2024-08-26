@@ -157,17 +157,18 @@ else:
 				text = "Идёт получение данных..."
 			)
 			Site = StorageBox.parse_site_name(Message.text)
+			Link = StorageBox.check_link(Message.text)
 			VideoID = None
 			Info = None
 
 			if Site:
-				VideoID = StorageBox.parse_video_id(Site, Message.text)
+				VideoID = StorageBox.parse_video_id(Site, Link)
 				Info = StorageBox.get_info(Site, VideoID)
-				if not Info: Info = Downloader.get_info(Message.text)
+				if not Info: Info = Downloader.get_info(Link)
 
 			if Info:
 				StorageBox.save_info(Site, VideoID, Info)
-				User.set_temp_property("link", Message.text)
+				User.set_temp_property("link", Link)
 				User.set_temp_property("site", Site)
 				User.set_temp_property("video_id", Info["id"])
 				Bot.delete_message(message_id = SendedMessage.id, chat_id = Message.chat.id)
