@@ -47,7 +47,7 @@ class YtDlp:
 
 		SupportedResolutions = [144, 240, 360, 480, 720, 1080, 2560, 3840, 7680]
 
-		if name != "audio only":
+		if name not in ["audio only"]:
 
 			if name and "x" in name:
 				Width = int(name.split("x")[0].rstrip("p"))
@@ -59,7 +59,7 @@ class YtDlp:
 				elif Width == 7680: name = "8K"
 				else: name = f"{Width}p"
 
-			else: name = "null"
+			else: name = None
 
 			if watermarked:
 				name += "w"
@@ -136,7 +136,7 @@ class YtDlp:
 		try:
 			Bestaudio = ""
 			Cookies = ""
-			if "youtube.com" in link or "youtu.be" in link or "instagram.com" in link: Bestaudio = "+bestaudio"
+			if "youtube.com" in link or "youtu.be" in link or "instagram.com" in link or "vk.com" in link: Bestaudio = "+bestaudio"
 			if "instagram.com" in link: Cookies = "--cookies yt-dlp/instagram.cookies"
 			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}{Bestaudio} --recode mp4 {self.__Proxy} {Cookies} -o {directory}{filename}"
 			if os.system(Command) in [0, 256]: IsSuccess = True
