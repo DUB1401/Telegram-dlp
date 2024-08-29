@@ -1,3 +1,5 @@
+from Source.Core.Storage import Storage
+
 import subprocess
 import json
 import sys
@@ -59,10 +61,12 @@ class YtDlp:
 				elif Width == 7680: name = "8K"
 				else: name = f"{Width}p"
 
-			else: name = None
+			else: name = "null"
 
 			if watermarked:
 				name += "w"
+
+			elif name == "null": name = None
 
 		else:
 			name = None
@@ -85,13 +89,33 @@ class YtDlp:
 		return resolutions
 	
 	#==========================================================================================#
+	# >>>>> СПЕЦИФИЧЕСКИЕ МЕТОДЫ СКАЧИВАНИЯ АУДИО <<<<< #
+	#==========================================================================================#
+
+	def __instagram_audio(self, link: str, directory: str, filename: str) -> bool:
+		"""
+		Скачивает аудиодорожку и перекодирует её в формат m4a.
+			link – ссылка на видео;
+			directory – директория загрузки;
+			filename – имя файла.
+		"""
+
+		IsSuccess = False
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio --recode m4a --cookies yt-dlp/instagram.cookies {self.__Proxy}"
+		ExitCode = os.system(Command)
+		if ExitCode == 0: IsSuccess = True
+
+		return IsSuccess
+
+	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, lib_path: str | None = None, proxy: str | None = None):
+	def __init__(self, storage: Storage, lib_path: str | None = None, proxy: str | None = None):
 		"""
 		Абстракция управления библиотекой yt-dlp.
-			lib_path – путь к исполняемому файлу библиотеки;
+			storage – хранилище данных;\n
+			lib_path – путь к исполняемому файлу библиотеки;\n
 			proxy – данные прокси-сервера.
 		"""
 
@@ -99,6 +123,7 @@ class YtDlp:
 		#==========================================================================================#
 		self.__LibPath = lib_path or "yt-dlp"
 		self.__Proxy = f"--proxy {proxy}" if proxy else ""
+		self.__Storage = storage
 	
 	def download_audio(self, link: str, directory: str, filename: str) -> bool:
 		"""
@@ -108,14 +133,16 @@ class YtDlp:
 			filename – имя файла.
 		"""
 
+		Domain = self.__Storage.parse_site_name(link)
 		IsSuccess = False
-		if not os.path.exists(directory): os.makedirs(directory)
-		
+
 		try:
-			Cookies = ""
-			if "instagram.com" in link: Cookies = "--cookies yt-dlp/instagram.cookies"
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" {Cookies} -o {directory}{filename} --extract-audio --recode m4a {self.__Proxy}"
-			if os.system(Command) == 0: IsSuccess = True
+
+			if Domain == "instagram.com": IsSuccess = self.__instagram_audio(link, directory, filename)
+
+			else:
+				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio --recode m4a {self.__Proxy}"
+				if os.system(Command) == 0: IsSuccess = True
 
 		except Exception as ExceptionData: print(ExceptionData)
 		
@@ -166,6 +193,9 @@ class YtDlp:
 	
 		except Exception as ExceptionData: print(ExceptionData)
 		
+		from dublib.Methods.JSON import WriteJSON
+		WriteJSON("test.json", Info)
+
 		return Info
 
 	def get_resolutions(self, info: dict, pretty: bool = True) -> dict:

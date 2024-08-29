@@ -82,8 +82,8 @@ elif ParsedCommand and ParsedCommand.name == "login":
 else:
 	Bot = TeleBot(Settings["token"])
 	Users = UsersManager("Data/Users")
-	Downloader = YtDlp("yt-dlp/yt-dlp", Settings["proxy"])
 	StorageBox = Storage("Storage", Settings["venv"])
+	Downloader = YtDlp(StorageBox, "yt-dlp/yt-dlp", Settings["proxy"])
 	AdminPanel = Panel()
 
 	#==========================================================================================#
@@ -221,7 +221,7 @@ else:
 				Bot.edit_message_text(
 					chat_id = Call.message.chat.id,
 					message_id = SendedMessage.id,
-					text = "✅ Аудио скачано.\n⏳ Выгружаю аудио в Telegram\\.\\.\\.",
+					text = "✅ Аудио скачано\\.\n⏳ Выгружаю аудио в Telegram\\.\\.\\.",
 					parse_mode = "MarkdownV2" 
 				)
 				Result = StorageBox.upload_file(User.id, Site, f"{VideoID}.m4a", Quality, Compression)
