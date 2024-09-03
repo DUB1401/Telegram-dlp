@@ -106,6 +106,111 @@ class YtDlp:
 		if ExitCode == 0: IsSuccess = True
 
 		return IsSuccess
+	
+	def __tiktok_audio(self, link: str, directory: str, filename: str) -> bool:
+		"""
+		Скачивает аудиодорожку и перекодирует её в формат m4a.
+			link – ссылка на видео;
+			directory – директория загрузки;
+			filename – имя файла.
+		"""
+
+		IsSuccess = False
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio --recode m4a"
+		ExitCode = os.system(Command)
+		if ExitCode == 0: IsSuccess = True
+
+		return IsSuccess
+	
+	def __youtube_audio(self, link: str, directory: str, filename: str) -> bool:
+		"""
+		Скачивает аудиодорожку и перекодирует её в формат m4a.
+			link – ссылка на видео;
+			directory – директория загрузки;
+			filename – имя файла.
+		"""
+
+		IsSuccess = False
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio --recode m4a"
+		ExitCode = os.system(Command)
+		if ExitCode == 0: IsSuccess = True
+
+		return IsSuccess
+
+	#==========================================================================================#
+	# >>>>> СПЕЦИФИЧЕСКИЕ МЕТОДЫ СКАЧИВАНИЯ ВИДЕО <<<<< #
+	#==========================================================================================#
+
+	def __instagram_video(self, link: str, directory: str, filename: str, format_id: str) -> bool:
+		"""
+		Скачивает аудиодорожку и перекодирует её в формат m4a.
+			link – ссылка на видео;
+			directory – директория загрузки;
+			filename – имя файла;
+			format_id – идентификатор формата загружаемого видео.
+		"""
+
+		IsSuccess = False
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}+bestaudio --recode mp4 -o {directory}{filename} --cookies yt-dlp/instagram.cookies"
+		ExitCode = os.system(Command)
+		if ExitCode in [0, 256]: IsSuccess = True
+
+		return IsSuccess
+	
+	def __tiktok_video(self, link: str, directory: str, filename: str, format_id: str) -> bool:
+		"""
+		Скачивает аудиодорожку и перекодирует её в формат m4a.
+			link – ссылка на видео;
+			directory – директория загрузки;
+			filename – имя файла;
+			format_id – идентификатор формата загружаемого видео.
+		"""
+
+		IsSuccess = False
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} --recode mp4 -o {directory}{filename}"
+		ExitCode = os.system(Command)
+		if ExitCode == 0: IsSuccess = True
+
+		return IsSuccess
+	
+	def __youtube_video(self, link: str, directory: str, filename: str, format_id: str) -> bool:
+		"""
+		Скачивает аудиодорожку и перекодирует её в формат m4a.
+			link – ссылка на видео;
+			directory – директория загрузки;
+			filename – имя файла;
+			format_id – идентификатор формата загружаемого видео.
+		"""
+
+		IsSuccess = False
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}+bestaudio --recode mp4 -o {directory}{filename}"
+		ExitCode = os.system(Command)
+		if ExitCode == 0: IsSuccess = True
+
+		return IsSuccess
+
+	#==========================================================================================#
+	# >>>>> СПЕЦИФИЧЕСКИЕ МЕТОДЫ ПОЛУЧЕНИЯ ДАННЫХ <<<<< #
+	#==========================================================================================#
+
+	def __instagram_info(self, link: str) -> dict | None:
+		"""
+		Скачивает аудиодорожку и перекодирует её в формат m4a.
+			link – ссылка на видео;
+			directory – директория загрузки;
+			filename – имя файла;
+			format_id – идентификатор формата загружаемого видео.
+		"""
+
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download --cookies yt-dlp/instagram.cookies",
+		Dump = subprocess.getoutput(Command)
+		Info = None 
+
+		if not Dump.startswith("ERROR"):
+			if "\n" in Dump: Dump = Dump.split("\n")[0]
+			Info = json.loads(Dump)
+
+		return Info
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -133,12 +238,15 @@ class YtDlp:
 			filename – имя файла.
 		"""
 
+		if not os.path.exists(directory): os.makedirs(directory)
 		Domain = self.__Storage.parse_site_name(link)
 		IsSuccess = False
 
 		try:
 
 			if Domain == "instagram.com": IsSuccess = self.__instagram_audio(link, directory, filename)
+			elif Domain == "tiktok.com": IsSuccess = self.__tiktok_audio(link, directory, filename)
+			elif Domain == "youtube.com": IsSuccess = self.__youtube_audio(link, directory, filename)
 
 			else:
 				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio --recode m4a {self.__Proxy}"
@@ -157,16 +265,19 @@ class YtDlp:
 			format_id – идентификатор формата загружаемого видео.
 		"""
 		
-		IsSuccess = False
 		if not os.path.exists(directory): os.makedirs(directory)
+		Domain = self.__Storage.parse_site_name(link)
+		IsSuccess = False
 		
 		try:
-			Bestaudio = ""
-			Cookies = ""
-			if "youtube.com" in link or "youtu.be" in link or "instagram.com" in link or "vk.com" in link: Bestaudio = "+bestaudio"
-			if "instagram.com" in link: Cookies = "--cookies yt-dlp/instagram.cookies"
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}{Bestaudio} --recode mp4 {self.__Proxy} {Cookies} -o {directory}{filename}"
-			if os.system(Command) in [0, 256]: IsSuccess = True
+
+			if Domain == "instagram.com": IsSuccess = self.__instagram_video(link, directory, filename, format_id)
+			elif Domain == "tiktok.com": IsSuccess = self.__tiktok_video(link, directory, filename, format_id)
+			elif Domain in ["youtube.com", "vk.com"]: IsSuccess = self.__youtube_video(link, directory, filename, format_id)
+
+			else:
+				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} --recode mp4 -o {directory}{filename} {self.__Proxy}"
+				if os.system(Command) == 0: IsSuccess = True
 
 		except Exception as ExceptionData: print(ExceptionData)
 		
@@ -178,18 +289,19 @@ class YtDlp:
 			link – ссылка на видео.
 		"""
 
+		Domain = self.__Storage.parse_site_name(link)
 		Info = None
 		
 		try:
-			Cookies = ""
-			if "instagram.com" in link: Cookies = "--cookies yt-dlp/instagram.cookies"
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {Cookies} {self.__Proxy}",
-			Dump = subprocess.getoutput(Command)
 
-			if not Dump.startswith("ERROR"):
-				if "\n" in Dump: Dump = Dump.split("\n")[0]
-				Info = json.loads(Dump)
-				self.__FilterInfo(Info)
+			if Domain == "instagram.com": Info = self.__instagram_info(link)
+
+			else: 
+				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy}",
+				Dump = subprocess.getoutput(Command)
+				if not Dump.startswith("ERROR"): Info = json.loads(Dump)
+
+			if Info: self.__FilterInfo(Info)
 	
 		except Exception as ExceptionData: print(ExceptionData)
 		
