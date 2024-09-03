@@ -271,22 +271,24 @@ else:
 		User.set_property("is_downloading", False)
 		User.clear_temp_properties()
 
-	@Bot.callback_query_handler(func = lambda Callback: Callback.data.startswith("download_video"))
+	@Bot.callback_query_handler(func = lambda Callback: Callback.data.count("video") or Callback.data.count("watermarked"))
 	def InlineButton(Call: types.CallbackQuery):
 		User = Users.auth(Call.from_user)
-		Bot.answer_callback_query(Call.id)
 		Bot.delete_message(Call.message.chat.id, Call.message.id)
-		User.set_property("is_downloading", True)
-		Query = Call.data.replace("download_video_", "").replace("%", " ")
+		
+		IsWatermarked = True if "watermarked" in Call.data else False
+		Query = Call.data.replace("download_watermarked_" if IsWatermarked else "download_video_", "").replace("%", " ")
 		Link = User.get_property("link")
 		VideoID = User.get_property("video_id")
 		Quality = Query.split("+")[0]
 		FormatID = Query.split("+")[1]
 		Site = User.get_property("site")
 		Compression = User.get_property("compression")
-		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression)
 		QualityImprovementGo = "" 
 		QualityImprovementReady = ""
+
+		if Quality == "null": Quality = None
+		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression, watermarked = IsWatermarked)
 
 		if Settings["quality_improvement"]:
 			QualityImprovementGo = "⏳ Улучшаю качество\\.\\.\\." 
@@ -296,6 +298,7 @@ else:
 			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "")
 
 		else:
+			User.set_property("is_downloading", True)
 			SendedMessage = Bot.send_message(
 				chat_id = Call.message.chat.id,
 				text = "⏳ Скачиваю видео\\.\\.\\.",
@@ -320,7 +323,7 @@ else:
 					text = f"✅ Видео скачано\\.\n{QualityImprovementReady}⏳ Выгружаю видео в Telegram\\.\\.\\.",
 					parse_mode = "MarkdownV2"
 				)
-				Result = StorageBox.upload_file(User.id, Site, f"{VideoID}.mp4", Quality, Compression)
+				Result = StorageBox.upload_file(User.id, Site, f"{VideoID}.mp4", Quality, Compression, watermarked = IsWatermarked)
 
 				if Result:
 					Bot.edit_message_text(
@@ -329,104 +332,7 @@ else:
 						text = f"✅ Видео скачано\\.\n{QualityImprovementReady}✅ Видео загружено в Telegram\\.\n⏳ Отправляю\\.\\.\\.",
 						parse_mode = "MarkdownV2"
 					)
-					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression)
-
-					if Result.code == 0:
-						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
-						Bot.edit_message_text(
-							chat_id = Call.message.chat.id,
-							message_id = SendedMessage.id,
-							text = f"✅ Видео скачано\\.\n{QualityImprovementReady}✅ Видео загружено в Telegram\\.\n✅ Отправлено\\.",
-							parse_mode = "MarkdownV2"
-						)
-
-					else:
-						Bot.edit_message_text(
-							chat_id = Call.message.chat.id,
-							message_id = SendedMessage.id,
-							text = f"✅ Видео скачано\\.\n{QualityImprovementReady}✅ Видео загружено в Telegram\\.\n❌ Не удалось отправить видео\\.",
-							parse_mode = "MarkdownV2"
-						)
-
-				else:
-					Bot.edit_message_text(
-						chat_id = Call.message.chat.id,
-						message_id = SendedMessage.id,
-						text = f"✅ Видео скачано\\.\n{QualityImprovementReady}❌ Не удалось загрузить видео в Telegram\\.",
-						parse_mode = "MarkdownV2"
-					)
-
-			else:
-				Bot.edit_message_text(
-					chat_id = Call.message.chat.id,
-					message_id = SendedMessage.id,
-					text = "❌ Не удалось скачать видео\\.",
-					parse_mode = "MarkdownV2"
-				)
-
-		User.set_property("is_downloading", False)
-		User.clear_temp_properties()
-
-	@Bot.callback_query_handler(func = lambda Callback: Callback.data.startswith("download_watermarked"))
-	def InlineButton(Call: types.CallbackQuery):
-		User = Users.auth(Call.from_user)
-		Bot.answer_callback_query(Call.id)
-		Bot.delete_message(Call.message.chat.id, Call.message.id)
-		User.set_property("is_downloading", True)
-		Query = Call.data.replace("download_watermarked_", "").replace("%", " ")
-		Link = User.get_property("link")
-		VideoID = User.get_property("video_id")
-		Quality = Query.split("+")[-2]
-		FormatID = Query.split("+")[-1]
-		Site = User.get_property("site")
-		Compression = User.get_property("compression")
-		if Quality == "null": Quality = None
-		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression, watermarked = True)
-		QualityImprovementGo = "" 
-		QualityImprovementReady = ""
-
-		if Settings["quality_improvement"]:
-			QualityImprovementGo = "⏳ Улучшаю качество\\.\\.\\." 
-			QualityImprovementReady = "✅ Качество улучшено\\.\n"
-
-		if FileMessageID[0]:
-			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Settings["bot_name"])
-
-		else:
-			SendedMessage = Bot.send_message(
-				chat_id = Call.message.chat.id,
-				text = "⏳ Скачиваю видео\\.\\.\\.",
-				parse_mode = "MarkdownV2"
-			)
-			Result = Downloader.download_video(Link, f"Temp/{User.id}/", f"{VideoID}.mp4", FormatID)
-
-			if Result:
-
-				if Settings["quality_improvement"]:
-					Bot.edit_message_text(
-						chat_id = Call.message.chat.id,
-						message_id = SendedMessage.id,
-						text = "✅ Видео скачано\\.\n" + QualityImprovementGo,
-						parse_mode = "MarkdownV2"
-					)
-					sleep(2)
-
-				Bot.edit_message_text(
-					chat_id = Call.message.chat.id,
-					message_id = SendedMessage.id,
-					text = f"✅ Видео скачано\\.\n{QualityImprovementReady}⏳ Выгружаю видео в Telegram\\.\\.\\.",
-					parse_mode = "MarkdownV2"
-				)
-				Result = StorageBox.upload_file(User.id, Site, f"{VideoID}.mp4", Quality, Compression, watermarked = True)
-
-				if Result:
-					Bot.edit_message_text(
-						chat_id = Call.message.chat.id,
-						message_id = SendedMessage.id,
-						text = f"✅ Видео скачано\\.\n{QualityImprovementReady}✅ Видео загружено в Telegram\\.\n⏳ Отправляю\\.\\.\\.",
-						parse_mode = "MarkdownV2"
-					)
-					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression, watermarked = True)
+					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression, watermarked = IsWatermarked)
 
 					if Result.code == 0:
 						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
