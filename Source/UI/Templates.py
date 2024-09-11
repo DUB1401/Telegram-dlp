@@ -1,4 +1,6 @@
-from telebot import TeleBot
+from threading import Thread
+from telebot import TeleBot, apihelper
+from time import sleep
 
 class StepsIndicator:
 	"""Шаблон: шаги выполнения."""
@@ -17,14 +19,44 @@ class StepsIndicator:
 	def text(self) -> str:
 		"""Текущий текст сообщения."""
 
-		Text = ""
+		Text = self.__Title + "\n"
 
 		for Index in range(len(self.__Procedures)):
 			Emoji = self.__Emoji[self.__Statuses[Index]]
-			Text += Emoji + self.__Procedures[Index] + "\n"
+			Text += Emoji + " " + self.__Procedures[Index] + "\n"
 			if self.__IsOnlyCurrent and Index == self.__Index: break
 
+		Text += self.__Footer
+		if "%s" in Text: Text = Text % self.__AnimationValue
+
 		return Text
+
+	#==========================================================================================#
+	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def __AnimateMessage(self, variants: list[str], interval: int, delay: int):
+		"""
+		Поочерёдно заменяет подстроку \"%s\" на один из вариантов через интервалы времени.
+			variants – список вариантов для подстановки;\n
+			interval – интервал обновления в секундах;\n
+			delay – интервал отложенного запуска.
+		"""
+
+		VariantIndex = 0
+		sleep(delay)
+		
+		while self.__Animation:
+
+			try:
+				sleep(interval)
+
+				if self.__Animation:
+					self.__AnimationValue = variants[VariantIndex]
+					VariantIndex += 1
+					self.update()
+
+			except IndexError: VariantIndex = 0
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -39,7 +71,7 @@ class StepsIndicator:
 			parse_mode – режим парсинга текста;\n
 			only_current – указывает, нужно ли выводить только пройденные и текущий шаги.
 		"""
-
+		
 		#---> Генерация динамических свойств.
 		#==========================================================================================#
 		self.__Bot = bot
@@ -51,6 +83,14 @@ class StepsIndicator:
 		self.__Statuses = [0] * len(procedures)
 		self.__MessageID = None
 		self.__Index = 0
+		self.__End = False
+
+		self.__Title = ""
+		self.__Footer = ""
+
+		self.__Animation = False
+		self.__AnimationValue = ""
+		self.__AnimationThread = None
 
 		self.__Emoji = {
 			-1: "❌",
@@ -58,30 +98,78 @@ class StepsIndicator:
 			1: "✅"
 		}
 
-	def error(self):
-		"""Помечает этап как неудачный."""
+	def error(self, stop: bool = True):
+		"""
+		Помечает этап как неудачный.
+			stop – указывает, следует ли считать выполнение прерванным.
+		"""
 
-		self.__Statuses[self.__Index] = -1
-		self.__Index += 1
-		self.update()
+		if not self.__End:
+			self.__Statuses[self.__Index] = -1
+			if not stop: self.__Index += 1
+			else: self.__End = True
+			self.update()
 
-	def next(self):
-		"""Переходит к следующему этапу."""
+	def next(self, text: str | None = None):
+		"""
+		Переходит к следующему этапу.
+			text – новое описание этапа.
+		"""
 
-		self.__Statuses[self.__Index] = 1
-		self.__Index += 1
-		self.update()
+		if not self.__End:
+			self.__Statuses[self.__Index] = 1
+			if text: self.__Procedures[self.__Index] = text
+			self.__Index += 1
+			self.update()
 
 	def send(self):
 		"""Отправляет базовое сообщение."""
 
-		self.__MessageID = self.__Bot.send_message(text = self.text, chat_id = self.__ChatID, parse_mode = self.__ParseMode).id
+		if not self.__End: self.__MessageID = self.__Bot.send_message(text = self.text, chat_id = self.__ChatID, parse_mode = self.__ParseMode).id
+
+	def set_footer(self, text: str | None, update: bool = False):
+		"""
+		Задаёт текст подписи под прогрессом.
+			text – подпись;\n
+			update – указывает, нужно ли обновить сообщение.
+		"""
+
+		self.__Footer = text or ""
+		if update: self.update()
+
+	def set_title(self, text: str | None, update: bool = False):
+		"""
+		Задаёт текст подписи над прогрессом.
+			text – подпись;\n
+			update – указывает, нужно ли обновить сообщение.
+		"""
+
+		self.__Title = text or ""
+		if update: self.update()
+
+	def start_animation(self, variants: list[str], interval: int, delay: int = 0):
+		"""
+		Запускает поочерёдную замену подстроки \"%s\" на один из вариантов через интервалы времени.
+			variants – список вариантов для подстановки;\n
+			interval – интервал обновления в секундах;\n
+			delay – интервал отложенного запуска.
+		"""
+
+		self.__AnimationThread = Thread(target = self.__AnimateMessage, args = [variants, interval, delay])
+		self.__Animation = True
+		self.__AnimationThread.start()
+
+	def stop_animation(self):
+		"""Останавливает поочерёдную замену подстроки \"%s\" на один из вариантов через интервалы времени."""
+
+		self.__Animation = False
+		self.__AnimationValue = ""
+		self.__AnimationThread = None
 
 	def update(self):
 		"""Обновляет сообщение."""
 
-		self.__Bot.edit_message_text(text = self.text, chat_id = self.__ChatID, message_id = self.__MessageID, parse_mode = self.__ParseMode)
-
-	
-
+		try:
+			if not self.__End: self.__Bot.edit_message_text(text = self.text, chat_id = self.__ChatID, message_id = self.__MessageID, parse_mode = self.__ParseMode)
 		
+		except apihelper.ApiException: pass
