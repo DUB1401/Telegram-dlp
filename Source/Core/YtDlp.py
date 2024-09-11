@@ -61,15 +61,9 @@ class YtDlp:
 				elif Width == 7680: name = "8K"
 				else: name = f"{Width}p"
 
-			else: name = "null"
+			if watermarked: name += "w"
 
-			if watermarked:
-				name += "w"
-
-			elif name == "null": name = None
-
-		else:
-			name = None
+		else: name = None
 
 		return name
 
@@ -116,9 +110,17 @@ class YtDlp:
 		"""
 
 		IsSuccess = False
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio --recode m4a"
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio --recode m4a {self.__Proxy}"
 		ExitCode = os.system(Command)
-		if ExitCode == 0: IsSuccess = True
+
+		if ExitCode == 0:
+			IsSuccess = True
+
+		elif self.__Proxy:
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio --recode m4a"
+			ExitCode = os.system(Command)
+			if ExitCode == 0: IsSuccess = True
+
 
 		return IsSuccess
 	
@@ -151,7 +153,7 @@ class YtDlp:
 		"""
 
 		IsSuccess = False
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}+bestaudio --recode mp4 -o {directory}{filename} --cookies yt-dlp/instagram.cookies"
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}+bestaudio --recode mp4 -o {directory}{filename} --cookies yt-dlp/instagram.cookies  {self.__Proxy}"
 		ExitCode = os.system(Command)
 		if ExitCode in [0, 256]: IsSuccess = True
 
@@ -167,9 +169,16 @@ class YtDlp:
 		"""
 
 		IsSuccess = False
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} --recode mp4 -o {directory}{filename}"
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} --recode mp4 -o {directory}{filename} {self.__Proxy}"
 		ExitCode = os.system(Command)
-		if ExitCode == 0: IsSuccess = True
+
+		if ExitCode == 0:
+			IsSuccess = True
+
+		elif self.__Proxy:
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} --recode mp4 -o {directory}{filename}"
+			ExitCode = os.system(Command)
+			if ExitCode == 0: IsSuccess = True
 
 		return IsSuccess
 	
@@ -195,20 +204,39 @@ class YtDlp:
 
 	def __instagram_info(self, link: str) -> dict | None:
 		"""
-		Скачивает аудиодорожку и перекодирует её в формат m4a.
-			link – ссылка на видео;
-			directory – директория загрузки;
-			filename – имя файла;
-			format_id – идентификатор формата загружаемого видео.
+		Получает описание видео.
+			link – ссылка на видео.
 		"""
 
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download --cookies yt-dlp/instagram.cookies",
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download --cookies yt-dlp/instagram.cookies {self.__Proxy}",
 		Dump = subprocess.getoutput(Command)
 		Info = None 
 
 		if not Dump.startswith("ERROR"):
 			if "\n" in Dump: Dump = Dump.split("\n")[0]
 			Info = json.loads(Dump)
+
+		return Info
+	
+	def __tiktok_info(self, link: str) -> dict | None:
+		"""
+		Получает описание видео.
+			link – ссылка на видео.
+		"""
+
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy}",
+		Dump = subprocess.getoutput(Command)
+		Info = None 
+
+		if not Dump.startswith("ERROR"):
+			Info = json.loads(Dump)
+
+		elif self.__Proxy:
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download",
+			Dump = subprocess.getoutput(Command)
+			if not Dump.startswith("ERROR"): Info = json.loads(Dump)
+
+		if type(Info) == dict: Info["formats"][0]["resolution"] = "480x720"
 
 		return Info
 
@@ -295,7 +323,8 @@ class YtDlp:
 		try:
 
 			if Domain == "instagram.com": Info = self.__instagram_info(link)
-
+			elif Domain == "tiktok.com": Info = self.__tiktok_info(link)
+				
 			else: 
 				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy}",
 				Dump = subprocess.getoutput(Command)

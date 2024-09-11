@@ -1,5 +1,6 @@
 from Source.UI.InlineKeyboards import InlineKeyboards
 from Source.Core.TelethonUser import TelethonUser
+from Source.UI.Templates import StepsIndicator
 from Source.Core.Storage import Storage
 from Source.UI.AdminPanel import Panel
 from Source.Core.YtDlp import YtDlp
@@ -172,7 +173,7 @@ else:
 				User.set_temp_property("site", Site)
 				User.set_temp_property("video_id", Info["id"])
 				Bot.delete_message(message_id = SendedMessage.id, chat_id = Message.chat.id)
-				InlineKeyboards().send_fromat_selector(Bot, Message.chat.id, Info)
+				InlineKeyboards().send_fromat_selector(Bot, Message.chat.id, Info, Settings["one_watermarked"])
 
 			else:
 				Bot.edit_message_text(
@@ -206,67 +207,37 @@ else:
 		Compression = User.get_property("compression")
 		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression)
 
+		Procedures = [
+			"Скачиваю аудио\\.\\.\\.",
+			"Выгружаю аудио в Telegram\\.\\.\\.",
+			"Отправляю\\.\\.\\."
+		]
+		SI = StepsIndicator(Bot, Call.message.chat.id, Procedures, parse_mode = "MarkdownV2")
+
 		if FileMessageID[0]:
 			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Settings["bot_name"])
 
 		else:
-			SendedMessage = Bot.send_message(
-				chat_id = Call.message.chat.id,
-				text = "⏳ Скачиваю аудио\\.\\.\\.",
-				parse_mode = "MarkdownV2" 
-			)
+			SI.send()
 			Result = Downloader.download_audio(Link, f"Temp/{User.id}/", f"{VideoID}.m4a")
 
 			if Result:
-				Bot.edit_message_text(
-					chat_id = Call.message.chat.id,
-					message_id = SendedMessage.id,
-					text = "✅ Аудио скачано\\.\n⏳ Выгружаю аудио в Telegram\\.\\.\\.",
-					parse_mode = "MarkdownV2" 
-				)
+				SI.next("Аудио скачано\\.")
 				Result = StorageBox.upload_file(User.id, Site, f"{VideoID}.m4a", Quality, Compression)
 
 				if Result:
-					Bot.edit_message_text(
-						chat_id = Call.message.chat.id,
-						message_id = SendedMessage.id,
-						text = "✅ Аудио скачано\\.\n✅ Аудио загружено в Telegram\\.\n⏳ Отправляю\\.\\.\\.",
-						parse_mode = "MarkdownV2" 
-					)
+					SI.next("Аудио загружено в Telegram\\.")
 					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression)
 
 					if Result.code == 0:
 						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
-						Bot.edit_message_text(
-							chat_id = Call.message.chat.id,
-							message_id = SendedMessage.id,
-							text = "✅ Аудио скачано\\.\n✅ Аудио загружено в Telegram\\.\n✅ Отправлено\\.",
-							parse_mode = "MarkdownV2" 
-						)
+						SI.next("Отправлено\\.")
 
-					else:
-						Bot.edit_message_text(
-							chat_id = Call.message.chat.id,
-							message_id = SendedMessage.id,
-							text = "✅ Аудио скачано\\.\n✅ Аудио загружено в Telegram\\.\n❌ Не удалось отправить аудио\\.",
-						parse_mode = "MarkdownV2" 
-						)
+					else: SI.error("Не удалось отправить видео\\.")
 
-				else:
-					Bot.edit_message_text(
-						chat_id = Call.message.chat.id,
-						message_id = SendedMessage.id,
-						text = "✅ Аудио скачано\\.\n❌ Не удалось загрузить аудио в Telegram\\.",
-						parse_mode = "MarkdownV2" 
-					)
+				else: SI.error("Не удалось загрузить аудио в Telegram\\.")
 
-			else:
-				Bot.edit_message_text(
-					chat_id = Call.message.chat.id,
-					message_id = SendedMessage.id,
-					text = "❌ Не удалось скачать аудио\\.",
-					parse_mode = "MarkdownV2" 
-				)
+			else: SI.error("❌ Не удалось скачать аудио\\.")
 
 		User.set_property("is_downloading", False)
 		User.clear_temp_properties()
@@ -284,88 +255,49 @@ else:
 		FormatID = Query.split("+")[1]
 		Site = User.get_property("site")
 		Compression = User.get_property("compression")
-		QualityImprovementGo = "" 
-		QualityImprovementReady = ""
+
+		Procedures = [
+			"Скачиваю видео\\.\\.\\.",
+			"Улучшаю качество\\.\\.\\.",
+			"Выгружаю видео в Telegram\\.\\.\\.",
+			"Отправляю\\.\\.\\."
+		]
+		if not Settings["quality_improvement"]: Procedures.pop(1)
+		SI = StepsIndicator(Bot, Call.message.chat.id, Procedures, parse_mode = "MarkdownV2")
 
 		if Quality == "null": Quality = None
 		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression, watermarked = IsWatermarked)
 
-		if Settings["quality_improvement"]:
-			QualityImprovementGo = "⏳ Улучшаю качество\\.\\.\\." 
-			QualityImprovementReady = "✅ Качество улучшено\\.\n"
-
 		if FileMessageID[0]:
-			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "")
+			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Settings["bot_name"])
 
 		else:
 			User.set_property("is_downloading", True)
-			SendedMessage = Bot.send_message(
-				chat_id = Call.message.chat.id,
-				text = "⏳ Скачиваю видео\\.\\.\\.",
-				parse_mode = "MarkdownV2"
-			)
+			SI.send()
 			Result = Downloader.download_video(Link, f"Temp/{User.id}/", f"{VideoID}.mp4", FormatID)
 
 			if Result:
 
 				if Settings["quality_improvement"]:
-					Bot.edit_message_text(
-						chat_id = Call.message.chat.id,
-						message_id = SendedMessage.id,
-						text = "✅ Видео скачано\\.\n" + QualityImprovementGo,
-						parse_mode = "MarkdownV2"
-					)
+					SI.next("Видео скачано\\.")
 					sleep(4)
+					SI.next("Качество улучшено\\.")
 
-				Bot.edit_message_text(
-					chat_id = Call.message.chat.id,
-					message_id = SendedMessage.id,
-					text = f"✅ Видео скачано\\.\n{QualityImprovementReady}⏳ Выгружаю видео в Telegram\\.\\.\\.",
-					parse_mode = "MarkdownV2"
-				)
 				Result = StorageBox.upload_file(User.id, Site, f"{VideoID}.mp4", Quality, Compression, watermarked = IsWatermarked)
 
 				if Result:
-					Bot.edit_message_text(
-						chat_id = Call.message.chat.id,
-						message_id = SendedMessage.id,
-						text = f"✅ Видео скачано\\.\n{QualityImprovementReady}✅ Видео загружено в Telegram\\.\n⏳ Отправляю\\.\\.\\.",
-						parse_mode = "MarkdownV2"
-					)
+					SI.next("Видео загружено в Telegram\\.")
 					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression, watermarked = IsWatermarked)
 
 					if Result.code == 0:
 						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
-						Bot.edit_message_text(
-							chat_id = Call.message.chat.id,
-							message_id = SendedMessage.id,
-							text = f"✅ Видео скачано\\.\n{QualityImprovementReady}✅ Видео загружено в Telegram\\.\n✅ Отправлено\\.",
-							parse_mode = "MarkdownV2"
-						)
+						SI.next("Отправлено\\.")
 
-					else:
-						Bot.edit_message_text(
-							chat_id = Call.message.chat.id,
-							message_id = SendedMessage.id,
-							text = f"✅ Видео скачано\\.\n{QualityImprovementReady}✅ Видео загружено в Telegram\\.\n❌ Не удалось отправить видео\\.",
-							parse_mode = "MarkdownV2"
-						)
+					else: SI.error("Не удалось отправить видео\\.")
 
-				else:
-					Bot.edit_message_text(
-						chat_id = Call.message.chat.id,
-						message_id = SendedMessage.id,
-						text = f"✅ Видео скачано\\.\n{QualityImprovementReady}❌ Не удалось загрузить видео в Telegram\\.",
-						parse_mode = "MarkdownV2"
-					)
+				else: SI.error("Не удалось загрузить видео в Telegram\\.")
 
-			else:
-				Bot.edit_message_text(
-					chat_id = Call.message.chat.id,
-					message_id = SendedMessage.id,
-					text = "❌ Не удалось скачать видео\\.",
-					parse_mode = "MarkdownV2"
-				)
+			else: SI.error("❌ Не удалось скачать видео\\.")
 
 		User.set_property("is_downloading", False)
 		User.clear_temp_properties()

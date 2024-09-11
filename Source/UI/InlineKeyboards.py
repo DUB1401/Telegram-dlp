@@ -16,12 +16,13 @@ class InlineKeyboards:
 		#==========================================================================================#
 		pass
 
-	def send_fromat_selector(self, bot: TeleBot, chat_id: int, info: dict):
+	def send_fromat_selector(self, bot: TeleBot, chat_id: int, info: dict, one_watermarked: bool = False):
 		"""
 		Отправляет пользователю сообщение с выбором формата.
 			bot – бот Telegram;
 			chat_id – идентификатор чата;
-			info – данные видео.
+			info – данные видео;
+			one_watermarked – указывает, выводить ли лишь один вариант видео с водяным знаком.
 		"""
 
 		Resolutions = YtDlp("yt-dlp/yt-dlp").get_resolutions(info)
@@ -35,6 +36,7 @@ class InlineKeyboards:
 		#---> Генерация кнопочного интерфейса.
 		#==========================================================================================#
 		Menu = types.InlineKeyboardMarkup()
+		Watermarked = list()
 
 		for ResolutionName in Resolutions.keys():
 
@@ -45,10 +47,16 @@ class InlineKeyboards:
 			else:
 				Resolution = ResolutionName.rstrip("w")
 				ButtolLabel = ""
-				if ResolutionName == "nullw": ButtolLabel = "С водяным знаком"
-				else: ButtolLabel = Resolution + " (с водяным знаком)"
-				Menu.add(types.InlineKeyboardButton("🎞️ " + ButtolLabel, callback_data = f"download_watermarked_{Resolution.replace(" ", "%")}+" + Resolutions[ResolutionName].replace(" ", "%")), row_width = 1)
+
+				if ResolutionName.endswith("w") and not one_watermarked: ButtolLabel = Resolution + " (с водяным знаком)"
+				elif one_watermarked: ButtolLabel = "С водяным знаком"
+
+				WatermarkedButton = types.InlineKeyboardButton("🎞️ " + ButtolLabel, callback_data = f"download_watermarked_{Resolution.replace(" ", "%")}+" + Resolutions[ResolutionName].replace(" ", "%"))
+				
+				if one_watermarked: Watermarked = [WatermarkedButton]
+				else: Watermarked.append(WatermarkedButton)
 		
+		for Button in Watermarked: Menu.add(Button, row_width = 1)
 		Menu.add(types.InlineKeyboardButton("🎵 Только аудио", callback_data = f"download_audio"), row_width = 1)
 		
 		#---> Составление описания.
@@ -113,7 +121,7 @@ class InlineKeyboards:
 		if "duration" in info.keys() and info["duration"]:
 			DurationSeconds = info["duration"]
 			Minutes = str(int(DurationSeconds / 60))
-			Seconds = str(int(DurationSeconds % 60)).ljust(2, "0")
+			Seconds = str(int(DurationSeconds % 60)).rjust(2, "0")
 			DurationSeconds = f"{Minutes}:{Seconds}"
 			Duration = f"🕓 {DurationSeconds}"
 
