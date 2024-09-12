@@ -1,6 +1,6 @@
+from Source.UI.Templates import Animation, StepsIndicator
 from Source.UI.InlineKeyboards import InlineKeyboards
 from Source.Core.TelethonUser import TelethonUser
-from Source.UI.Templates import StepsIndicator
 from Source.Core.Storage import Storage
 from Source.UI.AdminPanel import Panel
 from Source.Core.YtDlp import YtDlp
@@ -256,12 +256,20 @@ else:
 		Site = User.get_property("site")
 		Compression = User.get_property("compression")
 
+		ProgressAnimation = Animation()
+		ProgressAnimation.set_interval(1)
+		ProgressAnimation.add_lines("\\.")
+		ProgressAnimation.add_lines("\\.\\.")
+		ProgressAnimation.add_lines("\\.\\.\\.")
+		ProgressAnimation.add_lines("")
+
 		Procedures = [
-			"Скачиваю видео\\.\\.\\.",
-			"Улучшаю качество\\.\\.\\.",
-			"Выгружаю видео в Telegram\\.\\.\\.",
-			"Отправляю\\.\\.\\."
+			"Скачиваю видео%s",
+			"Улучшаю качество%s",
+			"Выгружаю видео в Telegram%s",
+			"Отправляю%s"
 		]
+
 		if not Settings["quality_improvement"]: Procedures.pop(1)
 		SI = StepsIndicator(Bot, Call.message.chat.id, Procedures, parse_mode = "MarkdownV2")
 
@@ -274,6 +282,7 @@ else:
 		else:
 			User.set_property("is_downloading", True)
 			SI.send()
+			SI.start_animation(ProgressAnimation)
 			Result = Downloader.download_video(Link, f"Temp/{User.id}/", f"{VideoID}.mp4", FormatID)
 
 			if Result:

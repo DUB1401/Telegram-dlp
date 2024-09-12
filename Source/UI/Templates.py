@@ -2,6 +2,87 @@ from threading import Thread
 from telebot import TeleBot, apihelper
 from time import sleep
 
+import random
+
+class Animation:
+	"""Текстовая анимация."""
+
+	#==========================================================================================#
+	# >>>>> СВОЙСТВА <<<<< #
+	#==========================================================================================#
+
+	@property
+	def delay(self) -> float:
+		"Интервал отложенного старта."
+
+		return self.__Delay
+
+	@property
+	def interval(self) -> float:
+		"Базовый интервал анимации."
+
+		return self.__Interval
+	
+	@property
+	def length(self) -> int:
+		"Количество элементов в анимации."
+
+		return len(self.__Variants)
+	
+	@property
+	def lines(self) -> list[tuple]:
+		"Базовый интервал анимации."
+
+		return self.__Lines
+
+	#==========================================================================================#
+	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def __init__(self):
+		"""Текстовая анимация."""
+
+		#---> Генерация динамических свойств.
+		#==========================================================================================#
+		self.__Lines = list()
+		self.__Interval = 0.0
+		self.__Delay = 0.0
+
+	def __getitem__(self, index: int) -> tuple[str, int]:
+		"""
+		Возвращает строку анимации.
+			index – индекс строки.
+		"""
+
+		return self.__Variants[index]
+
+	def add_lines(self, lines: str | list[str], interval: float | int | None = None):
+		"""
+		Добавляет строки в анимацию.
+			lines – строка или список строк;\n
+			interval – интервал ожидания.
+		"""
+
+		if type(lines) != list: lines = [lines]
+		Interval = interval or self.__Interval
+		for Line in lines: self.__Lines.append((Line, Interval))
+
+	def set_delay(self, delay: float | int):
+		"""
+		Задаёт интервал отложенного старта.
+			delay – интервал в секундах.
+		"""
+
+		self.__Delay = float(delay)
+
+	def set_interval(self, interval: float | int):
+		"""
+		Задаёт базовый интервал анимации.
+			interval – интервал в секундах.
+		"""
+
+		self.__Interval = float(interval)
+
 class StepsIndicator:
 	"""Шаблон: шаги выполнения."""
 
@@ -35,28 +116,31 @@ class StepsIndicator:
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __AnimateMessage(self, variants: list[str], interval: int, delay: int):
+	def __AnimateMessage(self, animations: list[Animation]):
 		"""
 		Поочерёдно заменяет подстроку \"%s\" на один из вариантов через интервалы времени.
-			variants – список вариантов для подстановки;\n
-			interval – интервал обновления в секундах;\n
-			delay – интервал отложенного запуска.
+			animations – анимация или список анимаций.
 		"""
 
-		VariantIndex = 0
-		sleep(delay)
+		CurrentAnimation = random.choice(animations)
+		CurrentAnimationLines = CurrentAnimation.lines
+		AnimationIndex = 0
+		sleep(CurrentAnimation.delay)
 		
 		while self.__Animation:
 
 			try:
-				sleep(interval)
+				sleep(CurrentAnimationLines[AnimationIndex][1])
 
 				if self.__Animation:
-					self.__AnimationValue = variants[VariantIndex]
-					VariantIndex += 1
+					self.__AnimationValue = CurrentAnimationLines[AnimationIndex][0]
+					AnimationIndex += 1
 					self.update()
 
-			except IndexError: VariantIndex = 0
+			except IndexError: 
+				CurrentAnimation = random.choice(animations)
+				CurrentAnimationLines = CurrentAnimation.lines
+				AnimationIndex = 0
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -147,15 +231,14 @@ class StepsIndicator:
 		self.__Title = text or ""
 		if update: self.update()
 
-	def start_animation(self, variants: list[str], interval: int, delay: int = 0):
+	def start_animation(self, animation: Animation | list[Animation]):
 		"""
 		Запускает поочерёдную замену подстроки \"%s\" на один из вариантов через интервалы времени.
-			variants – список вариантов для подстановки;\n
-			interval – интервал обновления в секундах;\n
-			delay – интервал отложенного запуска.
+			animation – анимация или список анимаций.
 		"""
 
-		self.__AnimationThread = Thread(target = self.__AnimateMessage, args = [variants, interval, delay])
+		if type(animation) != list: animation = [animation]
+		self.__AnimationThread = Thread(target = self.__AnimateMessage, args = [animation])
 		self.__Animation = True
 		self.__AnimationThread.start()
 
