@@ -7,5 +7,6 @@
 	"quality_improvement": true,
 	"proxy": "",
 	"one_watermarked": true,
-	"venv": true
+	"venv": true,
+	"modules": {}
 }
