@@ -65,8 +65,8 @@ class InlineKeyboards:
 		if "title" in info.keys() and info["title"]:
 			Title = info["title"]
 
-			if "video by" in Title.lower() and "description" in info.keys(): Title = info["description"]
-			elif "video by none" in Title.lower() and "playlist_title" in info.keys(): Title = info["playlist_title"]
+			if "video by" in Title.lower() and "description" in info.keys() and info["description"]: Title = info["description"]
+			elif "video by none" in Title.lower() and "playlist_title" in info.keys() and info["playlist_title"]: Title = info["playlist_title"]
 
 			if len(Title):
 				if len(Title) > 64: Title = Title[:64] + "..."
