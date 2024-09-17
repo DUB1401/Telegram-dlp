@@ -48,7 +48,8 @@ class YtDlp:
 		"""
 
 		SupportedResolutions = [144, 240, 360, 480, 720, 1080, 2560, 3840, 7680]
-
+		if name == None: name = ""
+		
 		if name not in ["audio only"]:
 
 			if name and "x" in name:
