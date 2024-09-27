@@ -84,7 +84,7 @@ else:
 	Bot = TeleBot(Settings["token"])
 	Users = UsersManager("Data/Users")
 	StorageBox = Storage("Storage", Settings["venv"])
-	Downloader = YtDlp(StorageBox, "yt-dlp/yt-dlp", Settings["proxy"])
+	Downloader = YtDlp(StorageBox, "yt-dlp/yt-dlp", Settings["proxy"], modules = Settings["modules"])
 	AdminPanel = Panel()
 
 	#==========================================================================================#
