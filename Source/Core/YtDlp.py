@@ -209,13 +209,18 @@ class YtDlp:
 			link – ссылка на видео.
 		"""
 
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download --cookies yt-dlp/instagram.cookies {self.__Proxy}",
-		Dump = subprocess.getoutput(Command)
-		Info = None 
+		Info = None
 
-		if not Dump.startswith("ERROR"):
-			if "\n" in Dump: Dump = Dump.split("\n")[0]
-			Info = json.loads(Dump)
+		for Try in range(2):
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download --cookies yt-dlp/instagram.cookies {self.__Proxy}",
+			Dump = subprocess.getoutput(Command)
+			
+			if not Dump.startswith("ERROR"):
+				if "\n" in Dump: Dump = Dump.split("\n")[0]
+				Info = json.loads(Dump)
+			
+			if Info: break
+			elif Try == 0 and "instagram" in self.__Modules.keys() and self.__Modules["instagram"]["cookies_generator"]: os.system(self.__Modules["instagram"]["cookies_generator"])
 
 		return Info
 	
@@ -237,7 +242,14 @@ class YtDlp:
 			Dump = subprocess.getoutput(Command)
 			if not Dump.startswith("ERROR"): Info = json.loads(Dump)
 
-		if type(Info) == dict: Info["formats"][0]["resolution"] = "480x720"
+		if type(Info) == dict: 
+			Formats = Info["formats"]
+
+			for Format in list(Formats):
+				if Format["format_id"].endswith("-2"): Formats.remove(Format)
+
+			Info["formats"] = Formats
+			Info["formats"][0]["resolution"] = "480x720"
 
 		return Info
 
@@ -245,12 +257,13 @@ class YtDlp:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, storage: Storage, lib_path: str | None = None, proxy: str | None = None):
+	def __init__(self, storage: Storage, lib_path: str | None = None, proxy: str | None = None, modules: dict | None = None):
 		"""
 		Абстракция управления библиотекой yt-dlp.
 			storage – хранилище данных;\n
 			lib_path – путь к исполняемому файлу библиотеки;\n
-			proxy – данные прокси-сервера.
+			proxy – данные прокси-сервера;\n
+			modules – словарь опций модуля.
 		"""
 
 		#---> Генерация динамических свойств.
@@ -258,6 +271,7 @@ class YtDlp:
 		self.__LibPath = lib_path or "yt-dlp"
 		self.__Proxy = f"--proxy {proxy}" if proxy else ""
 		self.__Storage = storage
+		self.__Modules = modules or dict()
 	
 	def download_audio(self, link: str, directory: str, filename: str) -> bool:
 		"""
