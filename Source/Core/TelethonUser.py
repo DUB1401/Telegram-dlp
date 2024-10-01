@@ -78,7 +78,7 @@ class TelethonUser:
 			
 		return IsSucess
 	
-	def upload_file(self, user_id: int, site: str, filename: str, quality: str, compression: bool, watermarked: bool) -> bool:
+	def upload_file(self, user_id: int, site: str, filename: str, quality: str, compression: bool, watermarked: bool, name: str | None = None) -> bool:
 		"""
 		Выгружает файл в Telegram.
 			user_id – идентификатор пользователя;
@@ -86,7 +86,8 @@ class TelethonUser:
 			filename – название файла;
 			quality – качество видео;
 			compression – указывает, нужно ли использовать сжатие;
-			watermarked – указывает, имеет ли видео водяной знак.
+			watermarked – указывает, имеет ли видео водяной знак;
+			name – новое название файла.
 		"""
 
 		IsSuccess = False
@@ -96,7 +97,11 @@ class TelethonUser:
 			Compression = "compression: on" if compression else "compression: off"
 			Watermarked = "watermarked: on" if watermarked else "watermarked: off"
 			Caption = f"{site}\n{VideoID}\n{quality}\n{Compression}\n{Watermarked}"
-			self.__Client.send_message(self.__BotName, message = Caption, file = f"Temp/{user_id}/{filename}", force_document = not compression)
+
+			if name: os.rename(f"Temp/{user_id}/{filename}", f"Temp/{user_id}/{name}")
+			else: name = filename
+
+			self.__Client.send_message(self.__BotName, message = Caption, file = f"Temp/{user_id}/{name}", force_document = not compression)
 			RemoveDirectoryContent(f"Temp/{user_id}")
 			os.rmdir(f"Temp/{user_id}")
 			IsSuccess = True

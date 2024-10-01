@@ -14,6 +14,18 @@ class Storage:
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
+	def __StringToFilename(self, filename: str) -> str:
+		"""
+		Преобразует строку в допустимое имя файла.
+			filename – строка.
+		"""
+
+		filename = filename.replace("\0", "")
+		filename = filename.replace("\\", "")
+		filename = filename.replace("/", "")
+
+		return filename
+
 	def __SearchFormat(self, data: dict, quality: str, compression: bool, watermarked: bool) -> int | None:
 		"""
 		Возвращает индекс формата.
@@ -237,7 +249,7 @@ class Storage:
 			if not os.path.exists(SaveDirectory): os.makedirs(SaveDirectory)
 			WriteJSON(f"{SaveDirectory}/{id}.json", info)
 
-	def upload_file(self, user_id: int, site: str, filename: str, quality: str, compression: bool, watermarked: bool = False) -> bool:
+	def upload_file(self, user_id: int, site: str, filename: str, quality: str, compression: bool, watermarked: bool = False, name: str | None = None) -> bool:
 		"""
 		Выгружает файл в Telegram.
 			user_id – идентификатор пользователя;
@@ -245,7 +257,8 @@ class Storage:
 			filename – название файла;
 			quality – качество видео;
 			compression – указывает, нужно ли использовать сжатие;
-			watermarked – указывает, имеет ли видео водяной знак.
+			watermarked – указывает, имеет ли видео водяной знак;
+			name – новое название файла.
 		"""
 
 		IsSuccess = False
@@ -253,7 +266,8 @@ class Storage:
 		compression = "-c" if compression else ""
 		watermarked = "-w" if watermarked else ""
 		Venv = ". .venv/bin/activate &&" if self.__Venv else ""
-		Result = os.system(f"{Venv} python3.{PythonMinorVersion} main.py upload --user {user_id} --site {site} --file {filename} --quality \"{quality}\" {compression} {watermarked}")
+		name = f"--name \"{self.__StringToFilename(name)}\"" if name else ""
+		Result = os.system(f"{Venv} python3.{PythonMinorVersion} main.py upload --user {user_id} --site {site} --file {filename} --quality \"{quality}\" {name} {compression} {watermarked}")
 		if Result == 0: IsSuccess = True
 
 		return IsSuccess
