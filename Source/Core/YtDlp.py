@@ -111,7 +111,7 @@ class YtDlp:
 		"""
 
 		IsSuccess = False
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio --recode m4a {self.__Proxy}"
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio --format download --recode m4a {self.__Proxy}"
 		ExitCode = os.system(Command)
 
 		if ExitCode == 0:

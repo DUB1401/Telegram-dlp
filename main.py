@@ -39,6 +39,7 @@ Com = Command("upload", "Выгружает файл на сервер Telegram.
 Com.add_key("file", important = True, description = "Название файла.")
 Com.add_key("site", important = True, description = "Домен сайта.")
 Com.add_key("user", important = True, description = "Идентификатор пользователя Telegram.")
+Com.add_key("name", description = "Название файла в Telegram.")
 Com.add_key("quality", important = True, description = "Качество видео.")
 Com.add_flag("c", "Включает режим сжатия файла Telegram.")
 Com.add_flag("w", "Помечает формат как имеющий водяной знак.")
@@ -67,12 +68,13 @@ if ParsedCommand and ParsedCommand.name == "upload":
 	Filename = ParsedCommand.get_key_value("file")
 	UserID = ParsedCommand.get_key_value("user")
 	Site = ParsedCommand.get_key_value("site")
+	Name = ParsedCommand.get_key_value("name")
 	Quality = ParsedCommand.get_key_value("quality")
 	Compression = ParsedCommand.check_flag("c")
 	Watermarked = ParsedCommand.check_flag("w")
 	User = TelethonUser(Settings["bot_name"])
 	User.initialize()
-	Result = User.upload_file(UserID, Site, Filename, Quality, Compression, Watermarked)
+	Result = User.upload_file(UserID, Site, Filename, Quality, Compression, Watermarked, Name)
 	if Result: exit(0)
 	else: exit(1)
 	
@@ -172,6 +174,7 @@ else:
 				User.set_temp_property("link", Link)
 				User.set_temp_property("site", Site)
 				User.set_temp_property("video_id", Info["id"])
+				User.set_temp_property("filename", Info["title"])
 				Bot.delete_message(message_id = SendedMessage.id, chat_id = Message.chat.id)
 				InlineKeyboards().send_fromat_selector(Bot, Message.chat.id, Info, Settings["one_watermarked"])
 
@@ -204,6 +207,7 @@ else:
 		VideoID = User.get_property("video_id")
 		Quality = "audio"
 		Site = User.get_property("site")
+		Name = User.get_property("filename") + ".m4a"
 		Compression = User.get_property("compression")
 		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression)
 
@@ -220,10 +224,10 @@ else:
 		else:
 			SI.send()
 			Result = Downloader.download_audio(Link, f"Temp/{User.id}/", f"{VideoID}.m4a")
-
+			
 			if Result:
 				SI.next("Аудио скачано\\.")
-				Result = StorageBox.upload_file(User.id, Site, f"{VideoID}.m4a", Quality, Compression)
+				Result = StorageBox.upload_file(User.id, Site, f"{VideoID}.m4a", Quality, Compression, name = Name)
 
 				if Result:
 					SI.next("Аудио загружено в Telegram\\.")
@@ -254,6 +258,7 @@ else:
 		Quality = Query.split("+")[0]
 		FormatID = Query.split("+")[1]
 		Site = User.get_property("site")
+		Name = User.get_property("filename") + ".mp4"
 		Compression = User.get_property("compression")
 
 		ProgressAnimation = Animation()
@@ -292,7 +297,7 @@ else:
 					sleep(4)
 					SI.next("Качество улучшено\\.")
 
-				Result = StorageBox.upload_file(User.id, Site, f"{VideoID}.mp4", Quality, Compression, watermarked = IsWatermarked)
+				Result = StorageBox.upload_file(User.id, Site, f"{VideoID}.mp4", Quality, Compression, watermarked = IsWatermarked, name = Name)
 
 				if Result:
 					SI.next("Видео загружено в Telegram\\.")

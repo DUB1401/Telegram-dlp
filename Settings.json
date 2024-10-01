@@ -8,5 +8,9 @@
 	"proxy": "",
 	"one_watermarked": true,
 	"venv": true,
-	"modules": {}
+	"modules": {
+		"instagram": {
+			"cookies_generator": ""
+		}
+	}
 }
