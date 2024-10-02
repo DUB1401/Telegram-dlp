@@ -78,7 +78,7 @@ class TelethonUser:
 			
 		return IsSucess
 	
-	def upload_file(self, user_id: int, site: str, filename: str, quality: str, compression: bool, watermarked: bool, name: str | None = None) -> bool:
+	def upload_file(self, user_id: int, site: str, filename: str, quality: str, compression: bool, recoding: bool, watermarked: bool, name: str | None = None) -> bool:
 		"""
 		Выгружает файл в Telegram.
 			user_id – идентификатор пользователя;
@@ -86,6 +86,7 @@ class TelethonUser:
 			filename – название файла;
 			quality – качество видео;
 			compression – указывает, нужно ли использовать сжатие;
+			recoding – указывает, перекодирован ли формат в стандартный;
 			watermarked – указывает, имеет ли видео водяной знак;
 			name – новое название файла.
 		"""
@@ -93,10 +94,11 @@ class TelethonUser:
 		IsSuccess = False
 		
 		try:
-			VideoID = filename[:-4]
+			VideoID = filename[:(len(filename.split(".")[-1]) + 1) * -1]
 			Compression = "compression: on" if compression else "compression: off"
+			Recoding = "recoding: on" if recoding else "recoding: off"
 			Watermarked = "watermarked: on" if watermarked else "watermarked: off"
-			Caption = f"{site}\n{VideoID}\n{quality}\n{Compression}\n{Watermarked}"
+			Caption = f"{site}\n{VideoID}\n{quality}\n{Compression}\n{Recoding}\n{Watermarked}"
 
 			if name: os.rename(f"Temp/{user_id}/{filename}", f"Temp/{user_id}/{name}")
 			else: name = filename

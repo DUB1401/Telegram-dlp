@@ -1,5 +1,5 @@
-from dublib.Engine.Bus import ExecutionError, ExecutionStatus
 from dublib.Methods.JSON import ReadJSON, WriteJSON
+from dublib.Engine.Bus import ExecutionStatus
 from urllib.parse import urlparse, parse_qs
 from time import sleep
 
@@ -26,12 +26,13 @@ class Storage:
 
 		return filename
 
-	def __SearchFormat(self, data: dict, quality: str, compression: bool, watermarked: bool) -> int | None:
+	def __SearchFormat(self, data: dict, quality: str, compression: bool, recoding: bool, watermarked: bool) -> int | None:
 		"""
 		Возвращает индекс формата.
 			data – данные видео;
 			quality – качество видео;
 			compression – использовалось ли сжатие;
+			recoding – перекодирован ли файл;
 			watermarked – включает поиск среди видео с водяным знаком.
 		"""
 
@@ -40,7 +41,7 @@ class Storage:
 
 		for Index in range(len(data[Key])):
 
-			if data[Key][Index]["quality"] == quality and data[Key][Index]["compression"] == compression:
+			if data[Key][Index]["quality"] == quality and data[Key][Index]["compression"] == compression and data[Key][Index]["recoding"] == recoding:
 				FormatIndex = Index
 				break
 
@@ -79,13 +80,14 @@ class Storage:
 
 		return link
 
-	def get_file_message_id(self, site: str, id: str, quality: str, compression: bool, watermarked: bool = False) -> list[int, None]:
+	def get_file_message_id(self, site: str, id: str, quality: str, compression: bool, recoding: bool, watermarked: bool = False) -> list[int, None]:
 		"""
 		Возвращает идентификаторы чата и сообщения с файлом.
 			site – название сайта;
 			id – идентификатор видео;
 			quality – качество;
 			compression – использовалось ли сжатие при загрузке;
+			recoding – указывает, перекодирован ли файл;
 			watermarked – указывает, что видео имеет водяной знак.
 		"""
 
@@ -98,11 +100,17 @@ class Storage:
 			File = ReadJSON(f"{Path}/{id}.json")
 
 			if quality == "audio":
-				ChatID = File["audio"]["chat_id"]
-				MessageID = File["audio"]["message_id"]
+
+				if recoding: 
+					ChatID = File["recoded_audio"]["chat_id"]
+					MessageID = File["recoded_audio"]["message_id"]
+
+				else:
+					ChatID = File["audio"]["chat_id"]
+					MessageID = File["audio"]["message_id"]
 
 			else:
-				FormatIndex = self.__SearchFormat(File, quality, compression, watermarked)
+				FormatIndex = self.__SearchFormat(File, quality, compression, recoding, watermarked)
 
 				if FormatIndex != None:
 					ChatID = File[Key][FormatIndex]["chat_id"]
@@ -183,13 +191,14 @@ class Storage:
 			
 		return VideoID
 
-	def register_file(self, site: str, id: str, quality: str | None, compression: bool, watermarked: bool, message_id: int, chat_id: int):
+	def register_file(self, site: str, id: str, quality: str | None, compression: bool, recoding: bool, watermarked: bool, message_id: int, chat_id: int):
 		"""
 		Добавляет видео в хранилище.
 			site – название сайта;
 			id – идентификатор видео;
 			quality – качество;
 			compression – использовалось ли сжатие при загрузке;
+			recoding – указывает, перекодирован ли файл;
 			watermarked – содержит ли видео водяной знак;
 			message_id – идентификатор сообщения с файлом;
 			chat_id – идентификатор чата с сообщением.
@@ -209,26 +218,38 @@ class Storage:
 				"audio": {
 					"message_id": None,
 					"chat_id": None
+				},
+				"recoded_audio": {
+					"message_id": None,
+					"chat_id": None
 				}
 			}
 
 		if quality == "audio":
-			File["audio"]["message_id"] = message_id
-			File["audio"]["chat_id"] = chat_id
 
-		elif watermarked and self.__SearchFormat(File, quality, compression, watermarked) == None:
+			if recoding: 
+				File["recoded_audio"]["message_id"] = message_id
+				File["recoded_audio"]["chat_id"] = chat_id
+
+			else:
+				File["audio"]["message_id"] = message_id
+				File["audio"]["chat_id"] = chat_id
+
+		elif watermarked and self.__SearchFormat(File, quality, compression, recoding, watermarked) == None:
 			Format = {
 				"quality": quality,
 				"compression": compression,
+				"recoding": recoding,
 				"message_id": message_id,
 				"chat_id": chat_id
 			}
 			File["watermarked"].append(Format)
 
-		elif self.__SearchFormat(File, quality, compression, watermarked) == None:
+		elif self.__SearchFormat(File, quality, compression, recoding, watermarked) == None:
 			Format = {
 				"quality": quality,
 				"compression": compression,
+				"recoding": recoding,
 				"message_id": message_id,
 				"chat_id": chat_id
 			}
@@ -249,7 +270,7 @@ class Storage:
 			if not os.path.exists(SaveDirectory): os.makedirs(SaveDirectory)
 			WriteJSON(f"{SaveDirectory}/{id}.json", info)
 
-	def upload_file(self, user_id: int, site: str, filename: str, quality: str, compression: bool, watermarked: bool = False, name: str | None = None) -> bool:
+	def upload_file(self, user_id: int, site: str, filename: str, quality: str, compression: bool, recoding: bool, watermarked: bool = False, name: str | None = None) -> bool:
 		"""
 		Выгружает файл в Telegram.
 			user_id – идентификатор пользователя;
@@ -257,6 +278,7 @@ class Storage:
 			filename – название файла;
 			quality – качество видео;
 			compression – указывает, нужно ли использовать сжатие;
+			recoding – указывает, перекодирован ли файл;
 			watermarked – указывает, имеет ли видео водяной знак;
 			name – новое название файла.
 		"""
@@ -264,21 +286,24 @@ class Storage:
 		IsSuccess = False
 		PythonMinorVersion = sys.version_info[1]
 		compression = "-c" if compression else ""
+		recoding = "-r" if recoding else ""
 		watermarked = "-w" if watermarked else ""
 		Venv = ". .venv/bin/activate &&" if self.__Venv else ""
-		name = f"--name \"{self.__StringToFilename(name)}\"" if name else ""
-		Result = os.system(f"{Venv} python3.{PythonMinorVersion} main.py upload --user {user_id} --site {site} --file {filename} --quality \"{quality}\" {name} {compression} {watermarked}")
+		Filetype = filename.split(".")[-1]
+		name = f"--name \"{self.__StringToFilename(name)}.{Filetype}\"" if name else ""
+		Result = os.system(f"{Venv} python3.{PythonMinorVersion} main.py upload --user {user_id} --site {site} --file {filename} --quality \"{quality}\" {name} {compression} {recoding} {watermarked}")
 		if Result == 0: IsSuccess = True
 
 		return IsSuccess
 	
-	def wait_file_uploading(self, site: str, id: str, quality: str, compression: bool, watermarked: bool = False, timeout: int = 10) -> ExecutionStatus:
+	def wait_file_uploading(self, site: str, id: str, quality: str, compression: bool, recoding: bool, watermarked: bool = False, timeout: int = 10) -> ExecutionStatus:
 		"""
 		Ждёт загрузки файла и возвращает идентификатор сообщения с ним.
 			site – название сайта;
 			id – идентификатор видео;
 			quality – качество;
 			compression – использовалось ли сжатие при загрузке;
+			recoding – указывает, перекодирован ли файл;
 			watermarked – имеет ли видео водяной знак;
 			timeout – время ожидания в секундах.
 		"""
@@ -288,7 +313,7 @@ class Storage:
 
 		while Try < timeout and Status.code != 0:
 			Try += 1
-			Result = self.get_file_message_id(site, id, quality, compression, watermarked)
+			Result = self.get_file_message_id(site, id, quality, compression, recoding, watermarked)
 
 			if not Result[0]:
 				sleep(1)
