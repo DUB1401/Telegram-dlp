@@ -182,14 +182,16 @@ class StepsIndicator:
 			1: "✅"
 		}
 
-	def error(self, stop: bool = True):
+	def error(self, text: str | None = None, stop: bool = True):
 		"""
 		Помечает этап как неудачный.
+			text – новое описание этапа;\n
 			stop – указывает, следует ли считать выполнение прерванным.
 		"""
 
 		if not self.__End:
 			self.__Statuses[self.__Index] = -1
+			if text: self.__Procedures[self.__Index] = text
 			if not stop: self.__Index += 1
 			else: self.__End = True
 			self.update()
@@ -253,6 +255,6 @@ class StepsIndicator:
 		"""Обновляет сообщение."""
 
 		try:
-			if not self.__End: self.__Bot.edit_message_text(text = self.text, chat_id = self.__ChatID, message_id = self.__MessageID, parse_mode = self.__ParseMode)
+			self.__Bot.edit_message_text(text = self.text, chat_id = self.__ChatID, message_id = self.__MessageID, parse_mode = self.__ParseMode)
 		
 		except apihelper.ApiException: pass

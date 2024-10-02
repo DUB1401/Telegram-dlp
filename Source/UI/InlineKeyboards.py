@@ -1,5 +1,6 @@
 from Source.Core.YtDlp import YtDlp
 
+from dublib.TelebotUtils import UserData
 from dublib.Polyglot import Markdown
 from telebot import TeleBot, types
 from dublib.Methods.JSON import *
@@ -15,6 +16,41 @@ class InlineKeyboards:
 		#---> Генерация динамических свойств.
 		#==========================================================================================#
 		pass
+
+	def options(self, user: UserData) -> types.InlineKeyboardMarkup:
+		"""
+		Строит Inline-интерфейс: панель опций.
+			user – пользователь.
+		"""
+
+		Data = {
+			"compression": {
+				"label": "Сжатие: ",
+				"enable": user.get_property("option_compression")
+			},
+			"recoding": {
+				"label": "Перекодирование: ",
+				"enable": user.get_property("option_recoding")
+			},
+			"archive": {
+				"label": "Архив: ",
+				"enable": user.get_property("option_archive")
+			},
+			"storage": {
+				"label": "Хранилище: ",
+				"enable": user.get_property("option_storage")
+			}
+		}
+		
+		Options = types.InlineKeyboardMarkup()
+
+		for Key in Data.keys():
+			Status = "вкл." if Data[Key]["enable"] else "выкл."
+			Callback = "disable" if Data[Key]["enable"] else "enable"
+			Button = types.InlineKeyboardButton(Data[Key]["label"] + Status, callback_data = f"option_{Key}_{Callback}")
+			Options.add(Button, row_width = 1)
+
+		return Options
 
 	def send_fromat_selector(self, bot: TeleBot, chat_id: int, info: dict, one_watermarked: bool = False):
 		"""

@@ -42,6 +42,7 @@ Com.add_key("user", important = True, description = "Идентификатор 
 Com.add_key("name", description = "Название файла в Telegram.")
 Com.add_key("quality", important = True, description = "Качество видео.")
 Com.add_flag("c", "Включает режим сжатия файла Telegram.")
+Com.add_flag("r", "Помечает формат как перекодированный в стандартный.")
 Com.add_flag("w", "Помечает формат как имеющий водяной знак.")
 CommandsList.append(Com)
 
@@ -71,10 +72,11 @@ if ParsedCommand and ParsedCommand.name == "upload":
 	Name = ParsedCommand.get_key_value("name")
 	Quality = ParsedCommand.get_key_value("quality")
 	Compression = ParsedCommand.check_flag("c")
+	Recoding = ParsedCommand.check_flag("r")
 	Watermarked = ParsedCommand.check_flag("w")
 	User = TelethonUser(Settings["bot_name"])
 	User.initialize()
-	Result = User.upload_file(UserID, Site, Filename, Quality, Compression, Watermarked, Name)
+	Result = User.upload_file(UserID, Site, Filename, Quality, Compression, Recoding, Watermarked, Name)
 	if Result: exit(0)
 	else: exit(1)
 	
@@ -105,32 +107,31 @@ else:
 			disable_web_page_preview = True
 		)
 	
-	@Bot.message_handler(commands = ["disable_compression"])
-	def CommandEnableCompression(Message: types.Message):
+	@Bot.message_handler(commands = ["settings"])
+	def CommandStart(Message: types.Message):
 		User = Users.auth(Message.from_user)
-		User.set_property("compression", False)
-		Bot.send_message(
-			chat_id = Message.chat.id,
-			text = "Сжатие данных на стороне Telegram отключено."
-		)
 
-	@Bot.message_handler(commands = ["enable_compression"])
-	def CommandEnableCompression(Message: types.Message):
-		User = Users.auth(Message.from_user)
-		User.set_property("compression", True)
 		Bot.send_message(
 			chat_id = Message.chat.id,
-			text = "Сжатие данных на стороне Telegram включено."
+			text = "Настройте *Telegram\\-dlp* под себя\\!\n\n*Сжатие* – управляет сжатием видеофайлов на стороне Telegram\\. При отключённом состоянии все видео будут отправляться как документы\\.\n\n*Перекодирование* – преобразует все форматы мультимедиа в _MP4_ и _M4A_\\. При отключённом состоянии будут отправляться нативные файлы \\(зачастую гораздо быстрее, особенно для [YouTube](https://www.youtube.com/)\\)\\.\n\n*Архив* – для некоторых источников бот сохраняет данные для загрузки видео\\. Вы можете воспользоваться архивными данными для моментального перехода к выбору скачиваемого файла, но эти сведения время от времени устаревают\\.\n\n*Хранилище* – если файл уже загружался кем\\-либо до вас, вы можете получить его моментально из хранилища\\.",
+			parse_mode = "MarkdownV2",
+			disable_web_page_preview = True,
+			reply_markup = InlineKeyboards().options(User)
 		)
 
 	@Bot.message_handler(commands = ["start"])
 	def CommandStart(Message: types.Message):
 		User = Users.auth(Message.from_user)
-		User.set_property("compression", True, force = False)
-		User.set_property("is_downloading", False)		
+		User.set_property("option_compression", True, force = False)
+		User.set_property("option_recoding", True, force = False)
+		User.set_property("option_archive", True, force = False)
+		User.set_property("option_storage", True, force = False)
+		User.set_property("is_downloading", False)
 		Bot.send_message(
 			chat_id = Message.chat.id,
-			text = "👋 Привет!\n\nЯ бот, помогающий скачивать видео и извлекать из них аудио. У меня очень широкий список поддерживаемых источников. Отправьте мне ссылку для начала работы."
+			text = "*Telegram\\-dlp* поможет вам скачать видео или извлечь из них аудиодорожки\\. Поддерживается широкий список [источников](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)\\.",
+			parse_mode = "MarkdownV2",
+			disable_web_page_preview = True
 		)
 		
 	#==========================================================================================#
@@ -197,6 +198,16 @@ else:
 
 	AdminPanel.decorators.inline_keyboards(Bot, Users)
 
+	@Bot.callback_query_handler(func = lambda Callback: Callback.data.startswith("option_"))
+	def InlineButton(Call: types.CallbackQuery):
+		User = Users.auth(Call.from_user)
+		CallbackData = Call.data.split("_")
+		Option = CallbackData[1]
+		Value = True if CallbackData[2] == "enable" else False
+		User.set_property("option_" + Option, Value)
+		Bot.edit_message_reply_markup(Call.message.chat.id, Call.message.id, reply_markup = InlineKeyboards().options(User))
+		Bot.answer_callback_query(Call.id)
+
 	@Bot.callback_query_handler(func = lambda Callback: Callback.data == "download_audio")
 	def InlineButton(Call: types.CallbackQuery):
 		User = Users.auth(Call.from_user)
@@ -207,31 +218,41 @@ else:
 		VideoID = User.get_property("video_id")
 		Quality = "audio"
 		Site = User.get_property("site")
-		Name = User.get_property("filename") + ".m4a"
-		Compression = User.get_property("compression")
-		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression)
+		Name = User.get_property("filename")
+		Compression = User.get_property("option_compression")
+		Recoding = User.get_property("option_recoding")
+		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression, Recoding)
+		
+		ProgressAnimation = Animation()
+		ProgressAnimation.set_interval(1)
+		ProgressAnimation.add_lines("\\.")
+		ProgressAnimation.add_lines("\\.\\.")
+		ProgressAnimation.add_lines("\\.\\.\\.")
+		ProgressAnimation.add_lines("")
 
 		Procedures = [
-			"Скачиваю аудио\\.\\.\\.",
-			"Выгружаю аудио в Telegram\\.\\.\\.",
-			"Отправляю\\.\\.\\."
+			"Скачиваю аудио%s",
+			"Выгружаю аудио в Telegram%s",
+			"Отправляю%s"
 		]
+
 		SI = StepsIndicator(Bot, Call.message.chat.id, Procedures, parse_mode = "MarkdownV2")
 
-		if FileMessageID[0]:
+		if FileMessageID[0] and User.get_property("option_storage"):
 			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Settings["bot_name"])
 
 		else:
 			SI.send()
-			Result = Downloader.download_audio(Link, f"Temp/{User.id}/", f"{VideoID}.m4a")
+			SI.start_animation(ProgressAnimation)
+			Result = Downloader.download_audio(Link, f"Temp/{User.id}/", VideoID, recoding = Recoding)
 			
 			if Result:
 				SI.next("Аудио скачано\\.")
-				Result = StorageBox.upload_file(User.id, Site, f"{VideoID}.m4a", Quality, Compression, name = Name)
+				Result = StorageBox.upload_file(User.id, Site, Result, Quality, Compression, Recoding, name = Name)
 
 				if Result:
 					SI.next("Аудио загружено в Telegram\\.")
-					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression)
+					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression, Recoding)
 
 					if Result.code == 0:
 						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
@@ -241,7 +262,7 @@ else:
 
 				else: SI.error("Не удалось загрузить аудио в Telegram\\.")
 
-			else: SI.error("❌ Не удалось скачать аудио\\.")
+			else: SI.error("Не удалось скачать аудио\\.")
 
 		User.set_property("is_downloading", False)
 		User.clear_temp_properties()
@@ -258,8 +279,9 @@ else:
 		Quality = Query.split("+")[0]
 		FormatID = Query.split("+")[1]
 		Site = User.get_property("site")
-		Name = User.get_property("filename") + ".mp4"
-		Compression = User.get_property("compression")
+		Name = User.get_property("filename")
+		Compression = User.get_property("option_compression")
+		Recoding = User.get_property("option_recoding")
 
 		ProgressAnimation = Animation()
 		ProgressAnimation.set_interval(1)
@@ -279,16 +301,16 @@ else:
 		SI = StepsIndicator(Bot, Call.message.chat.id, Procedures, parse_mode = "MarkdownV2")
 
 		if Quality == "null": Quality = None
-		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression, watermarked = IsWatermarked)
+		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression, Recoding, watermarked = IsWatermarked)
 
-		if FileMessageID[0]:
+		if FileMessageID[0] and User.get_property("option_storage"):
 			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Settings["bot_name"])
 
 		else:
 			User.set_property("is_downloading", True)
 			SI.send()
 			SI.start_animation(ProgressAnimation)
-			Result = Downloader.download_video(Link, f"Temp/{User.id}/", f"{VideoID}.mp4", FormatID)
+			Result = Downloader.download_video(Link, f"Temp/{User.id}/", VideoID, FormatID, recoding = Recoding)
 
 			if Result:
 
@@ -297,11 +319,13 @@ else:
 					sleep(4)
 					SI.next("Качество улучшено\\.")
 
-				Result = StorageBox.upload_file(User.id, Site, f"{VideoID}.mp4", Quality, Compression, watermarked = IsWatermarked, name = Name)
+				else: SI.next("Видео скачано\\.")
+
+				Result = StorageBox.upload_file(User.id, Site, Result, Quality, Compression, Recoding, watermarked = IsWatermarked, name = Name)
 
 				if Result:
 					SI.next("Видео загружено в Telegram\\.")
-					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression, watermarked = IsWatermarked)
+					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression, Recoding, watermarked = IsWatermarked)
 
 					if Result.code == 0:
 						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
@@ -311,7 +335,7 @@ else:
 
 				else: SI.error("Не удалось загрузить видео в Telegram\\.")
 
-			else: SI.error("❌ Не удалось скачать видео\\.")
+			else: SI.error("Не удалось скачать видео\\.")
 
 		User.set_property("is_downloading", False)
 		User.clear_temp_properties()
@@ -333,8 +357,9 @@ else:
 			VideoID = FileData[1]
 			Quality = FileData[2]
 			Compression = True if FileData[3].endswith("on") else False
-			Watermarked = True if FileData[4].endswith("on") else False
+			Recoding = True if FileData[4].endswith("on") else False
+			Watermarked = True if FileData[5].endswith("on") else False
 			if Quality == "None": Quality = None
-			StorageBox.register_file(Site, VideoID, Quality, Compression, Watermarked, Message.id, User.id)
+			StorageBox.register_file(Site, VideoID, Quality, Compression, Recoding, Watermarked, Message.id, User.id)
 
 	Bot.infinity_polling()
