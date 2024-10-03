@@ -1,5 +1,8 @@
 from Source.Core.Storage import Storage
 
+from dublib.Methods.Filesystem import RemoveDirectoryContent
+
+import urllib.request
 import subprocess
 import json
 import sys
@@ -7,6 +10,16 @@ import os
 
 class YtDlp:
 	"""Абстракция управления библиотекой yt-dlp."""
+
+	#==========================================================================================#
+	# >>>>> СВОЙСТВА <<<<< #
+	#==========================================================================================#
+
+	@property
+	def version(self) -> str:
+		"""Версия библиотеки yt-dlp по умолчанию."""
+
+		return "2024.09.27"
 
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
@@ -37,7 +50,7 @@ class YtDlp:
 		Buffer["formats"] = list()
 		
 		for Format in info["formats"]:
-			if Format["ext"] == "mp4": Buffer["formats"].append(Format)
+			if Format["ext"] != "mhtml": Buffer["formats"].append(Format)
 
 		return Buffer
 
@@ -50,8 +63,21 @@ class YtDlp:
 		Filename = None
 		Files = os.listdir(directory)
 		if len(Files): Filename = Files[0]
-		input(Filename)
+		
 		return Filename
+
+	def __CheckLib(self, update: bool):
+		"""
+		Проверяет, загружена и обновлена ли библиотека.
+			update – указывает, нужно ли обновлять библиотеку.
+		"""
+
+		if not os.path.exists("yt-dlp/yt-dlp"):
+			urllib.request.urlretrieve(f"https://github.com/yt-dlp/yt-dlp/releases/download/{self.version}/yt-dlp", "yt-dlp/yt-dlp")
+			os.system("chmod u+x yt-dlp/yt-dlp")
+
+		elif update:
+			os.system("yt-dlp/yt-dlp -U")
 
 	def __PrettyFormatName(self, name: str, watermarked: bool = False) -> str:
 		"""
@@ -127,7 +153,7 @@ class YtDlp:
 
 		IsSuccess = False
 		Recoding = "--recode m4a" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio --format download {Recoding} {self.__Proxy} -f 'b[url!^=\"https://www.tiktok.com/\"]'"
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio {Recoding} {self.__Proxy} -f 'b[url!^=\"https://www.tiktok.com/\"]'"
 		ExitCode = os.system(Command)
 
 		if ExitCode == 0:
@@ -191,14 +217,14 @@ class YtDlp:
 
 		IsSuccess = False
 		Recoding = "--recode mp4" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {directory}{filename} {self.__Proxy} -f 'b[url!^=\"https://www.tiktok.com/\"]'"
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {directory}{filename} {self.__Proxy} -f {format_id}"
 		ExitCode = os.system(Command)
 
 		if ExitCode == 0:
 			IsSuccess = True
 
 		elif self.__Proxy:
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {directory}{filename} -f 'b[url!^=\"https://www.tiktok.com/\"]'"
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {directory}{filename} -f {format_id}"
 			ExitCode = os.system(Command)
 			if ExitCode == 0: IsSuccess = True
 
@@ -253,7 +279,7 @@ class YtDlp:
 			link – ссылка на видео.
 		"""
 
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy} -f 'b[url!^=\"https://www.tiktok.com/\"]'",
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy}",
 		Dump = subprocess.getoutput(Command)
 		Info = None 
 
@@ -261,15 +287,15 @@ class YtDlp:
 			Info = json.loads(Dump)
 
 		elif self.__Proxy:
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download -f 'b[url!^=\"https://www.tiktok.com/\"]'",
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download",
 			Dump = subprocess.getoutput(Command)
 			if not Dump.startswith("ERROR"): Info = json.loads(Dump)
 
 		if type(Info) == dict: 
 			Formats = Info["formats"]
 
-			# for Format in list(Formats):
-			# 	if Format["format_id"].endswith("-2"): Formats.remove(Format)
+			for Format in list(Formats):
+				if Format["format_id"].endswith("-2"): Formats.remove(Format)
 
 			Info["formats"] = Formats
 			Info["formats"][0]["resolution"] = "480x720"
@@ -280,7 +306,7 @@ class YtDlp:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, storage: Storage, lib_path: str | None = None, proxy: str | None = None, modules: dict | None = None):
+	def __init__(self, storage: Storage, lib_path: str, proxy: str | None = None, modules: dict | None = None, update: bool = False):
 		"""
 		Абстракция управления библиотекой yt-dlp.
 			storage – хранилище данных;\n
@@ -291,10 +317,12 @@ class YtDlp:
 
 		#---> Генерация динамических свойств.
 		#==========================================================================================#
-		self.__LibPath = lib_path or "yt-dlp"
+		self.__LibPath = lib_path
 		self.__Proxy = f"--proxy {proxy}" if proxy else ""
 		self.__Storage = storage
 		self.__Modules = modules or dict()
+
+		self.__CheckLib(update)
 	
 	def download_audio(self, link: str, directory: str, filename: str, recoding: bool = True) -> str | None:
 		"""
@@ -306,6 +334,7 @@ class YtDlp:
 		"""
 
 		if not os.path.exists(directory): os.makedirs(directory)
+		else: RemoveDirectoryContent(directory)
 		Domain = self.__Storage.parse_site_name(link)
 		IsSuccess = False
 		Recoding = "--recode m4a" if recoding else ""
@@ -335,6 +364,7 @@ class YtDlp:
 		"""
 		
 		if not os.path.exists(directory): os.makedirs(directory)
+		else: RemoveDirectoryContent(directory)
 		Domain = self.__Storage.parse_site_name(link)
 		IsSuccess = False
 		Recoding = "--recode mp4" if recoding else ""
@@ -373,12 +403,12 @@ class YtDlp:
 				Dump = subprocess.getoutput(Command)
 				if not Dump.startswith("ERROR"): Info = json.loads(Dump)
 
-			if Info: self.__FilterInfo(Info)
+			if Info: Info = self.__FilterInfo(Info)
 	
 		except Exception as ExceptionData: print(ExceptionData)
 		
-		from dublib.Methods.JSON import WriteJSON
-		WriteJSON("test.json", Info)
+		# from dublib.Methods.JSON import WriteJSON
+		# WriteJSON("test.json", Info)
 
 		return Info
 
@@ -402,5 +432,5 @@ class YtDlp:
 					if Name != None: Resolutions[Name] = Format["format_id"]
 
 		Resolutions = self.__SortResolutions(Resolutions)
-
+		
 		return Resolutions

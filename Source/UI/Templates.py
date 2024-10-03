@@ -192,8 +192,14 @@ class StepsIndicator:
 		if not self.__End:
 			self.__Statuses[self.__Index] = -1
 			if text: self.__Procedures[self.__Index] = text
-			if not stop: self.__Index += 1
-			else: self.__End = True
+
+			if not stop:
+				self.__Index += 1
+
+			else:
+				self.__End = True
+				self.stop_animation()
+
 			self.update()
 
 	def next(self, text: str | None = None):

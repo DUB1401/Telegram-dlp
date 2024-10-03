@@ -19,7 +19,7 @@ from time import sleep
 #==========================================================================================#
 
 CheckPythonMinimalVersion(3, 12)
-MakeRootDirectories(["Data/Users", "Temp"])
+MakeRootDirectories(["Data/Users", "Temp", "yt-dlp"])
 Clear()
 
 #==========================================================================================#
@@ -88,7 +88,7 @@ else:
 	Bot = TeleBot(Settings["token"])
 	Users = UsersManager("Data/Users")
 	StorageBox = Storage("Storage", Settings["venv"])
-	Downloader = YtDlp(StorageBox, "yt-dlp/yt-dlp", Settings["proxy"], modules = Settings["modules"])
+	Downloader = YtDlp(StorageBox, "yt-dlp/yt-dlp", Settings["proxy"], modules = Settings["modules"], update = True)
 	AdminPanel = Panel()
 
 	#==========================================================================================#
@@ -113,7 +113,7 @@ else:
 
 		Bot.send_message(
 			chat_id = Message.chat.id,
-			text = "Настройте *Telegram\\-dlp* под себя\\!\n\n*Сжатие* – управляет сжатием видеофайлов на стороне Telegram\\. При отключённом состоянии все видео будут отправляться как документы\\.\n\n*Перекодирование* – преобразует все форматы мультимедиа в _MP4_ и _M4A_\\. При отключённом состоянии будут отправляться нативные файлы \\(зачастую гораздо быстрее, особенно для [YouTube](https://www.youtube.com/)\\)\\.\n\n*Архив* – для некоторых источников бот сохраняет данные для загрузки видео\\. Вы можете воспользоваться архивными данными для моментального перехода к выбору скачиваемого файла, но эти сведения время от времени устаревают\\.\n\n*Хранилище* – если файл уже загружался кем\\-либо до вас, вы можете получить его моментально из хранилища\\.",
+			text = "Настройте *Telegram\\-dlp* под себя\\!\n\n*Сжатие* – управляет сжатием видеофайлов на стороне Telegram\\. При отключённом состоянии все видео будут отправляться как документы\\.\n\n*Перекодирование* – преобразует все форматы мультимедиа в _MP4_ и _M4A_\\. При отключённом состоянии будут отправляться нативные файлы \\(зачастую гораздо быстрее, особенно для [YouTube](https://www.youtube.com/)\\)\\.\n\n*Архив* – для некоторых источников бот сохраняет параметры для загрузки видео\\. Вы можете воспользоваться архивными данными для моментального перехода к выбору скачиваемого файла, но эти сведения время от времени устаревают\\.\n\n*Хранилище* – если файл уже загружался кем\\-либо до вас, вы можете получить его моментально из хранилища\\.",
 			parse_mode = "MarkdownV2",
 			disable_web_page_preview = True,
 			reply_markup = InlineKeyboards().options(User)
@@ -152,7 +152,7 @@ else:
 		if User.get_property("is_downloading"):
 			Bot.send_message(
 				chat_id = Message.chat.id,
-				text = "Вы уже скачиваете видеоролик."
+				text = "Кажется, вы уже скачиваете файл. Если это не так, перезапустите бот командой /start для проверки."
 			)
 
 		elif urlparse(Message.text).scheme:
@@ -168,7 +168,7 @@ else:
 			if Site:
 				VideoID = StorageBox.parse_video_id(Site, Link)
 				Info = StorageBox.get_info(Site, VideoID)
-				if not Info: Info = Downloader.get_info(Link)
+				if not Info or not User.get_property("option_archive"): Info = Downloader.get_info(Link)
 
 			if Info:
 				StorageBox.save_info(Site, VideoID, Info)
@@ -177,7 +177,7 @@ else:
 				User.set_temp_property("video_id", Info["id"])
 				User.set_temp_property("filename", Info["title"])
 				Bot.delete_message(message_id = SendedMessage.id, chat_id = Message.chat.id)
-				InlineKeyboards().send_fromat_selector(Bot, Message.chat.id, Info, Settings["one_watermarked"])
+				InlineKeyboards().send_fromat_selector(Bot, Message.chat.id, Info, StorageBox, Settings["one_watermarked"])
 
 			else:
 				Bot.edit_message_text(
@@ -258,7 +258,7 @@ else:
 						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
 						SI.next("Отправлено\\.")
 
-					else: SI.error("Не удалось отправить видео\\.")
+					else: SI.error("Не удалось отправить аудио\\.")
 
 				else: SI.error("Не удалось загрузить аудио в Telegram\\.")
 
@@ -329,6 +329,7 @@ else:
 
 					if Result.code == 0:
 						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
+						SI.stop_animation()
 						SI.next("Отправлено\\.")
 
 					else: SI.error("Не удалось отправить видео\\.")
