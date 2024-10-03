@@ -1,3 +1,4 @@
+from Source.Core.Storage import Storage
 from Source.Core.YtDlp import YtDlp
 
 from dublib.TelebotUtils import UserData
@@ -52,16 +53,17 @@ class InlineKeyboards:
 
 		return Options
 
-	def send_fromat_selector(self, bot: TeleBot, chat_id: int, info: dict, one_watermarked: bool = False):
+	def send_fromat_selector(self, bot: TeleBot, chat_id: int, info: dict, storage: Storage, one_watermarked: bool = False):
 		"""
 		Отправляет пользователю сообщение с выбором формата.
-			bot – бот Telegram;
-			chat_id – идентификатор чата;
-			info – данные видео;
+			bot – бот Telegram;\n
+			chat_id – идентификатор чата;\n
+			info – данные видео;\n
+			storage – менеджер хранилища;\n
 			one_watermarked – указывает, выводить ли лишь один вариант видео с водяным знаком.
 		"""
 
-		Resolutions = YtDlp("yt-dlp/yt-dlp").get_resolutions(info)
+		Resolutions = YtDlp(storage, "yt-dlp/yt-dlp").get_resolutions(info)
 		Title = ""
 		Views = ""
 		Likes = ""
@@ -79,14 +81,13 @@ class InlineKeyboards:
 			if not ResolutionName.endswith("w"):
 				Button = types.InlineKeyboardButton("🎬 " + ResolutionName, callback_data = f"download_video_{ResolutionName.replace(" ", "%")}+" + Resolutions[ResolutionName].replace(" ", "%"))
 				Menu.add(Button, row_width = 1)
-
+			
 			else:
 				Resolution = ResolutionName.rstrip("w")
 				ButtolLabel = ""
 
 				if ResolutionName.endswith("w") and not one_watermarked: ButtolLabel = Resolution + " (с водяным знаком)"
 				elif one_watermarked: ButtolLabel = "С водяным знаком"
-
 				WatermarkedButton = types.InlineKeyboardButton("🎞️ " + ButtolLabel, callback_data = f"download_watermarked_{Resolution.replace(" ", "%")}+" + Resolutions[ResolutionName].replace(" ", "%"))
 				
 				if one_watermarked: Watermarked = [WatermarkedButton]

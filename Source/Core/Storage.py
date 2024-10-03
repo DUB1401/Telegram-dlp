@@ -23,7 +23,8 @@ class Storage:
 		filename = filename.replace("\0", "")
 		filename = filename.replace("\\", "")
 		filename = filename.replace("/", "")
-
+		filename = filename[:48]
+		
 		return filename
 
 	def __SearchFormat(self, data: dict, quality: str, compression: bool, recoding: bool, watermarked: bool) -> int | None:
@@ -206,24 +207,20 @@ class Storage:
 
 		Path = f"{self.__StorageDirectory}/Files/{site}"
 		if not os.path.exists(Path): os.makedirs(Path)
-		File = None
-
-		if os.path.exists(f"{Path}/{id}.json"):
-			File = ReadJSON(f"{Path}/{id}.json")
-
-		else:
-			File = {
-				"video": [],
-				"watermarked": [],
-				"audio": {
-					"message_id": None,
-					"chat_id": None
-				},
-				"recoded_audio": {
-					"message_id": None,
-					"chat_id": None
-				}
+		File = {
+			"video": [],
+			"watermarked": [],
+			"audio": {
+				"message_id": None,
+				"chat_id": None
+			},
+			"recoded_audio": {
+				"message_id": None,
+				"chat_id": None
 			}
+		}
+
+		if os.path.exists(f"{Path}/{id}.json"): File = ReadJSON(f"{Path}/{id}.json")
 
 		if quality == "audio":
 
