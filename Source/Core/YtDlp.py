@@ -50,7 +50,12 @@ class YtDlp:
 		Buffer["formats"] = list()
 		
 		for Format in info["formats"]:
-			if Format["ext"] != "mhtml": Buffer["formats"].append(Format)
+			ChecksStatus = True
+
+			if Format["ext"] == "mhtml": ChecksStatus = False
+			elif Format["format_id"].startswith("dash_sep-"): ChecksStatus = False
+
+			if ChecksStatus: Buffer["formats"].append(Format)
 
 		return Buffer
 
@@ -86,25 +91,25 @@ class YtDlp:
 		"""
 
 		SupportedResolutions = [144, 240, 360, 480, 720, 1080, 2560, 3840, 7680]
-		if name == None: name = ""
+
+		PrettyName = None
 		
 		if name not in ["audio only"]:
 
 			if name and "x" in name:
-				Width = int(name.split("x")[0].rstrip("p"))
+				PrettyName = name
+				Width = int(PrettyName.split("x")[0].rstrip("p"))
 				Width = min(SupportedResolutions, key = lambda SupportedResolution: abs(SupportedResolution - Width))
-				if Width == 720: name = "HD"
-				elif Width == 1080: name = "Full HD"
-				elif Width == 2560: name = "2K"
-				elif Width == 3840: name = "4K"
-				elif Width == 7680: name = "8K"
-				else: name = f"{Width}p"
+				if Width == 720: PrettyName = "HD"
+				elif Width == 1080: PrettyName = "Full HD"
+				elif Width == 2560: PrettyName = "2K"
+				elif Width == 3840: PrettyName = "4K"
+				elif Width == 7680: PrettyName = "8K"
+				else: PrettyName = f"{Width}p"
 
-			if watermarked: name += "w"
+			if PrettyName and watermarked: PrettyName += "w"
 
-		else: name = None
-
-		return name
+		return PrettyName
 
 	def __SortResolutions(self, resolutions: dict) -> dict:
 		"""
@@ -125,59 +130,56 @@ class YtDlp:
 	# >>>>> СПЕЦИФИЧЕСКИЕ МЕТОДЫ СКАЧИВАНИЯ АУДИО <<<<< #
 	#==========================================================================================#
 
-	def __instagram_audio(self, link: str, directory: str, filename: str, recoding: bool = True) -> bool:
+	def __instagram_audio(self, link: str, path: str, recoding: bool = True) -> bool:
 		"""
 		Скачивает аудиодорожку и перекодирует её в формат m4a.
 			link – ссылка на видео;
-			directory – директория загрузки;
-			filename – имя файла;
+			path – путь к файлу;
 			recoding – указывает, нужно ли перекодировать файл в M4A.
 		"""
 
 		IsSuccess = False
 		Recoding = "--recode m4a" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio {Recoding} --cookies yt-dlp/instagram.cookies {self.__Proxy}"
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} --cookies yt-dlp/instagram.cookies {self.__Proxy}"
 		ExitCode = os.system(Command)
 		if ExitCode == 0: IsSuccess = True
 
 		return IsSuccess
 	
-	def __tiktok_audio(self, link: str, directory: str, filename: str, recoding: bool = True) -> bool:
+	def __tiktok_audio(self, link: str, path: str, recoding: bool = True) -> bool:
 		"""
 		Скачивает аудиодорожку и перекодирует её в формат m4a.
 			link – ссылка на видео;
-			directory – директория загрузки;
-			filename – имя файла;
+			path – путь к файлу;
 			recoding – указывает, нужно ли перекодировать файл в M4A.
 		"""
 
 		IsSuccess = False
 		Recoding = "--recode m4a" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio {Recoding} {self.__Proxy} -f 'b[url!^=\"https://www.tiktok.com/\"]'"
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} {self.__Proxy} -f 'b[url!^=\"https://www.tiktok.com/\"]'"
 		ExitCode = os.system(Command)
 
 		if ExitCode == 0:
 			IsSuccess = True
 
 		elif self.__Proxy:
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio {Recoding} -f 'b[url!^=\"https://www.tiktok.com/\"]'"
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} -f 'b[url!^=\"https://www.tiktok.com/\"]'"
 			ExitCode = os.system(Command)
 			if ExitCode == 0: IsSuccess = True
 
 		return IsSuccess
 	
-	def __youtube_audio(self, link: str, directory: str, filename: str, recoding: bool = True) -> bool:
+	def __youtube_audio(self, link: str, path: str, recoding: bool = True) -> bool:
 		"""
 		Скачивает аудиодорожку и перекодирует её в формат m4a.
 			link – ссылка на видео;
-			directory – директория загрузки;
-			filename – имя файла;
+			path – путь к файлу;
 			recoding – указывает, нужно ли перекодировать файл в M4A.
 		"""
 
 		IsSuccess = False
 		Recoding = "--recode m4a" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio {Recoding}"
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding}"
 		ExitCode = os.system(Command)
 		if ExitCode == 0: IsSuccess = True
 
@@ -187,64 +189,61 @@ class YtDlp:
 	# >>>>> СПЕЦИФИЧЕСКИЕ МЕТОДЫ СКАЧИВАНИЯ ВИДЕО <<<<< #
 	#==========================================================================================#
 
-	def __instagram_video(self, link: str, directory: str, filename: str, format_id: str, recoding: bool = True) -> bool:
+	def __instagram_video(self, link: str, path: str, format_id: str, recoding: bool = True) -> bool:
 		"""
 		Скачивает аудиодорожку и перекодирует её в формат m4a.
 			link – ссылка на видео;
-			directory – директория загрузки;
-			filename – имя файла;
+			path – путь к файлу;
 			format_id – идентификатор формата загружаемого видео;
 			recoding – указывает, нужно ли перекодировать файл в MP4.
 		"""
 
 		IsSuccess = False
 		Recoding = "--recode mp4" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}+bestaudio {Recoding} -o {directory}{filename} --cookies yt-dlp/instagram.cookies  {self.__Proxy}"
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}+bestaudio {Recoding} -o {path} --cookies yt-dlp/instagram.cookies  {self.__Proxy}"
 		ExitCode = os.system(Command)
 		if ExitCode in [0, 256]: IsSuccess = True
 
 		return IsSuccess
 	
-	def __tiktok_video(self, link: str, directory: str, filename: str, format_id: str, recoding: bool = True) -> bool:
+	def __tiktok_video(self, link: str, path: str, format_id: str, recoding: bool = True) -> bool:
 		"""
 		Скачивает аудиодорожку и перекодирует её в формат m4a.
 			link – ссылка на видео;
-			directory – директория загрузки;
-			filename – имя файла;
+			path – путь к файлу;
 			format_id – идентификатор формата загружаемого видео;
 			recoding – указывает, нужно ли перекодировать файл в MP4.
 		"""
 
 		IsSuccess = False
 		Recoding = "--recode mp4" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {directory}{filename} {self.__Proxy} -f {format_id}"
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {path} {self.__Proxy} -f {format_id}"
 		ExitCode = os.system(Command)
 
 		if ExitCode == 0:
 			IsSuccess = True
 
 		elif self.__Proxy:
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {directory}{filename} -f {format_id}"
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {path} -f {format_id}"
 			ExitCode = os.system(Command)
 			if ExitCode == 0: IsSuccess = True
 
 		return IsSuccess
 	
-	def __youtube_video(self, link: str, directory: str, filename: str, format_id: str, recoding: bool = True) -> bool:
+	def __youtube_video(self, link: str, path: str, format_id: str, recoding: bool = True) -> bool:
 		"""
 		Скачивает аудиодорожку и перекодирует её в формат m4a.
 			link – ссылка на видео;
-			directory – директория загрузки;
-			filename – имя файла;
+			path – путь к файлу;
 			format_id – идентификатор формата загружаемого видео;
 			recoding – указывает, нужно ли перекодировать файл в MP4.
 		"""
 
 		IsSuccess = False
 		Recoding = "--recode mp4" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}+bestaudio {Recoding} -o {directory}{filename}"
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}+bestaudio {Recoding} -o {path}"
 		ExitCode = os.system(Command)
-		if ExitCode == 0: IsSuccess = True
+		if ExitCode in [0, 256]: IsSuccess = True
 
 		return IsSuccess
 
@@ -338,15 +337,15 @@ class YtDlp:
 		Domain = self.__Storage.parse_site_name(link)
 		IsSuccess = False
 		Recoding = "--recode m4a" if recoding else ""
-		filename = f"\"{filename}.%(ext)s\""
+		Path = f"\"{directory}/{filename}.%(ext)s\""
 
 		try:
-			if Domain == "instagram.com": IsSuccess = self.__instagram_audio(link, directory, filename, recoding)
-			elif Domain == "tiktok.com": IsSuccess = self.__tiktok_audio(link, directory, filename, recoding)
-			elif Domain == "youtube.com": IsSuccess = self.__youtube_audio(link, directory, filename, recoding)
+			if Domain == "instagram.com": IsSuccess = self.__instagram_audio(link, Path, recoding)
+			elif Domain == "tiktok.com": IsSuccess = self.__tiktok_audio(link, Path, recoding)
+			elif Domain == "youtube.com": IsSuccess = self.__youtube_audio(link, Path, recoding)
 
 			else:
-				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {directory}{filename} --extract-audio {Recoding} {self.__Proxy}"
+				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {Path} --extract-audio {Recoding} {self.__Proxy}"
 				if os.system(Command) == 0: IsSuccess = True
 
 		except Exception as ExceptionData: print(ExceptionData)
@@ -368,16 +367,16 @@ class YtDlp:
 		Domain = self.__Storage.parse_site_name(link)
 		IsSuccess = False
 		Recoding = "--recode mp4" if recoding else ""
-		filename = f"\"{filename}.%(ext)s\""
-
+		Path = f"\"{directory}{filename}.%(ext)s\""
+		
 		try:
 
-			if Domain == "instagram.com": IsSuccess = self.__instagram_video(link, directory, filename, format_id, recoding)
-			elif Domain == "tiktok.com": IsSuccess = self.__tiktok_video(link, directory, filename, format_id, recoding)
-			elif Domain in ["youtube.com", "vk.com"]: IsSuccess = self.__youtube_video(link, directory, filename, format_id, recoding)
+			if Domain == "instagram.com": IsSuccess = self.__instagram_video(link, Path, format_id, recoding)
+			elif Domain == "tiktok.com": IsSuccess = self.__tiktok_video(link, Path, format_id, recoding)
+			elif Domain in ["youtube.com", "vk.com"]: IsSuccess = self.__youtube_video(link, Path, format_id, recoding)
 
 			else:
-				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {directory}{filename} {self.__Proxy}"
+				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {Path} {self.__Proxy}"
 				if os.system(Command) == 0: IsSuccess = True
 
 		except Exception as ExceptionData: print(ExceptionData)
@@ -407,8 +406,8 @@ class YtDlp:
 	
 		except Exception as ExceptionData: print(ExceptionData)
 		
-		# from dublib.Methods.JSON import WriteJSON
-		# WriteJSON("test.json", Info)
+		from dublib.Methods.JSON import WriteJSON
+		WriteJSON("test.json", Info)
 
 		return Info
 
