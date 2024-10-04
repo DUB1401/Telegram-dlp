@@ -171,6 +171,15 @@ else:
 				if not Info or not User.get_property("option_archive"): Info = Downloader.get_info(Link)
 
 			if Info:
+
+				if "duration" in Info.keys() and type(Info["duration"]) == int and Info["duration"] >= 14400: 
+					Bot.edit_message_text(
+						message_id = SendedMessage.id,
+						chat_id = Message.chat.id,
+						text = "Видео слишком длинное."
+					)
+					return
+
 				StorageBox.save_info(Site, VideoID, Info)
 				User.set_temp_property("link", Link)
 				User.set_temp_property("site", Site)
