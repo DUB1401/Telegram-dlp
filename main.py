@@ -186,7 +186,7 @@ else:
 				User.set_temp_property("video_id", Info["id"])
 				User.set_temp_property("filename", Info["title"])
 				Bot.delete_message(message_id = SendedMessage.id, chat_id = Message.chat.id)
-				InlineKeyboards().send_fromat_selector(Bot, Message.chat.id, Info, StorageBox, Settings["one_watermarked"])
+				InlineKeyboards().send_fromat_selector(Bot, Message.chat.id, Info, StorageBox, Settings["proxy"], Settings["one_watermarked"])
 
 			else:
 				Bot.edit_message_text(
