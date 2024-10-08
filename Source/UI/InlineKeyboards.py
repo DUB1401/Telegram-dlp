@@ -53,13 +53,14 @@ class InlineKeyboards:
 
 		return Options
 
-	def send_fromat_selector(self, bot: TeleBot, chat_id: int, info: dict, storage: Storage, one_watermarked: bool = False):
+	def send_fromat_selector(self, bot: TeleBot, chat_id: int, info: dict, storage: Storage, proxy: str, one_watermarked: bool = False):
 		"""
 		Отправляет пользователю сообщение с выбором формата.
 			bot – бот Telegram;\n
 			chat_id – идентификатор чата;\n
 			info – данные видео;\n
 			storage – менеджер хранилища;\n
+			proxy – используемый прокси;\n
 			one_watermarked – указывает, выводить ли лишь один вариант видео с водяным знаком.
 		"""
 
@@ -184,7 +185,9 @@ class InlineKeyboards:
 		IsThumbnail = False
 
 		try:
-			if requests.get(info["thumbnail"], timeout = 5).status_code == 200: IsThumbnail = True
+			Proxy = {"https": proxy} if proxy else None
+			if requests.get(info["thumbnail"], timeout = 30, proxies = Proxy).status_code == 200: IsThumbnail = True
+			elif requests.get(info["thumbnail"], timeout = 3).status_code == 200: IsThumbnail = True
 
 		except: pass
 		
