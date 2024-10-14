@@ -161,11 +161,21 @@ else:
 				text = "Идёт получение данных..."
 			)
 			Site = StorageBox.parse_site_name(Message.text)
-			Link = StorageBox.check_link(Message.text)
+			Link = None
 			VideoID = None
 			Info = None
 
 			if Site:
+				Link = StorageBox.check_link(Site, Message.text)
+
+				if StorageBox.check_for_playlist(Site, Link):
+					Bot.edit_message_text(
+						message_id = SendedMessage.id,
+						chat_id = Message.chat.id,
+						text = "Данная ссылка ведёт к плейлисту, а не конкретному видео."
+					)
+					return
+
 				VideoID = StorageBox.parse_video_id(Site, Link)
 				Info = StorageBox.get_info(Site, VideoID)
 				if not Info or not User.get_property("option_archive"): Info = Downloader.get_info(Link)

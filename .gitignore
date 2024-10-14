@@ -1,14 +1,11 @@
-# === REPOSITORY === #
-
 # Python virtual enviroment and cache.
 __pycache__
 .venv
-
-# === USER === #
-
 # Downloaders cookies.
 yt-dlp/instagram.cookies
 # Downloaded files data.
 Storage
+# yt-dlp
+yt-dlp
 # Users data.
 Data
