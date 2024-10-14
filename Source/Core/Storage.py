@@ -1,6 +1,6 @@
+from urllib.parse import urlparse, parse_qs, urlencode
 from dublib.Methods.JSON import ReadJSON, WriteJSON
 from dublib.Engine.Bus import ExecutionStatus
-from urllib.parse import urlparse, parse_qs
 from time import sleep
 
 import base64
@@ -13,6 +13,21 @@ class Storage:
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
+
+	def __RemoveQueryParameter(self, url: str, key: str) -> str:
+		"""
+		Удаляет параметр запроса из ссылки.
+			url – ссылка;\n
+			key – ключ параметра.
+		"""
+
+		Parts = urlparse(url)
+		Query = parse_qs(Parts.query)
+		Query.pop(key, None)
+		NewQuery = urlencode(Query, doseq = True)
+		NewURL = Parts._replace(query = NewQuery).geturl()
+		
+		return NewURL
 
 	def __StringToFilename(self, filename: str) -> str:
 		"""
@@ -64,20 +79,34 @@ class Storage:
 		self.__StorageDirectory = directory
 		self.__Venv = venv
 
-	def check_link(self, link: str) -> str:
+	def check_for_playlist(self, site: str, link: str) -> bool:
 		"""
-		Проверяет, нужно ли ссылке преобразования для корректной загрузке и выполняет эту процедуру.
+		Проверяет, ведёт ли ссылка на плейлист.
+			site – домен обрабатываемого сайта;\n
 			link – ссылка.
 		"""
 
-		
-		if "instagram.com" in link:
+		return False
 
-			if "/s/" in link:
-				Buffer = link.split("?")[0].split("/")[-1]
-				
-				if not Buffer.isdigit():
-					link = "https://www.instagram.com/stories/highlights/" + str(base64.b64decode(Buffer)).split(":")[-1].rstrip("'")
+	def check_link(self, site: str, link: str) -> str:
+		"""
+		Проверяет, нужно ли ссылке преобразования для корректной загрузке и выполняет эту процедуру.
+			site – домен обрабатываемого сайта;\n
+			link – ссылка.
+		"""
+
+		match site:
+		
+			case "instagram.com":
+
+				if "/s/" in link:
+					Buffer = link.split("?")[0].split("/")[-1]
+					
+					if not Buffer.isdigit():
+						link = "https://www.instagram.com/stories/highlights/" + str(base64.b64decode(Buffer)).split(":")[-1].rstrip("'")
+
+			case "youtube.com":
+				if "&list=" in link: link = self.__RemoveQueryParameter(link, "list")
 
 		return link
 
