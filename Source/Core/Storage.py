@@ -86,7 +86,14 @@ class Storage:
 			link – ссылка.
 		"""
 
-		return False
+		IsPlaylist = False
+
+		match site:
+
+			case "youtube.com":
+				if "/playlist?list" in link: IsPlaylist = True
+
+		return IsPlaylist
 
 	def check_link(self, site: str, link: str) -> str:
 		"""
