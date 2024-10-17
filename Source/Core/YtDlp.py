@@ -167,6 +167,12 @@ class YtDlp:
 			ExitCode = os.system(Command)
 			if ExitCode == 0: IsSuccess = True
 
+		if ExitCode != 0:
+			Extractor = "--extractor-args \"tiktok:api_hostname=api31-normal-useast2a.tiktokv.com;app_info=7370097943049078561\""
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} {self.__Proxy} -f 'b[url!^=\"https://www.tiktok.com/\"]' {Extractor}"
+			ExitCode = os.system(Command)
+			if ExitCode == 0: IsSuccess = True
+
 		return IsSuccess
 	
 	def __youtube_audio(self, link: str, path: str, recoding: bool = True) -> bool:
@@ -225,6 +231,12 @@ class YtDlp:
 
 		elif self.__Proxy:
 			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {path} -f {format_id}"
+			ExitCode = os.system(Command)
+			if ExitCode == 0: IsSuccess = True
+
+		if ExitCode != 0:
+			Extractor = "--extractor-args \"tiktok:api_hostname=api31-normal-useast2a.tiktokv.com;app_info=7370097943049078561\""
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {path} {self.__Proxy} -f {format_id} {Extractor}"
 			ExitCode = os.system(Command)
 			if ExitCode == 0: IsSuccess = True
 
@@ -287,6 +299,12 @@ class YtDlp:
 
 		elif self.__Proxy:
 			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download",
+			Dump = subprocess.getoutput(Command)
+			if not Dump.startswith("ERROR"): Info = json.loads(Dump)
+		
+		if not Info:
+			Extractor = "--extractor-args \"tiktok:api_hostname=api31-normal-useast2a.tiktokv.com;app_info=7370097943049078561\""
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy} {Extractor}",
 			Dump = subprocess.getoutput(Command)
 			if not Dump.startswith("ERROR"): Info = json.loads(Dump)
 
