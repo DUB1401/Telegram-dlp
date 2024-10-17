@@ -182,6 +182,7 @@ class Storage:
 			Site = urlparse(link).hostname.replace("www.", "")
 			if Site == "youtu.be": Site = "youtube.com"
 			if Site == "vt.tiktok.com": Site = "tiktok.com"
+			if Site == "vm.tiktok.com": Site = "tiktok.com"
 			if Site == "rt.pornhub.com": Site = "pornhub.com"
 			
 		except: pass
