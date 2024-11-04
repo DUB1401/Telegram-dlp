@@ -139,8 +139,9 @@ class YtDlp:
 		"""
 
 		IsSuccess = False
+		Proxy = ("--proxy" + self.__Modules["instagram"]["proxy"]) if self.__Modules["instagram"]["proxy"] else self.__Proxy
 		Recoding = "--recode m4a" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} --cookies yt-dlp/instagram.cookies {self.__Proxy}"
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} --cookies yt-dlp/instagram.cookies {Proxy}"
 		ExitCode = os.system(Command)
 		if ExitCode == 0: IsSuccess = True
 
@@ -205,8 +206,9 @@ class YtDlp:
 		"""
 
 		IsSuccess = False
+		Proxy = ("--proxy" + self.__Modules["instagram"]["proxy"]) if self.__Modules["instagram"]["proxy"] else self.__Proxy
 		Recoding = "--recode mp4" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}+bestaudio {Recoding} -o {path} --cookies yt-dlp/instagram.cookies  {self.__Proxy}"
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}+bestaudio {Recoding} -o {path} --cookies yt-dlp/instagram.cookies  {Proxy}"
 		ExitCode = os.system(Command)
 		if ExitCode in [0, 256]: IsSuccess = True
 
@@ -270,9 +272,10 @@ class YtDlp:
 		"""
 
 		Info = None
+		Proxy = ("--proxy" + self.__Modules["instagram"]["proxy"]) if self.__Modules["instagram"]["proxy"] else self.__Proxy
 
 		for Try in range(2):
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download --cookies yt-dlp/instagram.cookies {self.__Proxy}",
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download --cookies yt-dlp/instagram.cookies {Proxy}",
 			Dump = subprocess.getoutput(Command)
 			
 			if not Dump.startswith("ERROR"):
