@@ -10,7 +10,8 @@
 	"venv": true,
 	"modules": {
 		"instagram": {
-			"cookies_generator": ""
+			"cookies_generator": "",
+			"proxy": ""
 		}
 	}
 }
