@@ -183,7 +183,7 @@ class Storage:
 			if Site == "youtu.be": Site = "youtube.com"
 			if Site == "vt.tiktok.com": Site = "tiktok.com"
 			if Site == "vm.tiktok.com": Site = "tiktok.com"
-			if Site == "rt.pornhub.com": Site = "pornhub.com"
+			if "pornhub.com" in Site: Site = "pornhub.com"
 			
 		except: pass
 		
@@ -205,7 +205,10 @@ class Storage:
 
 		if site == "youtube.com":
 
-			if "youtube.com" in link:
+			if "youtube.com" in link and "/shorts/" in link:
+				VideoID = link.split("/shorts/")[-1].split("?")[0]
+
+			elif "youtube.com" in link:
 				Query = urlparse(link).query
 				Query = parse_qs(Query)
 				if "v" in Query.keys(): VideoID = Query["v"][0]
