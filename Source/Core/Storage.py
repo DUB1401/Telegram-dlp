@@ -90,7 +90,7 @@ class Storage:
 
 		match site:
 
-			case "youtube.com":
+			case "youtube":
 				if "/playlist?list" in link: IsPlaylist = True
 
 		return IsPlaylist
@@ -104,7 +104,7 @@ class Storage:
 
 		match site:
 		
-			case "instagram.com":
+			case "instagram":
 
 				if "/s/" in link:
 					Buffer = link.split("?")[0].split("/")[-1]
@@ -112,7 +112,7 @@ class Storage:
 					if not Buffer.isdigit():
 						link = "https://www.instagram.com/stories/highlights/" + str(base64.b64decode(Buffer)).split(":")[-1].rstrip("'")
 
-			case "youtube.com":
+			case "youtube":
 				if "&list=" in link: link = self.__RemoveQueryParameter(link, "list")
 
 		return link
@@ -180,10 +180,10 @@ class Storage:
 
 		try:
 			Site = urlparse(link).hostname.replace("www.", "")
-			if Site == "youtu.be": Site = "youtube.com"
-			if Site == "vt.tiktok.com": Site = "tiktok.com"
-			if Site == "vm.tiktok.com": Site = "tiktok.com"
-			if "pornhub.com" in Site: Site = "pornhub.com"
+			if Site.endswith(".com"): Site = Site[:-4]
+			if Site == "youtu.be": Site = "youtube"
+			if Site == "vt.tiktok" or Site == "vm.tiktok.com": Site = "tiktok"
+			if "pornhub" in Site: Site = "pornhub"
 			
 		except: pass
 		
@@ -198,12 +198,12 @@ class Storage:
 
 		VideoID = None
 
-		if site == "instagram.com":
+		if site == "instagram":
 
 			if "/reel/" in link:
 				VideoID = link.split("?")[0].rstrip("/").split("/")[-1]
 
-		if site == "youtube.com":
+		if site == "youtube":
 
 			if "youtube.com" in link and "/shorts/" in link:
 				VideoID = link.split("/shorts/")[-1].split("?")[0]
@@ -216,11 +216,11 @@ class Storage:
 			elif "youtu.be" in link:
 				VideoID = link.split("?")[0].split("/")[-1]
 
-		if site == "tiktok.com":
+		if site == "tiktok":
 			Buffer = link.split("?")[0].split("/")[-1]
 			if Buffer.isdigit(): VideoID = Buffer
 
-		if site == "vk.com":
+		if site == "vk":
 			
 			if "video" in link:
 				Query = urlparse(link).query

@@ -34,7 +34,7 @@ class YtDlp:
 
 		IsWatermarked = False
 
-		if domain == "tiktok.com":
+		if domain == "tiktok":
 
 			if format["format_id"] == "download": IsWatermarked = True
 
@@ -78,7 +78,7 @@ class YtDlp:
 		"""
 
 		if not os.path.exists("yt-dlp/yt-dlp"):
-			urllib.request.urlretrieve(f"https://github.com/yt-dlp/yt-dlp/releases/download/{self.version}/yt-dlp", "yt-dlp/yt-dlp")
+			urllib.request.urlretrieve(f"https://github/yt-dlp/yt-dlp/releases/download/{self.version}/yt-dlp", "yt-dlp/yt-dlp")
 			os.system("chmod u+x yt-dlp/yt-dlp")
 
 		elif update:
@@ -139,7 +139,8 @@ class YtDlp:
 		"""
 
 		IsSuccess = False
-		Proxy = ("--proxy" + self.__Modules["instagram"]["proxy"]) if self.__Modules["instagram"]["proxy"] else self.__Proxy
+		Proxy = ""
+		if self.__Modules["instagram"]["proxy"]: Proxy = "--proxy " + self.__Modules["instagram"]["proxy"]
 		Recoding = "--recode m4a" if recoding else ""
 		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} --cookies yt-dlp/instagram.cookies {Proxy}"
 		ExitCode = os.system(Command)
@@ -157,20 +158,20 @@ class YtDlp:
 
 		IsSuccess = False
 		Recoding = "--recode m4a" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} {self.__Proxy} -f 'b[url!^=\"https://www.tiktok.com/\"]'"
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} {self.__Proxy} -f 'b[url!^=\"https://www.tiktok/\"]'"
 		ExitCode = os.system(Command)
 
 		if ExitCode == 0:
 			IsSuccess = True
 
 		elif self.__Proxy:
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} -f 'b[url!^=\"https://www.tiktok.com/\"]'"
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} -f 'b[url!^=\"https://www.tiktok/\"]'"
 			ExitCode = os.system(Command)
 			if ExitCode == 0: IsSuccess = True
 
 		if ExitCode != 0:
-			Extractor = "--extractor-args \"tiktok:api_hostname=api31-normal-useast2a.tiktokv.com;app_info=7370097943049078561\""
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} {self.__Proxy} -f 'b[url!^=\"https://www.tiktok.com/\"]' {Extractor}"
+			Extractor = "--extractor-args \"tiktok:api_hostname=api31-normal-useast2a.tiktokv;app_info=7370097943049078561\""
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} {self.__Proxy} -f 'b[url!^=\"https://www.tiktok/\"]' {Extractor}"
 			ExitCode = os.system(Command)
 			if ExitCode == 0: IsSuccess = True
 
@@ -206,9 +207,10 @@ class YtDlp:
 		"""
 
 		IsSuccess = False
-		Proxy = ("--proxy" + self.__Modules["instagram"]["proxy"]) if self.__Modules["instagram"]["proxy"] else self.__Proxy
+		Proxy = ""
+		if self.__Modules["instagram"]["proxy"]: Proxy = "--proxy " + self.__Modules["instagram"]["proxy"]
 		Recoding = "--recode mp4" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}+bestaudio {Recoding} -o {path} --cookies yt-dlp/instagram.cookies  {Proxy}"
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}+bestaudio {Recoding} -o {path} --cookies yt-dlp/instagram.cookies {Proxy}"
 		ExitCode = os.system(Command)
 		if ExitCode in [0, 256]: IsSuccess = True
 
@@ -237,7 +239,7 @@ class YtDlp:
 			if ExitCode == 0: IsSuccess = True
 
 		if ExitCode != 0:
-			Extractor = "--extractor-args \"tiktok:api_hostname=api31-normal-useast2a.tiktokv.com;app_info=7370097943049078561\""
+			Extractor = "--extractor-args \"tiktok:api_hostname=api31-normal-useast2a.tiktokv;app_info=7370097943049078561\""
 			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {path} {self.__Proxy} -f {format_id} {Extractor}"
 			ExitCode = os.system(Command)
 			if ExitCode == 0: IsSuccess = True
@@ -272,10 +274,11 @@ class YtDlp:
 		"""
 
 		Info = None
-		Proxy = ("--proxy" + self.__Modules["instagram"]["proxy"]) if self.__Modules["instagram"]["proxy"] else self.__Proxy
+		Proxy = ""
+		if self.__Modules["instagram"]["proxy"]: Proxy = "--proxy " + self.__Modules["instagram"]["proxy"]
 
 		for Try in range(2):
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download --cookies yt-dlp/instagram.cookies {Proxy}",
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download --cookies yt-dlp/instagram.cookies {Proxy}"
 			Dump = subprocess.getoutput(Command)
 			
 			if not Dump.startswith("ERROR"):
@@ -306,7 +309,7 @@ class YtDlp:
 			if not Dump.startswith("ERROR"): Info = json.loads(Dump)
 		
 		if not Info:
-			Extractor = "--extractor-args \"tiktok:api_hostname=api31-normal-useast2a.tiktokv.com;app_info=7370097943049078561\""
+			Extractor = "--extractor-args \"tiktok:api_hostname=api31-normal-useast2a.tiktokv;app_info=7370097943049078561\""
 			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy} {Extractor}",
 			Dump = subprocess.getoutput(Command)
 			if not Dump.startswith("ERROR"): Info = json.loads(Dump)
@@ -361,9 +364,9 @@ class YtDlp:
 		Path = f"\"{directory}/{filename}.%(ext)s\""
 
 		try:
-			if Domain == "instagram.com": IsSuccess = self.__instagram_audio(link, Path, recoding)
-			elif Domain == "tiktok.com": IsSuccess = self.__tiktok_audio(link, Path, recoding)
-			elif Domain == "youtube.com": IsSuccess = self.__youtube_audio(link, Path, recoding)
+			if Domain == "instagram": IsSuccess = self.__instagram_audio(link, Path, recoding)
+			elif Domain == "tiktok": IsSuccess = self.__tiktok_audio(link, Path, recoding)
+			elif Domain == "youtube": IsSuccess = self.__youtube_audio(link, Path, recoding)
 
 			else:
 				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {Path} --extract-audio {Recoding} {self.__Proxy}"
@@ -392,9 +395,9 @@ class YtDlp:
 		
 		try:
 
-			if Domain == "instagram.com": IsSuccess = self.__instagram_video(link, Path, format_id, recoding)
-			elif Domain == "tiktok.com": IsSuccess = self.__tiktok_video(link, Path, format_id, recoding)
-			elif Domain in ["youtube.com", "vk.com"]: IsSuccess = self.__youtube_video(link, Path, format_id, recoding)
+			if Domain == "instagram": IsSuccess = self.__instagram_video(link, Path, format_id, recoding)
+			elif Domain == "tiktok": IsSuccess = self.__tiktok_video(link, Path, format_id, recoding)
+			elif Domain in ["youtube", "vk"]: IsSuccess = self.__youtube_video(link, Path, format_id, recoding)
 
 			else:
 				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {Path} {self.__Proxy}"
@@ -414,9 +417,8 @@ class YtDlp:
 		Info = None
 		
 		try:
-
-			if Domain == "instagram.com": Info = self.__instagram_info(link)
-			elif Domain == "tiktok.com": Info = self.__tiktok_info(link)
+			if Domain == "instagram": Info = self.__instagram_info(link)
+			elif Domain == "tiktok": Info = self.__tiktok_info(link)
 				
 			else: 
 				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy}",
