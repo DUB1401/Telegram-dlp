@@ -112,6 +112,8 @@ class Storage:
 					if not Buffer.isdigit():
 						link = "https://www.instagram.com/stories/highlights/" + str(base64.b64decode(Buffer)).split(":")[-1].rstrip("'")
 
+				link = self.__RemoveQueryParameter(link, "igsh")
+
 			case "youtube":
 				if "&list=" in link: link = self.__RemoveQueryParameter(link, "list")
 

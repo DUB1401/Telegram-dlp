@@ -296,7 +296,7 @@ class YtDlp:
 			link – ссылка на видео.
 		"""
 
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy}",
+		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy}"
 		Dump = subprocess.getoutput(Command)
 		Info = None 
 
@@ -304,13 +304,13 @@ class YtDlp:
 			Info = json.loads(Dump)
 
 		elif self.__Proxy:
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download",
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download"
 			Dump = subprocess.getoutput(Command)
 			if not Dump.startswith("ERROR"): Info = json.loads(Dump)
 		
 		if not Info:
 			Extractor = "--extractor-args \"tiktok:api_hostname=api31-normal-useast2a.tiktokv;app_info=7370097943049078561\""
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy} {Extractor}",
+			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy} {Extractor}"
 			Dump = subprocess.getoutput(Command)
 			if not Dump.startswith("ERROR"): Info = json.loads(Dump)
 
@@ -421,7 +421,7 @@ class YtDlp:
 			elif Domain == "tiktok": Info = self.__tiktok_info(link)
 				
 			else: 
-				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy}",
+				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy}"
 				Dump = subprocess.getoutput(Command)
 				if not Dump.startswith("ERROR"): Info = json.loads(Dump)
 
