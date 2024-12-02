@@ -186,7 +186,7 @@ class InlineKeyboards:
 
 		try:
 			Proxy = {"https": proxy} if proxy else None
-			if requests.get(info["thumbnail"], timeout = 30, proxies = Proxy).status_code == 200: IsThumbnail = True
+			if requests.get(info["thumbnail"], timeout = 5, proxies = Proxy).status_code == 200: IsThumbnail = True
 			elif requests.get(info["thumbnail"], timeout = 3).status_code == 200: IsThumbnail = True
 
 		except: pass
