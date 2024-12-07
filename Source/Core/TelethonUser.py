@@ -1,5 +1,5 @@
 from dublib.Methods.Filesystem import RemoveDirectoryContent
-from dublib.CLI.StyledPrinter import StyledPrinter, Styles
+from dublib.CLI.TextStyler import TextStyler, Styles
 from dublib.Methods.JSON import ReadJSON, WriteJSON
 from telethon.sync import TelegramClient
 
@@ -27,7 +27,7 @@ class TelethonUser:
 			bot_name – текстовый идентификатор бота.
 		"""
 		
-		#---> Генерация динамических свойств.
+		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
 		self.__Client = None
 		self.__BotName = bot_name
@@ -71,10 +71,10 @@ class TelethonUser:
 				os.replace("Account.session", "Data/Account.session")
 				WriteJSON("Data/Account.json", {"phone_number": phone_number, "api_id": api_id, "api_hash": api_hash})
 				IsSucess = True
-				if logging: StyledPrinter("Authorization successful.", text_color = Styles.Colors.Green)
+				if logging: TextStyler("Authorization successful.", text_color = Styles.Colors.Green).print()
 			
 		except Exception as ExceptionData:
-			if logging: StyledPrinter(f"ERROR: {ExceptionData}", text_color = Styles.Colors.Red)
+			if logging: TextStyler(f"ERROR: {ExceptionData}", text_color = Styles.Colors.Red).print()
 			
 		return IsSucess
 	

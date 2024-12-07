@@ -1,11 +1,11 @@
+from Source.Core.Extractors.Base import BaseExtractor
+from Source.Core.Configurator import Configurator
 from Source.Core.Storage import Storage
+from .Extractors import *
 
 from dublib.Methods.Filesystem import RemoveDirectoryContent
 
 import urllib.request
-import subprocess
-import json
-import sys
 import os
 
 class YtDlp:
@@ -34,7 +34,7 @@ class YtDlp:
 
 		IsWatermarked = False
 
-		if domain == "tiktok":
+		if domain == ExtendedSupport.TikTok.name:
 
 			if format["format_id"] == "download": IsWatermarked = True
 
@@ -71,17 +71,14 @@ class YtDlp:
 		
 		return Filename
 
-	def __CheckLib(self, update: bool):
-		"""
-		Проверяет, загружена и обновлена ли библиотека.
-			update – указывает, нужно ли обновлять библиотеку.
-		"""
+	def __CheckLib(self):
+		"""Проверяет, загружена и обновлена ли библиотека."""
 
 		if not os.path.exists("yt-dlp/yt-dlp"):
 			urllib.request.urlretrieve(f"https://github/yt-dlp/yt-dlp/releases/download/{self.version}/yt-dlp", "yt-dlp/yt-dlp")
 			os.system("chmod u+x yt-dlp/yt-dlp")
 
-		elif update:
+		elif self.__Settings["lib_autoupdate"]:
 			os.system("yt-dlp/yt-dlp -U")
 
 	def __PrettyFormatName(self, name: str, watermarked: bool = False) -> str:
@@ -125,227 +122,26 @@ class YtDlp:
 		resolutions = {Key: resolutions[Key] for Key in Resolutions}
 		
 		return resolutions
-	
-	#==========================================================================================#
-	# >>>>> СПЕЦИФИЧЕСКИЕ МЕТОДЫ СКАЧИВАНИЯ АУДИО <<<<< #
-	#==========================================================================================#
-
-	def __instagram_audio(self, link: str, path: str, recoding: bool = True) -> bool:
-		"""
-		Скачивает аудиодорожку и перекодирует её в формат m4a.
-			link – ссылка на видео;
-			path – путь к файлу;
-			recoding – указывает, нужно ли перекодировать файл в M4A.
-		"""
-
-		IsSuccess = False
-		Proxy = ""
-		if self.__Modules["instagram"]["proxy"]: Proxy = "--proxy " + self.__Modules["instagram"]["proxy"]
-		Recoding = "--recode m4a" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} --cookies yt-dlp/instagram.cookies {Proxy}"
-		ExitCode = os.system(Command)
-		if ExitCode == 0: IsSuccess = True
-
-		return IsSuccess
-	
-	def __tiktok_audio(self, link: str, path: str, recoding: bool = True) -> bool:
-		"""
-		Скачивает аудиодорожку и перекодирует её в формат m4a.
-			link – ссылка на видео;
-			path – путь к файлу;
-			recoding – указывает, нужно ли перекодировать файл в M4A.
-		"""
-
-		IsSuccess = False
-		Recoding = "--recode m4a" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} {self.__Proxy} -f 'b[url!^=\"https://www.tiktok/\"]'"
-		ExitCode = os.system(Command)
-
-		if ExitCode == 0:
-			IsSuccess = True
-
-		elif self.__Proxy:
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} -f 'b[url!^=\"https://www.tiktok/\"]'"
-			ExitCode = os.system(Command)
-			if ExitCode == 0: IsSuccess = True
-
-		if ExitCode != 0:
-			Extractor = "--extractor-args \"tiktok:api_hostname=api31-normal-useast2a.tiktokv;app_info=7370097943049078561\""
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding} {self.__Proxy} -f 'b[url!^=\"https://www.tiktok/\"]' {Extractor}"
-			ExitCode = os.system(Command)
-			if ExitCode == 0: IsSuccess = True
-
-		return IsSuccess
-	
-	def __youtube_audio(self, link: str, path: str, recoding: bool = True) -> bool:
-		"""
-		Скачивает аудиодорожку и перекодирует её в формат m4a.
-			link – ссылка на видео;
-			path – путь к файлу;
-			recoding – указывает, нужно ли перекодировать файл в M4A.
-		"""
-
-		IsSuccess = False
-		Recoding = "--recode m4a" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {path} --extract-audio {Recoding}"
-		ExitCode = os.system(Command)
-		if ExitCode == 0: IsSuccess = True
-
-		return IsSuccess
-
-	#==========================================================================================#
-	# >>>>> СПЕЦИФИЧЕСКИЕ МЕТОДЫ СКАЧИВАНИЯ ВИДЕО <<<<< #
-	#==========================================================================================#
-
-	def __instagram_video(self, link: str, path: str, format_id: str, recoding: bool = True) -> bool:
-		"""
-		Скачивает аудиодорожку и перекодирует её в формат m4a.
-			link – ссылка на видео;
-			path – путь к файлу;
-			format_id – идентификатор формата загружаемого видео;
-			recoding – указывает, нужно ли перекодировать файл в MP4.
-		"""
-
-		IsSuccess = False
-		Proxy = ""
-		if self.__Modules["instagram"]["proxy"]: Proxy = "--proxy " + self.__Modules["instagram"]["proxy"]
-		Recoding = "--recode mp4" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}+bestaudio {Recoding} -o {path} --cookies yt-dlp/instagram.cookies {Proxy}"
-		ExitCode = os.system(Command)
-		if ExitCode in [0, 256]: IsSuccess = True
-
-		return IsSuccess
-	
-	def __tiktok_video(self, link: str, path: str, format_id: str, recoding: bool = True) -> bool:
-		"""
-		Скачивает аудиодорожку и перекодирует её в формат m4a.
-			link – ссылка на видео;
-			path – путь к файлу;
-			format_id – идентификатор формата загружаемого видео;
-			recoding – указывает, нужно ли перекодировать файл в MP4.
-		"""
-
-		IsSuccess = False
-		Recoding = "--recode mp4" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {path} {self.__Proxy} -f {format_id}"
-		ExitCode = os.system(Command)
-
-		if ExitCode == 0:
-			IsSuccess = True
-
-		elif self.__Proxy:
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {path} -f {format_id}"
-			ExitCode = os.system(Command)
-			if ExitCode == 0: IsSuccess = True
-
-		if ExitCode != 0:
-			Extractor = "--extractor-args \"tiktok:api_hostname=api31-normal-useast2a.tiktokv;app_info=7370097943049078561\""
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {path} {self.__Proxy} -f {format_id} {Extractor}"
-			ExitCode = os.system(Command)
-			if ExitCode == 0: IsSuccess = True
-
-		return IsSuccess
-	
-	def __youtube_video(self, link: str, path: str, format_id: str, recoding: bool = True) -> bool:
-		"""
-		Скачивает аудиодорожку и перекодирует её в формат m4a.
-			link – ссылка на видео;
-			path – путь к файлу;
-			format_id – идентификатор формата загружаемого видео;
-			recoding – указывает, нужно ли перекодировать файл в MP4.
-		"""
-
-		IsSuccess = False
-		Recoding = "--recode mp4" if recoding else ""
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id}+bestaudio {Recoding} -o {path}"
-		ExitCode = os.system(Command)
-		if ExitCode in [0, 256]: IsSuccess = True
-
-		return IsSuccess
-
-	#==========================================================================================#
-	# >>>>> СПЕЦИФИЧЕСКИЕ МЕТОДЫ ПОЛУЧЕНИЯ ДАННЫХ <<<<< #
-	#==========================================================================================#
-
-	def __instagram_info(self, link: str) -> dict | None:
-		"""
-		Получает описание видео.
-			link – ссылка на видео.
-		"""
-
-		Info = None
-		Proxy = ""
-		if self.__Modules["instagram"]["proxy"]: Proxy = "--proxy " + self.__Modules["instagram"]["proxy"]
-
-		for Try in range(2):
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download --cookies yt-dlp/instagram.cookies {Proxy}"
-			Dump = subprocess.getoutput(Command)
-			
-			if not Dump.startswith("ERROR"):
-				if "\n" in Dump: Dump = Dump.split("\n")[0]
-				Info = json.loads(Dump)
-			
-			if Info: break
-			elif Try == 0 and "instagram" in self.__Modules.keys() and self.__Modules["instagram"]["cookies_generator"]: os.system(self.__Modules["instagram"]["cookies_generator"])
-
-		return Info
-	
-	def __tiktok_info(self, link: str) -> dict | None:
-		"""
-		Получает описание видео.
-			link – ссылка на видео.
-		"""
-
-		Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy}"
-		Dump = subprocess.getoutput(Command)
-		Info = None 
-
-		if not Dump.startswith("ERROR"):
-			Info = json.loads(Dump)
-
-		elif self.__Proxy:
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download"
-			Dump = subprocess.getoutput(Command)
-			if not Dump.startswith("ERROR"): Info = json.loads(Dump)
-		
-		if not Info:
-			Extractor = "--extractor-args \"tiktok:api_hostname=api31-normal-useast2a.tiktokv;app_info=7370097943049078561\""
-			Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy} {Extractor}"
-			Dump = subprocess.getoutput(Command)
-			if not Dump.startswith("ERROR"): Info = json.loads(Dump)
-
-		if type(Info) == dict: 
-			Formats = Info["formats"]
-
-			for Format in list(Formats):
-				if Format["format_id"].endswith("-2"): Formats.remove(Format)
-
-			Info["formats"] = Formats
-			Info["formats"][0]["resolution"] = "480x720"
-
-		return Info
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, storage: Storage, lib_path: str, proxy: str | None = None, modules: dict | None = None, update: bool = False):
+	def __init__(self, storage: Storage, settings: dict):
 		"""
 		Абстракция управления библиотекой yt-dlp.
 			storage – хранилище данных;\n
-			lib_path – путь к исполняемому файлу библиотеки;\n
-			proxy – данные прокси-сервера;\n
-			modules – словарь опций модуля.
+			settings – словарь настроек.
 		"""
 
-		#---> Генерация динамических свойств.
+		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
-		self.__LibPath = lib_path
-		self.__Proxy = f"--proxy {proxy}" if proxy else ""
 		self.__Storage = storage
-		self.__Modules = modules or dict()
+		self.__Settings = settings.copy()
 
-		self.__CheckLib(update)
+		self.__Configs = Configurator(self.__Settings["configs"])
+
+		self.__CheckLib()
 	
 	def download_audio(self, link: str, directory: str, filename: str, recoding: bool = True) -> str | None:
 		"""
@@ -358,19 +154,26 @@ class YtDlp:
 
 		if not os.path.exists(directory): os.makedirs(directory)
 		else: RemoveDirectoryContent(directory)
+
 		Domain = self.__Storage.parse_site_name(link)
+		Path = f"{directory}/{filename}.%(ext)s"
 		IsSuccess = False
-		Recoding = "--recode m4a" if recoding else ""
-		Path = f"\"{directory}/{filename}.%(ext)s\""
+		SourceType = None
+		Config = None
+
+		try: SourceType = ExtendedSupport(Domain)
+		except: pass
+
+		try: Config = self.__Configs[SourceType]
+		except: pass
 
 		try:
-			if Domain == "instagram": IsSuccess = self.__instagram_audio(link, Path, recoding)
-			elif Domain == "tiktok": IsSuccess = self.__tiktok_audio(link, Path, recoding)
-			elif Domain == "youtube": IsSuccess = self.__youtube_audio(link, Path, recoding)
 
-			else:
-				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" -o {Path} --extract-audio {Recoding} {self.__Proxy}"
-				if os.system(Command) == 0: IsSuccess = True
+			if SourceType in EXTRACTORS.keys():
+				Extractor: BaseExtractor = EXTRACTORS[SourceType](link, Config, recoding)
+				IsSuccess = Extractor.audio(Path)
+
+			else: IsSuccess = BaseExtractor(link, Config, recoding).audio(Path)
 
 		except Exception as ExceptionData: print(ExceptionData)
 		
@@ -388,20 +191,26 @@ class YtDlp:
 		
 		if not os.path.exists(directory): os.makedirs(directory)
 		else: RemoveDirectoryContent(directory)
+
 		Domain = self.__Storage.parse_site_name(link)
+		Path = f"{directory}{filename}.%(ext)s"
 		IsSuccess = False
-		Recoding = "--recode mp4" if recoding else ""
-		Path = f"\"{directory}{filename}.%(ext)s\""
+		SourceType = None
+		Config = None
+
+		try: SourceType = ExtendedSupport(Domain)
+		except: pass
+
+		try: Config = self.__Configs[SourceType]
+		except: pass
 		
 		try:
 
-			if Domain == "instagram": IsSuccess = self.__instagram_video(link, Path, format_id, recoding)
-			elif Domain == "tiktok": IsSuccess = self.__tiktok_video(link, Path, format_id, recoding)
-			elif Domain in ["youtube", "vk"]: IsSuccess = self.__youtube_video(link, Path, format_id, recoding)
+			if SourceType in EXTRACTORS.keys():
+				Extractor: BaseExtractor = EXTRACTORS[SourceType](link, Config, recoding)
+				IsSuccess = Extractor.video(Path, format_id)
 
-			else:
-				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --format {format_id} {Recoding} -o {Path} {self.__Proxy}"
-				if os.system(Command) == 0: IsSuccess = True
+			else: IsSuccess = BaseExtractor(link, Config, recoding).video(Path, format_id)
 
 		except Exception as ExceptionData: print(ExceptionData)
 		
@@ -414,23 +223,30 @@ class YtDlp:
 		"""
 
 		Domain = self.__Storage.parse_site_name(link)
+		SourceType = None
 		Info = None
+		Config = None
+
+		try: SourceType = ExtendedSupport(Domain)
+		except: pass
+
+		try: Config = self.__Configs[SourceType]
+		except: pass
 		
 		try:
-			if Domain == "instagram": Info = self.__instagram_info(link)
-			elif Domain == "tiktok": Info = self.__tiktok_info(link)
-				
-			else: 
-				Command = f"python3.{sys.version_info[1]} {self.__LibPath} \"{link}\" --dump-json --quiet --no-warnings --skip-download {self.__Proxy}"
-				Dump = subprocess.getoutput(Command)
-				if not Dump.startswith("ERROR"): Info = json.loads(Dump)
+
+			if SourceType in EXTRACTORS.keys():
+				Extractor: BaseExtractor = EXTRACTORS[SourceType](link, Config)
+				Info = Extractor.info()
+
+			else: Info = BaseExtractor(link, Config).info()
 
 			if Info: Info = self.__FilterInfo(Info)
 	
 		except Exception as ExceptionData: print(ExceptionData)
-		
-		# from dublib.Methods.JSON import WriteJSON
-		# WriteJSON("test.json", Info)
+
+		# from dublib.Methods.Filesystem import WriteJSON
+		# WriteJSON("Test.json", Info)
 
 		return Info
 
@@ -444,7 +260,7 @@ class YtDlp:
 		Resolutions = dict()
 
 		for Format in info["formats"]:
-			Watermarked = self.__CheckWatermark(info["webpage_url_domain"], Format)
+			Watermarked = self.__CheckWatermark(info["extractor"], Format)
 
 			if Format["resolution"] or Watermarked:
 
