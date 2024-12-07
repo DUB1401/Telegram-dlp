@@ -14,7 +14,7 @@ class InlineKeyboards:
 	def __init__(self):
 		"""Генератор кнопочного интерфейса."""
 
-		#---> Генерация динамических свойств.
+		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
 		pass
 
@@ -53,24 +53,28 @@ class InlineKeyboards:
 
 		return Options
 
-	def send_fromat_selector(self, bot: TeleBot, chat_id: int, info: dict, storage: Storage, proxy: str, one_watermarked: bool = False):
+	def send_format_selector(self, bot: TeleBot, chat_id: int, info: dict, storage: Storage, settings: dict):
 		"""
 		Отправляет пользователю сообщение с выбором формата.
 			bot – бот Telegram;\n
 			chat_id – идентификатор чата;\n
 			info – данные видео;\n
 			storage – менеджер хранилища;\n
-			proxy – используемый прокси;\n
-			one_watermarked – указывает, выводить ли лишь один вариант видео с водяным знаком.
+			settings – словарь настроек.
 		"""
 
-		Resolutions = YtDlp(storage, "yt-dlp/yt-dlp").get_resolutions(info)
+		Resolutions = YtDlp(storage, settings).get_resolutions(info)
 		Title = ""
 		Views = ""
 		Likes = ""
 		Newline = ""
 		Uploader = ""
 		Duration = ""
+
+		Proxy = None
+
+		try: Proxy = settings["configs"]["*"]["proxy"]
+		except KeyError: pass
 
 		#---> Генерация кнопочного интерфейса.
 		#==========================================================================================#
@@ -87,11 +91,11 @@ class InlineKeyboards:
 				Resolution = ResolutionName.rstrip("w")
 				ButtolLabel = ""
 
-				if ResolutionName.endswith("w") and not one_watermarked: ButtolLabel = Resolution + " (с водяным знаком)"
-				elif one_watermarked: ButtolLabel = "С водяным знаком"
+				if ResolutionName.endswith("w") and not settings["one_watermarked"]: ButtolLabel = Resolution + " (с водяным знаком)"
+				elif settings["one_watermarked"]: ButtolLabel = "С водяным знаком"
 				WatermarkedButton = types.InlineKeyboardButton("🎞️ " + ButtolLabel, callback_data = f"download_watermarked_{Resolution.replace(" ", "%")}+" + Resolutions[ResolutionName].replace(" ", "%"))
 				
-				if one_watermarked: Watermarked = [WatermarkedButton]
+				if settings["one_watermarked"]: Watermarked = [WatermarkedButton]
 				else: Watermarked.append(WatermarkedButton)
 		
 		for Button in Watermarked: Menu.add(Button, row_width = 1)
@@ -185,7 +189,7 @@ class InlineKeyboards:
 		IsThumbnail = False
 
 		try:
-			Proxy = {"https": proxy} if proxy else None
+			Proxy = {"https": Proxy} if Proxy else None
 			if requests.get(info["thumbnail"], timeout = 5, proxies = Proxy).status_code == 200: IsThumbnail = True
 			elif requests.get(info["thumbnail"], timeout = 3).status_code == 200: IsThumbnail = True
 

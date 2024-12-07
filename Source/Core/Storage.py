@@ -67,17 +67,16 @@ class Storage:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self, directory: str, venv: bool = True):
+	def __init__(self, directory: str):
 		"""
 		Хранилище данных медиа-файлов.
-			directory – путь к директории хранения;
-			venv – указывает, используется ли вирутальная среда Python.
+			directory – путь к директории хранения.
 		"""
 
-		#---> Генерация динамических свойств.
+		#---> Генерация динамических атрибутов.
 		#==========================================================================================#
 		self.__StorageDirectory = directory
-		self.__Venv = venv
+		self.__Venv = os.path.exists(".venv")
 
 	def check_for_playlist(self, site: str, link: str) -> bool:
 		"""
@@ -186,6 +185,7 @@ class Storage:
 			if Site == "youtu.be": Site = "youtube"
 			if Site == "vt.tiktok" or Site == "vm.tiktok.com": Site = "tiktok"
 			if "pornhub" in Site: Site = "pornhub"
+			if Site == "vkvideo.ru": Site = "vk"
 			
 		except: pass
 		

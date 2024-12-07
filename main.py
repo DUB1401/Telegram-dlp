@@ -1,5 +1,6 @@
 from Source.UI.Templates import Animation, StepsIndicator
 from Source.UI.InlineKeyboards import InlineKeyboards
+from Source.Core.Configurator import Configurator
 from Source.Core.TelethonUser import TelethonUser
 from Source.Core.Storage import Storage
 from Source.UI.AdminPanel import Panel
@@ -54,7 +55,7 @@ CommandsList.append(Com)
 
 Analyzer = Terminalyzer()
 Analyzer.enable_help(True)
-Analyzer.help_translation.help_command_description = "Выводит список поддерживаемых команд. Добавьте название другой команды в качестве аргумента для подробностей."
+Analyzer.help_translation.command_description = "Выводит список поддерживаемых команд. Добавьте название другой команды в качестве аргумента для подробностей."
 Analyzer.help_translation.important_note = ""
 ParsedCommand = Analyzer.check_commands(CommandsList)
 
@@ -87,8 +88,8 @@ elif ParsedCommand and ParsedCommand.name == "login":
 else:
 	Bot = TeleBot(Settings["token"])
 	Users = UsersManager("Data/Users")
-	StorageBox = Storage("Storage", Settings["venv"])
-	Downloader = YtDlp(StorageBox, "yt-dlp/yt-dlp", Settings["proxy"], modules = Settings["modules"], update = True)
+	StorageBox = Storage("Storage")
+	Downloader = YtDlp(StorageBox, Settings)
 	AdminPanel = Panel()
 
 	#==========================================================================================#
@@ -150,16 +151,15 @@ else:
 		if AdminPanel.procedures.text(Bot, User, Message): return
 
 		if User.get_property("is_downloading"):
-			Bot.send_message(
-				chat_id = Message.chat.id,
-				text = "Кажется, вы уже скачиваете файл. Если это не так, перезапустите бот командой /start для проверки."
-			)
+			Bot.send_message(chat_id = Message.chat.id, text = "Кажется, вы уже скачиваете файл. Если это не так, перезапустите бот командой /start для проверки.")
+			return
 
-		elif urlparse(Message.text).scheme:
+		if urlparse(Message.text).scheme:
 			SendedMessage = Bot.send_message(
 				chat_id = Message.chat.id,
 				text = "Идёт получение данных..."
 			)
+
 			Site = StorageBox.parse_site_name(Message.text)
 			Link = None
 			VideoID = None
@@ -167,7 +167,7 @@ else:
 
 			if Site:
 				Link = StorageBox.check_link(Site, Message.text)
-
+				
 				if StorageBox.check_for_playlist(Site, Link):
 					Bot.edit_message_text(
 						message_id = SendedMessage.id,
@@ -196,14 +196,9 @@ else:
 				User.set_temp_property("video_id", Info["id"])
 				User.set_temp_property("filename", Info["title"])
 				Bot.delete_message(message_id = SendedMessage.id, chat_id = Message.chat.id)
-				InlineKeyboards().send_fromat_selector(Bot, Message.chat.id, Info, StorageBox, Settings["proxy"], Settings["one_watermarked"])
+				InlineKeyboards().send_format_selector(Bot, Message.chat.id, Info, StorageBox, Settings)
 
-			else:
-				Bot.edit_message_text(
-					message_id = SendedMessage.id,
-					chat_id = Message.chat.id,
-					text = "Мне не удалось обнаружить видео по этой ссылке."
-				)
+			else: Bot.edit_message_text(message_id = SendedMessage.id, chat_id = Message.chat.id,text = "Мне не удалось обнаружить видео по этой ссылке.")
 
 		else:
 			Bot.send_message(
@@ -366,7 +361,7 @@ else:
 
 	AdminPanel.decorators.photo(Bot, Users)
 
-	@Bot.message_handler(content_types = ["audio", "document", "video"])
+	@Bot.message_handler(content_types = ["voice", "audio", "document", "video"])
 	def File(Message: types.Message):
 		User = Users.auth(Message.from_user)
 		AdminPanel.procedures.files(Bot, User, Message)

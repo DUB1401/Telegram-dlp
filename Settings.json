@@ -3,15 +3,12 @@
 	"bot_name": "",
 	"trusted_sources_id": [],
 	"password": "1234",
-	"premium": false,
-	"quality_improvement": true,
-	"proxy": "",
+	"quality_improvement": false,
 	"one_watermarked": true,
-	"venv": true,
-	"modules": {
+	"lib_autoupdate": true,
+	"configs": {
 		"instagram": {
-			"cookies_generator": "",
-			"proxy": ""
+			"cookies_generator": ""
 		}
 	}
 }
