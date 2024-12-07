@@ -1,6 +1,5 @@
 from Source.UI.Templates import Animation, StepsIndicator
 from Source.UI.InlineKeyboards import InlineKeyboards
-from Source.Core.Configurator import Configurator
 from Source.Core.TelethonUser import TelethonUser
 from Source.Core.Storage import Storage
 from Source.UI.AdminPanel import Panel
@@ -361,7 +360,7 @@ else:
 
 	AdminPanel.decorators.photo(Bot, Users)
 
-	@Bot.message_handler(content_types = ["voice", "audio", "document", "video"])
+	@Bot.message_handler(content_types = ["audio", "document", "video", "voice"])
 	def File(Message: types.Message):
 		User = Users.auth(Message.from_user)
 		AdminPanel.procedures.files(Bot, User, Message)

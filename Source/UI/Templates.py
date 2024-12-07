@@ -27,7 +27,7 @@ class Animation:
 	def length(self) -> int:
 		"Количество элементов в анимации."
 
-		return len(self.__Variants)
+		return len(self.__Lines)
 	
 	@property
 	def lines(self) -> list[tuple]:
@@ -54,7 +54,7 @@ class Animation:
 			index – индекс строки.
 		"""
 
-		return self.__Variants[index]
+		return self.__Lines[index]
 
 	def add_lines(self, lines: str | list[str], interval: float | int | None = None):
 		"""
@@ -116,13 +116,14 @@ class StepsIndicator:
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __AnimateMessage(self, animations: list[Animation]):
+	def __AnimateMessage(self, animations: list[Animation], primary: int | None):
 		"""
 		Поочерёдно заменяет подстроку \"%s\" на один из вариантов через интервалы времени.
-			animations – анимация или список анимаций.
+			animations – анимация или список анимаций;\n
+			primary – индекс анимации, которая должна быть проиграна первой.
 		"""
 
-		CurrentAnimation = random.choice(animations)
+		CurrentAnimation = animations[primary] if primary != None else random.choice(animations)
 		CurrentAnimationLines = CurrentAnimation.lines
 		AnimationIndex = 0
 		sleep(CurrentAnimation.delay)
@@ -239,14 +240,15 @@ class StepsIndicator:
 		self.__Title = text or ""
 		if update: self.update()
 
-	def start_animation(self, animation: Animation | list[Animation]):
+	def start_animation(self, animation: Animation | list[Animation], primary: int | None = None):
 		"""
 		Запускает поочерёдную замену подстроки \"%s\" на один из вариантов через интервалы времени.
-			animation – анимация или список анимаций.
+			animation – анимация или список анимаций;\n
+			primary – индекс анимации, которая должна быть проиграна первой.
 		"""
 
 		if type(animation) != list: animation = [animation]
-		self.__AnimationThread = Thread(target = self.__AnimateMessage, args = [animation])
+		self.__AnimationThread = Thread(target = self.__AnimateMessage, args = [animation, primary])
 		self.__Animation = True
 		self.__AnimationThread.start()
 
