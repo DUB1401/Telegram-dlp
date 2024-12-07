@@ -4,7 +4,8 @@
 Бот оптимизирован для работы со следующими источниками:
 * [ВКонтакте](https://vk.com/)
 * [YouTube](https://www.youtube.com/)
-* [TikTok](https://www.tiktok.com//)
+* [PornHub](https://www.pornhub.com/)
+* [TikTok](https://www.tiktok.com/)
 * [Instagram](https://www.instagram.com/)
 
 Со списком остальных сайтов, работа с которыми также теоретически поддерживается, но не горантируется, можно ознакомится [здесь](https://github.com/yt-dlp/yt-dlp).
