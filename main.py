@@ -1,11 +1,10 @@
 from Source.UI.Templates import Animation, StepsIndicator
 from Source.UI.InlineKeyboards import InlineKeyboards
 from Source.Core.TelethonUser import TelethonUser
-from Source.Core.Storage import Storage
-from Source.UI.AdminPanel import Panel
-from Source.Core.YtDlp import YtDlp
-
+from Source.UI.TeleBotAdminPanel import Panel
 from Source.Core.GetText import GetText
+from Source.Core.Storage import Storage
+from Source.Core.YtDlp import YtDlp
 
 from dublib.Methods.System import CheckPythonMinimalVersion, Clear
 from dublib.CLI.Terminalyzer import Command, Terminalyzer
