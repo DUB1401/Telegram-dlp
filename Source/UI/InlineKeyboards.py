@@ -1,5 +1,6 @@
 from Source.Core.Storage import Storage
 from Source.Core.YtDlp import YtDlp
+from Source.Core.GetText import _
 
 from dublib.TelebotUtils import UserData
 from dublib.Polyglot import Markdown
@@ -26,19 +27,19 @@ class InlineKeyboards:
 
 		Data = {
 			"compression": {
-				"label": "Сжатие: ",
+				"label": _("Сжатие:"),
 				"enable": user.get_property("option_compression")
 			},
 			"recoding": {
-				"label": "Перекодирование: ",
+				"label": _("Перекодирование:"),
 				"enable": user.get_property("option_recoding")
 			},
 			"archive": {
-				"label": "Архив: ",
+				"label": _("Архив:"),
 				"enable": user.get_property("option_archive")
 			},
 			"storage": {
-				"label": "Хранилище: ",
+				"label": _("Хранилище:"),
 				"enable": user.get_property("option_storage")
 			}
 		}
@@ -46,9 +47,9 @@ class InlineKeyboards:
 		Options = types.InlineKeyboardMarkup()
 
 		for Key in Data.keys():
-			Status = "вкл." if Data[Key]["enable"] else "выкл."
+			Status = _("вкл.") if Data[Key]["enable"] else _("выкл.")
 			Callback = "disable" if Data[Key]["enable"] else "enable"
-			Button = types.InlineKeyboardButton(Data[Key]["label"] + Status, callback_data = f"option_{Key}_{Callback}")
+			Button = types.InlineKeyboardButton(Data[Key]["label"] + " " + Status, callback_data = f"option_{Key}_{Callback}")
 			Options.add(Button, row_width = 1)
 
 		return Options
@@ -91,15 +92,15 @@ class InlineKeyboards:
 				Resolution = ResolutionName.rstrip("w")
 				ButtolLabel = ""
 
-				if ResolutionName.endswith("w") and not settings["one_watermarked"]: ButtolLabel = Resolution + " (с водяным знаком)"
-				elif settings["one_watermarked"]: ButtolLabel = "С водяным знаком"
+				if ResolutionName.endswith("w") and not settings["one_watermarked"]: ButtolLabel = Resolution + " (" + _("с водяным знаком") + ")"
+				elif settings["one_watermarked"]: ButtolLabel = _("С водяным знаком")
 				WatermarkedButton = types.InlineKeyboardButton("🎞️ " + ButtolLabel, callback_data = f"download_watermarked_{Resolution.replace(" ", "%")}+" + Resolutions[ResolutionName].replace(" ", "%"))
 				
 				if settings["one_watermarked"]: Watermarked = [WatermarkedButton]
 				else: Watermarked.append(WatermarkedButton)
 		
 		for Button in Watermarked: Menu.add(Button, row_width = 1)
-		Menu.add(types.InlineKeyboardButton("🎵 Только аудио", callback_data = f"download_audio"), row_width = 1)
+		Menu.add(types.InlineKeyboardButton("🎵 " + _("Только аудио"), callback_data = f"download_audio"), row_width = 1)
 		
 		#---> Составление описания.
 		#==========================================================================================#
@@ -199,7 +200,7 @@ class InlineKeyboards:
 			bot.send_photo(
 				chat_id = chat_id,
 				photo = info["thumbnail"],
-				caption = f"{Title}{Views}{Likes}{Duration}{Newline}{Uploader}\nВыберите формат загрузки:",
+				caption = f"{Title}{Views}{Likes}{Duration}{Newline}{Uploader}\n" + _("Выберите формат загрузки:"),
 				parse_mode = "MarkdownV2",
 				reply_markup = Menu
 			)
