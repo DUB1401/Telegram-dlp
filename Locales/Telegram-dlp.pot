@@ -1,0 +1,235 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2024-12-08 12:02+0300\n"
+"PO-Revision-Date: 2024-12-08 09:11+0300\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.4.4\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-SearchPath-0: main.py\n"
+"X-Poedit-SearchPath-1: Source/UI/InlineKeyboards.py\n"
+
+#: Source/UI/InlineKeyboards.py:30
+msgid "Сжатие:"
+msgstr ""
+
+#: Source/UI/InlineKeyboards.py:34
+msgid "Перекодирование:"
+msgstr ""
+
+#: Source/UI/InlineKeyboards.py:38
+msgid "Архив:"
+msgstr ""
+
+#: Source/UI/InlineKeyboards.py:42
+msgid "Хранилище:"
+msgstr ""
+
+#: Source/UI/InlineKeyboards.py:50
+msgid "вкл."
+msgstr ""
+
+#: Source/UI/InlineKeyboards.py:50
+msgid "выкл."
+msgstr ""
+
+#: Source/UI/InlineKeyboards.py:95
+msgid "с водяным знаком"
+msgstr ""
+
+#: Source/UI/InlineKeyboards.py:96
+msgid "С водяным знаком"
+msgstr ""
+
+#: Source/UI/InlineKeyboards.py:103
+msgid "Только аудио"
+msgstr ""
+
+#: Source/UI/InlineKeyboards.py:203
+msgid "Выберите формат загрузки:"
+msgstr ""
+
+#: main.py:36
+msgid "Выгружает файл на сервер Telegram."
+msgstr ""
+
+#: main.py:37
+msgid "Название файла."
+msgstr ""
+
+#: main.py:38
+msgid "Домен сайта."
+msgstr ""
+
+#: main.py:39
+msgid "Идентификатор пользователя Telegram."
+msgstr ""
+
+#: main.py:40
+msgid "Название файла в Telegram."
+msgstr ""
+
+#: main.py:41
+msgid "Качество видео."
+msgstr ""
+
+#: main.py:42
+msgid "Включает режим сжатия файла Telegram."
+msgstr ""
+
+#: main.py:43
+msgid "Помечает формат как перекодированный в стандартный."
+msgstr ""
+
+#: main.py:44
+msgid "Помечает формат как имеющий водяной знак."
+msgstr ""
+
+#: main.py:47
+msgid "Выполняет вход в аккаунт."
+msgstr ""
+
+#: main.py:48
+msgid "Номер телефона."
+msgstr ""
+
+#: main.py:49
+msgid "API ID пользователя."
+msgstr ""
+
+#: main.py:50
+msgid "API Hash пользователя."
+msgstr ""
+
+#: main.py:55
+msgid "Выводит список поддерживаемых команд. Добавьте название другой команды в качестве аргумента для подробностей."
+msgstr ""
+
+#: main.py:103
+msgid "<b>Telegram-dlp</b> является Open Source проектом под лицензией Apache 2.0 за авторством <a href=\"https://github.com/DUB1401\">@DUB1401</a> и использует библиотеку <a href=\"https://github.com/yt-dlp/yt-dlp\">yt-dlp</a>. Исходный код и документация доступны в <a href=\"https://github.com/DUB1401/Telegram-dlp\">этом</a> репозитории."
+msgstr ""
+
+#: main.py:114
+msgid ""
+"Настройте <b>Telegram-dlp</b> под себя!\n"
+"\n"
+"<b>Сжатие</b> – управляет сжатием видеофайлов на стороне Telegram. При отключённом состоянии все видео будут отправляться как документы.\n"
+"\n"
+"<b>Перекодирование</b> – преобразует все форматы мультимедиа в <i>MP4</i> и <i>M4A</i>. При отключённом состоянии будут отправляться нативные файлы (зачастую гораздо быстрее, особенно для <a href=\"https://www.youtube.com\">YouTube</a>.\n"
+"\n"
+"<b>Архив</b> – для некоторых источников бот сохраняет параметры для загрузки видео. Вы можете воспользоваться архивными данными для моментального перехода к выбору скачиваемого файла, но эти сведения время от времени устаревают.\n"
+"\n"
+"<b>Хранилище</b> – если файл уже загружался кем-либо до вас, вы можете получить его моментально из хранилища."
+msgstr ""
+
+#: main.py:130
+msgid "<b>Telegram-dlp</b> поможет вам скачать видео или извлечь из них аудиодорожки. Поддерживается широкий список <a href=\"https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md\">источников</a>."
+msgstr ""
+
+#: main.py:151
+msgid "Кажется, вы уже скачиваете файл. Если это не так, перезапустите бот командой /start для проверки."
+msgstr ""
+
+#: main.py:157
+msgid "Идёт получение данных..."
+msgstr ""
+
+#: main.py:172
+msgid "Данная ссылка ведёт к плейлисту, а не конкретному видео."
+msgstr ""
+
+#: main.py:186
+msgid "Видео слишком длинное."
+msgstr ""
+
+#: main.py:198
+msgid "Мне не удалось обнаружить видео по этой ссылке."
+msgstr ""
+
+#: main.py:203
+msgid "Ваше сообщение не является ссылкой. Попробуйте ещё раз."
+msgstr ""
+
+#: main.py:245
+#, python-format
+msgid "Скачиваю аудио%s"
+msgstr ""
+
+#: main.py:246
+#, python-format
+msgid "Выгружаю аудио в Telegram%s"
+msgstr ""
+
+#: main.py:247 main.py:308
+#, python-format
+msgid "Отправляю%s"
+msgstr ""
+
+#: main.py:261
+msgid "Аудио скачано."
+msgstr ""
+
+#: main.py:265
+msgid "Аудио загружено в Telegram."
+msgstr ""
+
+#: main.py:270 main.py:344
+msgid "Отправлено."
+msgstr ""
+
+#: main.py:272
+msgid "Не удалось отправить аудио."
+msgstr ""
+
+#: main.py:274
+msgid "Не удалось загрузить аудио в Telegram."
+msgstr ""
+
+#: main.py:276
+msgid "Не удалось скачать аудио."
+msgstr ""
+
+#: main.py:305
+#, python-format
+msgid "Скачиваю видео%s"
+msgstr ""
+
+#: main.py:306
+#, python-format
+msgid "Улучшаю качество%s"
+msgstr ""
+
+#: main.py:307
+#, python-format
+msgid "Выгружаю видео в Telegram%s"
+msgstr ""
+
+#: main.py:329 main.py:333
+msgid "Видео скачано."
+msgstr ""
+
+#: main.py:331
+msgid "Качество улучшено."
+msgstr ""
+
+#: main.py:338
+msgid "Видео загружено в Telegram."
+msgstr ""
+
+#: main.py:346
+msgid "Не удалось отправить видео."
+msgstr ""
+
+#: main.py:348
+msgid "Не удалось загрузить видео в Telegram."
+msgstr ""
+
+#: main.py:350
+msgid "Не удалось скачать видео."
+msgstr ""

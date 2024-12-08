@@ -5,6 +5,8 @@ from Source.Core.Storage import Storage
 from Source.UI.AdminPanel import Panel
 from Source.Core.YtDlp import YtDlp
 
+from Source.Core.GetText import GetText
+
 from dublib.Methods.System import CheckPythonMinimalVersion, Clear
 from dublib.CLI.Terminalyzer import Command, Terminalyzer
 from dublib.Methods.Filesystem import MakeRootDirectories
@@ -21,13 +23,9 @@ from time import sleep
 CheckPythonMinimalVersion(3, 12)
 MakeRootDirectories(["Data/Users", "Temp", "yt-dlp"])
 Clear()
-
-#==========================================================================================#
-# >>>>> ЧТЕНИЕ НАСТРОЕК <<<<< #
-#==========================================================================================#
-
 Settings = ReadJSON("Settings.json")
-if type(Settings["token"]) != str or Settings["token"].strip() == "": raise Exception("Invalid Telegram bot token.")
+GetText.initialize("Telegram-dlp", Settings["language"])
+_ = GetText.gettext
 
 #==========================================================================================#
 # >>>>> НАСТРОЙКА ОБРАБОТЧИКА КОМАНД <<<<< #
@@ -35,26 +33,26 @@ if type(Settings["token"]) != str or Settings["token"].strip() == "": raise Exce
 
 CommandsList = list()
 
-Com = Command("upload", "Выгружает файл на сервер Telegram.")
-Com.add_key("file", important = True, description = "Название файла.")
-Com.add_key("site", important = True, description = "Домен сайта.")
-Com.add_key("user", important = True, description = "Идентификатор пользователя Telegram.")
-Com.add_key("name", description = "Название файла в Telegram.")
-Com.add_key("quality", important = True, description = "Качество видео.")
-Com.add_flag("c", "Включает режим сжатия файла Telegram.")
-Com.add_flag("r", "Помечает формат как перекодированный в стандартный.")
-Com.add_flag("w", "Помечает формат как имеющий водяной знак.")
+Com = Command("upload", _("Выгружает файл на сервер Telegram."))
+Com.add_key("file", important = True, description = _("Название файла."))
+Com.add_key("site", important = True, description = _("Домен сайта."))
+Com.add_key("user", important = True, description = _("Идентификатор пользователя Telegram."))
+Com.add_key("name", description = _("Название файла в Telegram."))
+Com.add_key("quality", important = True, description = _("Качество видео."))
+Com.add_flag("c", _("Включает режим сжатия файла Telegram."))
+Com.add_flag("r", _("Помечает формат как перекодированный в стандартный."))
+Com.add_flag("w", _("Помечает формат как имеющий водяной знак."))
 CommandsList.append(Com)
 
-Com = Command("login", "Выполняет вход в аккаунт.")
-Com.add_argument(important = True, description = "Номер телефона.")
-Com.add_argument(important = True, description = "API ID пользователя.")
-Com.add_argument(important = True, description = "API Hash пользователя.")
+Com = Command("login", _("Выполняет вход в аккаунт."))
+Com.add_argument(important = True, description = _("Номер телефона."))
+Com.add_argument(important = True, description = _("API ID пользователя."))
+Com.add_argument(important = True, description = _("API Hash пользователя."))
 CommandsList.append(Com)
 
 Analyzer = Terminalyzer()
 Analyzer.enable_help(True)
-Analyzer.help_translation.command_description = "Выводит список поддерживаемых команд. Добавьте название другой команды в качестве аргумента для подробностей."
+Analyzer.help_translation.command_description = _("Выводит список поддерживаемых команд. Добавьте название другой команды в качестве аргумента для подробностей.")
 Analyzer.help_translation.important_note = ""
 ParsedCommand = Analyzer.check_commands(CommandsList)
 
@@ -102,8 +100,8 @@ else:
 		User = Users.auth(Message.from_user)
 		Bot.send_message(
 			chat_id = Message.chat.id,
-			text = "*Telegram\\-dlp* является Open Source проектом под лицензией Apache 2\\.0 за авторством [@DUB1401](https://github.com/DUB1401)\\ и использует библиотеку [yt\\-dlp](https://github.com/yt-dlp/yt-dlp)\\. Исходный код и документация доступны в [этом](https://github.com/DUB1401/Telegram-dlp) репозитории\\.",
-			parse_mode = "MarkdownV2",
+			text = _("<b>Telegram-dlp</b> является Open Source проектом под лицензией Apache 2.0 за авторством <a href=\"https://github.com/DUB1401\">@DUB1401</a> и использует библиотеку <a href=\"https://github.com/yt-dlp/yt-dlp\">yt-dlp</a>. Исходный код и документация доступны в <a href=\"https://github.com/DUB1401/Telegram-dlp\">этом</a> репозитории."),
+			parse_mode = "HTML",
 			disable_web_page_preview = True
 		)
 	
@@ -113,8 +111,8 @@ else:
 
 		Bot.send_message(
 			chat_id = Message.chat.id,
-			text = "Настройте *Telegram\\-dlp* под себя\\!\n\n*Сжатие* – управляет сжатием видеофайлов на стороне Telegram\\. При отключённом состоянии все видео будут отправляться как документы\\.\n\n*Перекодирование* – преобразует все форматы мультимедиа в _MP4_ и _M4A_\\. При отключённом состоянии будут отправляться нативные файлы \\(зачастую гораздо быстрее, особенно для [YouTube](https://www.youtube.com/)\\)\\.\n\n*Архив* – для некоторых источников бот сохраняет параметры для загрузки видео\\. Вы можете воспользоваться архивными данными для моментального перехода к выбору скачиваемого файла, но эти сведения время от времени устаревают\\.\n\n*Хранилище* – если файл уже загружался кем\\-либо до вас, вы можете получить его моментально из хранилища\\.",
-			parse_mode = "MarkdownV2",
+			text = _("Настройте <b>Telegram-dlp</b> под себя!\n\n<b>Сжатие</b> – управляет сжатием видеофайлов на стороне Telegram. При отключённом состоянии все видео будут отправляться как документы.\n\n<b>Перекодирование</b> – преобразует все форматы мультимедиа в <i>MP4</i> и <i>M4A</i>. При отключённом состоянии будут отправляться нативные файлы (зачастую гораздо быстрее, особенно для <a href=\"https://www.youtube.com\">YouTube</a>.\n\n<b>Архив</b> – для некоторых источников бот сохраняет параметры для загрузки видео. Вы можете воспользоваться архивными данными для моментального перехода к выбору скачиваемого файла, но эти сведения время от времени устаревают.\n\n<b>Хранилище</b> – если файл уже загружался кем-либо до вас, вы можете получить его моментально из хранилища."),
+			parse_mode = "HTML",
 			disable_web_page_preview = True,
 			reply_markup = InlineKeyboards().options(User)
 		)
@@ -129,8 +127,8 @@ else:
 		User.set_property("is_downloading", False)
 		Bot.send_message(
 			chat_id = Message.chat.id,
-			text = "*Telegram\\-dlp* поможет вам скачать видео или извлечь из них аудиодорожки\\. Поддерживается широкий список [источников](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)\\.",
-			parse_mode = "MarkdownV2",
+			text = _("<b>Telegram-dlp</b> поможет вам скачать видео или извлечь из них аудиодорожки. Поддерживается широкий список <a href=\"https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md\">источников</a>."),
+			parse_mode = "HTML",
 			disable_web_page_preview = True
 		)
 		
@@ -150,13 +148,13 @@ else:
 		if AdminPanel.procedures.text(Bot, User, Message): return
 
 		if User.get_property("is_downloading"):
-			Bot.send_message(chat_id = Message.chat.id, text = "Кажется, вы уже скачиваете файл. Если это не так, перезапустите бот командой /start для проверки.")
+			Bot.send_message(chat_id = Message.chat.id, text = _("Кажется, вы уже скачиваете файл. Если это не так, перезапустите бот командой /start для проверки."))
 			return
 
 		if urlparse(Message.text).scheme:
 			SendedMessage = Bot.send_message(
 				chat_id = Message.chat.id,
-				text = "Идёт получение данных..."
+				text = _("Идёт получение данных...")
 			)
 
 			Site = StorageBox.parse_site_name(Message.text)
@@ -171,7 +169,7 @@ else:
 					Bot.edit_message_text(
 						message_id = SendedMessage.id,
 						chat_id = Message.chat.id,
-						text = "Данная ссылка ведёт к плейлисту, а не конкретному видео."
+						text = _("Данная ссылка ведёт к плейлисту, а не конкретному видео.")
 					)
 					return
 
@@ -185,7 +183,7 @@ else:
 					Bot.edit_message_text(
 						message_id = SendedMessage.id,
 						chat_id = Message.chat.id,
-						text = "Видео слишком длинное."
+						text = _("Видео слишком длинное.")
 					)
 					return
 
@@ -197,12 +195,12 @@ else:
 				Bot.delete_message(message_id = SendedMessage.id, chat_id = Message.chat.id)
 				InlineKeyboards().send_format_selector(Bot, Message.chat.id, Info, StorageBox, Settings)
 
-			else: Bot.edit_message_text(message_id = SendedMessage.id, chat_id = Message.chat.id,text = "Мне не удалось обнаружить видео по этой ссылке.")
+			else: Bot.edit_message_text(message_id = SendedMessage.id, chat_id = Message.chat.id,text = _("Мне не удалось обнаружить видео по этой ссылке."))
 
 		else:
 			Bot.send_message(
 				chat_id = Message.chat.id,
-				text = "Ваше сообщение не является ссылкой. Попробуйте ещё раз."
+				text = _("Ваше сообщение не является ссылкой. Попробуйте ещё раз.")
 			)
 
 	#==========================================================================================#
@@ -238,18 +236,18 @@ else:
 		
 		ProgressAnimation = Animation()
 		ProgressAnimation.set_interval(1)
-		ProgressAnimation.add_lines("\\.")
-		ProgressAnimation.add_lines("\\.\\.")
-		ProgressAnimation.add_lines("\\.\\.\\.")
+		ProgressAnimation.add_lines(".")
+		ProgressAnimation.add_lines("..")
+		ProgressAnimation.add_lines("...")
 		ProgressAnimation.add_lines("")
 
 		Procedures = [
-			"Скачиваю аудио%s",
-			"Выгружаю аудио в Telegram%s",
-			"Отправляю%s"
+			_("Скачиваю аудио%s"),
+			_("Выгружаю аудио в Telegram%s"),
+			_("Отправляю%s")
 		]
 
-		SI = StepsIndicator(Bot, Call.message.chat.id, Procedures, parse_mode = "MarkdownV2")
+		SI = StepsIndicator(Bot, Call.message.chat.id, Procedures, parse_mode = "HTML")
 
 		if FileMessageID[0] and User.get_property("option_storage"):
 			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Settings["bot_name"])
@@ -260,22 +258,22 @@ else:
 			Result = Downloader.download_audio(Link, f"Temp/{User.id}/", VideoID, recoding = Recoding)
 			
 			if Result:
-				SI.next("Аудио скачано\\.")
+				SI.next(_("Аудио скачано."))
 				Result = StorageBox.upload_file(User.id, Site, Result, Quality, Compression, Recoding, name = Name)
 
 				if Result:
-					SI.next("Аудио загружено в Telegram\\.")
+					SI.next(_("Аудио загружено в Telegram."))
 					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression, Recoding)
 
 					if Result.code == 0:
 						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
-						SI.next("Отправлено\\.")
+						SI.next(_("Отправлено."))
 
-					else: SI.error("Не удалось отправить аудио\\.")
+					else: SI.error(_("Не удалось отправить аудио."))
 
-				else: SI.error("Не удалось загрузить аудио в Telegram\\.")
+				else: SI.error(_("Не удалось загрузить аудио в Telegram."))
 
-			else: SI.error("Не удалось скачать аудио\\.")
+			else: SI.error(_("Не удалось скачать аудио."))
 
 		User.set_property("is_downloading", False)
 		User.clear_temp_properties()
@@ -298,20 +296,20 @@ else:
 
 		ProgressAnimation = Animation()
 		ProgressAnimation.set_interval(1)
-		ProgressAnimation.add_lines("\\.")
-		ProgressAnimation.add_lines("\\.\\.")
-		ProgressAnimation.add_lines("\\.\\.\\.")
+		ProgressAnimation.add_lines(".")
+		ProgressAnimation.add_lines("..")
+		ProgressAnimation.add_lines("...")
 		ProgressAnimation.add_lines("")
 
 		Procedures = [
-			"Скачиваю видео%s",
-			"Улучшаю качество%s",
-			"Выгружаю видео в Telegram%s",
-			"Отправляю%s"
+			_("Скачиваю видео%s"),
+			_("Улучшаю качество%s"),
+			_("Выгружаю видео в Telegram%s"),
+			_("Отправляю%s")
 		]
 
 		if not Settings["quality_improvement"]: Procedures.pop(1)
-		SI = StepsIndicator(Bot, Call.message.chat.id, Procedures, parse_mode = "MarkdownV2")
+		SI = StepsIndicator(Bot, Call.message.chat.id, Procedures, parse_mode = "HTML")
 
 		if Quality == "null": Quality = None
 		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression, Recoding, watermarked = IsWatermarked)
@@ -328,28 +326,28 @@ else:
 			if Result:
 
 				if Settings["quality_improvement"]:
-					SI.next("Видео скачано\\.")
+					SI.next(_("Видео скачано."))
 					sleep(4)
-					SI.next("Качество улучшено\\.")
+					SI.next(_("Качество улучшено."))
 
-				else: SI.next("Видео скачано\\.")
+				else: SI.next(_("Видео скачано."))
 
 				Result = StorageBox.upload_file(User.id, Site, Result, Quality, Compression, Recoding, watermarked = IsWatermarked, name = Name)
 
 				if Result:
-					SI.next("Видео загружено в Telegram\\.")
+					SI.next(_("Видео загружено в Telegram."))
 					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression, Recoding, watermarked = IsWatermarked)
 
 					if Result.code == 0:
 						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
 						SI.stop_animation()
-						SI.next("Отправлено\\.")
+						SI.next(_("Отправлено."))
 
-					else: SI.error("Не удалось отправить видео\\.")
+					else: SI.error(_("Не удалось отправить видео."))
 
-				else: SI.error("Не удалось загрузить видео в Telegram\\.")
+				else: SI.error(_("Не удалось загрузить видео в Telegram."))
 
-			else: SI.error("Не удалось скачать видео\\.")
+			else: SI.error(_("Не удалось скачать видео."))
 
 		User.set_property("is_downloading", False)
 		User.clear_temp_properties()
