@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2024-12-08 12:02+0300\n"
-"PO-Revision-Date: 2024-12-08 12:03+0300\n"
+"POT-Creation-Date: 2024-12-09 16:34+0300\n"
+"PO-Revision-Date: 2024-12-09 16:35+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -53,59 +53,59 @@ msgstr "Only audio"
 msgid "Выберите формат загрузки:"
 msgstr "Select download format:"
 
-#: main.py:36
+#: main.py:35
 msgid "Выгружает файл на сервер Telegram."
 msgstr "Uploads file to Telegram server."
 
-#: main.py:37
+#: main.py:36
 msgid "Название файла."
 msgstr "Filename."
 
-#: main.py:38
+#: main.py:37
 msgid "Домен сайта."
 msgstr "Domain."
 
-#: main.py:39
+#: main.py:38
 msgid "Идентификатор пользователя Telegram."
 msgstr "Telegram user ID."
 
-#: main.py:40
+#: main.py:39
 msgid "Название файла в Telegram."
 msgstr "Filename on Telegram."
 
-#: main.py:41
+#: main.py:40
 msgid "Качество видео."
 msgstr "Video quality."
 
-#: main.py:42
+#: main.py:41
 msgid "Включает режим сжатия файла Telegram."
 msgstr "Enable Telegram files compression mode."
 
-#: main.py:43
+#: main.py:42
 msgid "Помечает формат как перекодированный в стандартный."
 msgstr "Marks format as recoded."
 
-#: main.py:44
+#: main.py:43
 msgid "Помечает формат как имеющий водяной знак."
 msgstr "Marks format as watermarked."
 
-#: main.py:47
+#: main.py:46
 msgid "Выполняет вход в аккаунт."
 msgstr "Log in Telegram account."
 
-#: main.py:48
+#: main.py:47
 msgid "Номер телефона."
 msgstr "Phone number."
 
-#: main.py:49
+#: main.py:48
 msgid "API ID пользователя."
 msgstr "User API ID."
 
-#: main.py:50
+#: main.py:49
 msgid "API Hash пользователя."
 msgstr "User API Hash."
 
-#: main.py:55
+#: main.py:54
 msgid ""
 "Выводит список поддерживаемых команд. Добавьте название другой команды в "
 "качестве аргумента для подробностей."
@@ -113,7 +113,7 @@ msgstr ""
 "Displays a list of supported commands. Add the name of the other team as an "
 "argument for details."
 
-#: main.py:103
+#: main.py:102
 msgid ""
 "<b>Telegram-dlp</b> является Open Source проектом под лицензией Apache 2.0 "
 "за авторством <a href=\"https://github.com/DUB1401\">@DUB1401</a> и "
@@ -127,7 +127,7 @@ msgstr ""
 "source code and documentation are available in <a href=\"https://github.com/"
 "DUB1401/Telegram-dlp\">this</a> repository."
 
-#: main.py:114
+#: main.py:113
 msgid ""
 "Настройте <b>Telegram-dlp</b> под себя!\n"
 "\n"
@@ -164,7 +164,7 @@ msgstr ""
 "<b>Storage</b> – if the file has already been uploaded by someone before "
 "you, you can get it instantly from the storage."
 
-#: main.py:130
+#: main.py:129
 msgid ""
 "<b>Telegram-dlp</b> поможет вам скачать видео или извлечь из них "
 "аудиодорожки. Поддерживается широкий список <a href=\"https://github.com/yt-"
@@ -174,7 +174,11 @@ msgstr ""
 "from them. A wide list is supported <a href=\"https://github.com/yt-dlp/yt-"
 "dlp/blob/master/supported sites.md\">sources</a>."
 
-#: main.py:151
+#: main.py:139
+msgid "Возникли проблемы? Сообщите о них сюда:"
+msgstr "Problems with bot? Contact us:"
+
+#: main.py:160
 msgid ""
 "Кажется, вы уже скачиваете файл. Если это не так, перезапустите бот "
 "командой /start для проверки."
@@ -182,100 +186,100 @@ msgstr ""
 "It seems that you are already downloading the file. If this is not the case, "
 "restart the bot with the /start command to check."
 
-#: main.py:157
+#: main.py:166
 msgid "Идёт получение данных..."
 msgstr "Receiving data..."
 
-#: main.py:172
+#: main.py:181
 msgid "Данная ссылка ведёт к плейлисту, а не конкретному видео."
 msgstr "This link leads to a playlist, not a specific video."
 
-#: main.py:186
+#: main.py:195
 msgid "Видео слишком длинное."
 msgstr "The video is too long."
 
-#: main.py:198
+#: main.py:207
 msgid "Мне не удалось обнаружить видео по этой ссылке."
 msgstr "Unable to find the video on this link."
 
-#: main.py:203
+#: main.py:212
 msgid "Ваше сообщение не является ссылкой. Попробуйте ещё раз."
 msgstr "Your message is not a link. Try again."
 
-#: main.py:245
+#: main.py:254
 #, python-format
 msgid "Скачиваю аудио%s"
 msgstr "Downloading audio%s"
 
-#: main.py:246
+#: main.py:255
 #, python-format
 msgid "Выгружаю аудио в Telegram%s"
 msgstr "Uploading audio%s"
 
-#: main.py:247 main.py:308
+#: main.py:256 main.py:317
 #, python-format
 msgid "Отправляю%s"
 msgstr "Sending%s"
 
-#: main.py:261
+#: main.py:270
 msgid "Аудио скачано."
 msgstr "Audio downloaded."
 
-#: main.py:265
+#: main.py:274
 msgid "Аудио загружено в Telegram."
 msgstr "Audio uploaded to Telegram."
 
-#: main.py:270 main.py:344
+#: main.py:279 main.py:353
 msgid "Отправлено."
 msgstr "Sended."
 
-#: main.py:272
+#: main.py:281
 msgid "Не удалось отправить аудио."
 msgstr "Unable to send audio."
 
-#: main.py:274
+#: main.py:283
 msgid "Не удалось загрузить аудио в Telegram."
 msgstr "Unable to upload audio to Telegram."
 
-#: main.py:276
+#: main.py:285
 msgid "Не удалось скачать аудио."
 msgstr "Unable to download audio."
 
-#: main.py:305
+#: main.py:314
 #, python-format
 msgid "Скачиваю видео%s"
 msgstr "Downloading video%s"
 
-#: main.py:306
+#: main.py:315
 #, python-format
 msgid "Улучшаю качество%s"
 msgstr "Improving quality%s"
 
-#: main.py:307
+#: main.py:316
 #, python-format
 msgid "Выгружаю видео в Telegram%s"
 msgstr "Uploading video to Telegram%s"
 
-#: main.py:329 main.py:333
+#: main.py:338 main.py:342
 msgid "Видео скачано."
 msgstr "Video downloaded."
 
-#: main.py:331
+#: main.py:340
 msgid "Качество улучшено."
 msgstr "Quality improved."
 
-#: main.py:338
+#: main.py:347
 msgid "Видео загружено в Telegram."
 msgstr "Video uploaded to Telegram."
 
-#: main.py:346
+#: main.py:355
 msgid "Не удалось отправить видео."
 msgstr "Unable to send video."
 
-#: main.py:348
+#: main.py:357
 msgid "Не удалось загрузить видео в Telegram."
 msgstr "Unable to upload video to Telegram."
 
-#: main.py:350
+#: main.py:359
 msgid "Не удалось скачать видео."
 msgstr "Unable to download video."
