@@ -19,7 +19,7 @@ class YtDlp:
 	def version(self) -> str:
 		"""Версия библиотеки yt-dlp по умолчанию."""
 
-		return "2024.10.07"
+		return "2024.12.06"
 
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
@@ -75,7 +75,7 @@ class YtDlp:
 		"""Проверяет, загружена и обновлена ли библиотека."""
 
 		if not os.path.exists("yt-dlp/yt-dlp"):
-			urllib.request.urlretrieve(f"https://github/yt-dlp/yt-dlp/releases/download/{self.version}/yt-dlp", "yt-dlp/yt-dlp")
+			urllib.request.urlretrieve(f"https://github.com/yt-dlp/yt-dlp/releases/download/{self.version}/yt-dlp", "yt-dlp/yt-dlp")
 			os.system("chmod u+x yt-dlp/yt-dlp")
 
 		elif self.__Settings["lib_autoupdate"]:

@@ -131,6 +131,16 @@ else:
 			disable_web_page_preview = True
 		)
 		
+	@Bot.message_handler(commands = ["support"])
+	def CommandAbout(Message: types.Message):
+		User = Users.auth(Message.from_user)
+		if Settings["support_contact"]: Bot.send_message(
+			chat_id = Message.chat.id,
+			text = _("Возникли проблемы? Сообщите о них сюда:") + " " + Settings["support_contact"],
+			parse_mode = "HTML",
+			disable_web_page_preview = True
+		)
+
 	#==========================================================================================#
 	# >>>>> ОБРАБОТКА REPLY-КНОПОК <<<<< #
 	#==========================================================================================#
