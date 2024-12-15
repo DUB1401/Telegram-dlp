@@ -7,7 +7,7 @@ from dublib.Polyglot import Markdown
 from telebot import TeleBot, types
 from dublib.Methods.JSON import *
 
-import requests
+import telebot
 
 class InlineKeyboards:
 	"""Генератор кнопочного интерфейса."""
@@ -71,11 +71,6 @@ class InlineKeyboards:
 		Newline = ""
 		Uploader = ""
 		Duration = ""
-
-		Proxy = None
-
-		try: Proxy = settings["configs"]["*"]["proxy"]
-		except KeyError: pass
 
 		#---> Генерация кнопочного интерфейса.
 		#==========================================================================================#
@@ -187,16 +182,9 @@ class InlineKeyboards:
 
 		#---> Отправка сообщения.
 		#==========================================================================================#
-		IsThumbnail = False
+		IsSended = False
 
 		try:
-			Proxy = {"https": Proxy} if Proxy else None
-			if requests.get(info["thumbnail"], timeout = 5, proxies = Proxy).status_code == 200: IsThumbnail = True
-			elif requests.get(info["thumbnail"], timeout = 3).status_code == 200: IsThumbnail = True
-
-		except: pass
-		
-		if IsThumbnail:
 			bot.send_photo(
 				chat_id = chat_id,
 				photo = info["thumbnail"],
@@ -204,11 +192,13 @@ class InlineKeyboards:
 				parse_mode = "MarkdownV2",
 				reply_markup = Menu
 			)
+			IsSended = True
 
-		else:
-			bot.send_message(
+		except telebot.apihelper.ApiTelegramException: pass
+
+		if not IsSended: bot.send_message(
 				chat_id = chat_id,
-				text = f"{Title}{Views}{Likes}{Duration}{Newline}{Uploader}\nВыберите формат загрузки:",
+				text = f"{Title}{Views}{Likes}{Duration}{Newline}{Uploader}\n" + _("Выберите формат загрузки:"),
 				parse_mode = "MarkdownV2",
 				disable_web_page_preview = True,
 				reply_markup = Menu
