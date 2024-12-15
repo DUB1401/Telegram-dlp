@@ -116,14 +116,19 @@ class StepsIndicator:
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __AnimateMessage(self, animations: list[Animation], primary: int | None):
+	def __AnimateMessage(self, animations: list[Animation], primary: Animation | None):
 		"""
 		Поочерёдно заменяет подстроку \"%s\" на один из вариантов через интервалы времени.
 			animations – анимация или список анимаций;\n
-			primary – индекс анимации, которая должна быть проиграна первой.
+			primary – первая однократно проигрываемая анимация.
 		"""
 
-		CurrentAnimation = animations[primary] if primary != None else random.choice(animations)
+		CurrentAnimation = random.choice(animations)
+
+		if primary:
+			CurrentAnimation = primary
+			primary = None
+
 		CurrentAnimationLines = CurrentAnimation.lines
 		AnimationIndex = 0
 		sleep(CurrentAnimation.delay)
@@ -240,11 +245,11 @@ class StepsIndicator:
 		self.__Title = text or ""
 		if update: self.update()
 
-	def start_animation(self, animation: Animation | list[Animation], primary: int | None = None):
+	def start_animation(self, animation: Animation | list[Animation], primary: Animation | None = None):
 		"""
 		Запускает поочерёдную замену подстроки \"%s\" на один из вариантов через интервалы времени.
 			animation – анимация или список анимаций;\n
-			primary – индекс анимации, которая должна быть проиграна первой.
+			primary – первая однократно проигрываемая анимация.
 		"""
 
 		if type(animation) != list: animation = [animation]
