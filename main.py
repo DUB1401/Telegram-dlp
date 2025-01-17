@@ -10,7 +10,8 @@ from dublib.Methods.System import CheckPythonMinimalVersion, Clear
 from dublib.CLI.Terminalyzer import Command, Terminalyzer
 from dublib.Methods.Filesystem import MakeRootDirectories
 from dublib.TelebotUtils import UsersManager
-from dublib.Methods.JSON import ReadJSON
+from dublib.Methods.Filesystem import ReadJSON
+
 from telebot import types, TeleBot
 from urllib.parse import urlparse
 from time import sleep

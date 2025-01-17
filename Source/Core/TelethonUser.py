@@ -1,6 +1,7 @@
 from dublib.Methods.Filesystem import RemoveDirectoryContent
+from dublib.Methods.Filesystem import ReadJSON, WriteJSON
 from dublib.CLI.TextStyler import TextStyler, Styles
-from dublib.Methods.JSON import ReadJSON, WriteJSON
+
 from telethon.sync import TelegramClient
 
 import os

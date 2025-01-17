@@ -5,7 +5,6 @@ from Source.Core.GetText import _
 from dublib.TelebotUtils import UserData
 from dublib.Polyglot import Markdown
 from telebot import TeleBot, types
-from dublib.Methods.JSON import *
 
 import telebot
 
