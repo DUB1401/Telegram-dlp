@@ -10,7 +10,8 @@ from dublib.Methods.System import CheckPythonMinimalVersion, Clear
 from dublib.CLI.Terminalyzer import Command, Terminalyzer
 from dublib.Methods.Filesystem import MakeRootDirectories
 from dublib.TelebotUtils import UsersManager
-from dublib.Methods.JSON import ReadJSON
+from dublib.Methods.Filesystem import ReadJSON
+
 from telebot import types, TeleBot
 from urllib.parse import urlparse
 from time import sleep
@@ -22,7 +23,10 @@ from time import sleep
 CheckPythonMinimalVersion(3, 12)
 MakeRootDirectories(["Data/Users", "Temp", "yt-dlp"])
 Clear()
+
 Settings = ReadJSON("Settings.json")
+Bot = TeleBot(Settings["token"])
+
 GetText.initialize("Telegram-dlp", Settings["language"])
 _ = GetText.gettext
 
@@ -71,18 +75,17 @@ if ParsedCommand and ParsedCommand.name == "upload":
 	Compression = ParsedCommand.check_flag("c")
 	Recoding = ParsedCommand.check_flag("r")
 	Watermarked = ParsedCommand.check_flag("w")
-	User = TelethonUser(Settings["bot_name"])
+	User = TelethonUser(Bot.get_me().username)
 	User.initialize()
 	Result = User.upload_file(UserID, Site, Filename, Quality, Compression, Recoding, Watermarked, Name)
 	if Result: exit(0)
 	else: exit(1)
 	
 elif ParsedCommand and ParsedCommand.name == "login":
-	User = TelethonUser(Settings["bot_name"])
+	User = TelethonUser(Bot.get_me().username)
 	User.login(ParsedCommand.arguments[0], ParsedCommand.arguments[1], ParsedCommand.arguments[2])
 	
 else:
-	Bot = TeleBot(Settings["token"])
 	Users = UsersManager("Data/Users")
 	StorageBox = Storage("Storage")
 	Downloader = YtDlp(StorageBox, Settings)
@@ -259,7 +262,7 @@ else:
 		SI = StepsIndicator(Bot, Call.message.chat.id, Procedures, parse_mode = "HTML")
 
 		if FileMessageID[0] and User.get_property("option_storage"):
-			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Settings["bot_name"])
+			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Bot.get_me().username)
 
 		else:
 			SI.send()
@@ -275,7 +278,7 @@ else:
 					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression, Recoding)
 
 					if Result.code == 0:
-						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
+						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Bot.get_me().username)
 						SI.next(_("Отправлено."))
 
 					else: SI.error(_("Не удалось отправить аудио."))
@@ -324,7 +327,7 @@ else:
 		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression, Recoding, watermarked = IsWatermarked)
 
 		if FileMessageID[0] and User.get_property("option_storage"):
-			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Settings["bot_name"])
+			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Bot.get_me().username)
 
 		else:
 			User.set_property("is_downloading", True)
@@ -348,7 +351,7 @@ else:
 					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression, Recoding, watermarked = IsWatermarked)
 
 					if Result.code == 0:
-						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
+						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Bot.get_me().username)
 						SI.stop_animation()
 						SI.next(_("Отправлено."))
 

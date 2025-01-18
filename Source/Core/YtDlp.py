@@ -19,7 +19,7 @@ class YtDlp:
 	def version(self) -> str:
 		"""Версия библиотеки yt-dlp по умолчанию."""
 
-		return "2024.12.06"
+		return "2025.01.15"
 
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
@@ -250,7 +250,7 @@ class YtDlp:
 
 		return Info
 
-	def get_resolutions(self, info: dict, pretty: bool = True) -> dict:
+	def get_resolutions(self, info: dict, pretty: bool = True) -> dict[str, str]:
 		"""
 		Возвращает словарь определений разрешений, где клюём является ширина кадра, а значением – ID формата.
 			info – словарное представления описания видео;

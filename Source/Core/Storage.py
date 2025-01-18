@@ -1,6 +1,7 @@
-from urllib.parse import urlparse, parse_qs, urlencode
-from dublib.Methods.JSON import ReadJSON, WriteJSON
+from dublib.Methods.Filesystem import ReadJSON, WriteJSON
 from dublib.Engine.Bus import ExecutionStatus
+
+from urllib.parse import urlparse, parse_qs, urlencode
 from time import sleep
 
 import base64
@@ -348,7 +349,8 @@ class Storage:
 		"""
 
 		Try = 0
-		Status = ExecutionStatus(-1)
+		Status = ExecutionStatus()
+		Status.code = -1
 
 		while Try < timeout and Status.code != 0:
 			Try += 1
@@ -358,7 +360,7 @@ class Storage:
 				sleep(1)
 
 			else:
-				Status = ExecutionStatus(0)
+				Status.code = 0
 				Status["chat_id"] = Result[0]
 				Status["message_id"] = Result[1]	
 
