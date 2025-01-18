@@ -262,7 +262,7 @@ else:
 		SI = StepsIndicator(Bot, Call.message.chat.id, Procedures, parse_mode = "HTML")
 
 		if FileMessageID[0] and User.get_property("option_storage"):
-			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Settings["bot_name"])
+			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Bot.get_me().username)
 
 		else:
 			SI.send()
@@ -278,7 +278,7 @@ else:
 					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression, Recoding)
 
 					if Result.code == 0:
-						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
+						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Bot.get_me().username)
 						SI.next(_("Отправлено."))
 
 					else: SI.error(_("Не удалось отправить аудио."))
@@ -327,7 +327,7 @@ else:
 		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression, Recoding, watermarked = IsWatermarked)
 
 		if FileMessageID[0] and User.get_property("option_storage"):
-			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Settings["bot_name"])
+			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Bot.get_me().username)
 
 		else:
 			User.set_property("is_downloading", True)
@@ -351,7 +351,7 @@ else:
 					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression, Recoding, watermarked = IsWatermarked)
 
 					if Result.code == 0:
-						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Settings["bot_name"])
+						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Bot.get_me().username)
 						SI.stop_animation()
 						SI.next(_("Отправлено."))
 

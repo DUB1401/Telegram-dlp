@@ -66,6 +66,9 @@ class TelethonUser:
 				Client.sign_in(phone_number, Code, phone_code_hash = Hash)
 				
 			if Client.is_user_authorized():
+				Settings = ReadJSON("Settings.json")
+				Settings["trusted_sources_id"].append(Client.get_me().id)
+				WriteJSON("Settings.json", Settings)
 				Client.disconnect()
 				Client = None
 				Hash = None
