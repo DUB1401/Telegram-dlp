@@ -1,0 +1,111 @@
+from Source.Core.GetText import _
+
+from Patch.Hello import PatchReplyKeyboards
+
+from dublib.Methods.Filesystem import ReadJSON
+from dublib.TelebotUtils import UsersManager
+
+from telebot import TeleBot, types
+from time import sleep
+
+BOT_NAME = ""
+SUPPORT = ""
+
+class PatchInlineKeyboards:
+	"""Генератор кнопочного интерфейса."""
+
+	def __init__(self):
+		"""Генератор кнопочного интерфейса."""
+
+		#---> Генерация динамических атрибутов.
+		#==========================================================================================#
+		self.__Settings = ReadJSON("Patch/Settings.json")
+
+	def ok(self) -> types.InlineKeyboardMarkup:
+		Menu = types.InlineKeyboardMarkup()
+		Button = types.InlineKeyboardButton(_("Всё ясно!"), callback_data = "delete_message")
+		Menu.add(Button, row_width = 1)
+
+		return Menu
+	
+	def share(self) -> types.InlineKeyboardMarkup:
+		Menu = types.InlineKeyboardMarkup()
+
+		Share = types.InlineKeyboardButton(
+			"Поделиться", 
+			switch_inline_query = "\n\n" +  self.__Settings["bot_title"] + "\n" + _("Лучший бот для скачивания не только видео 🎬, но и аудио 🎵 с YouTube, TikTok, Instagram и всех других медиа площадок!")
+			)
+		
+		Menu.add(Share)
+
+		return Menu
+	
+	def support(self) -> types.InlineKeyboardMarkup:
+		Menu = types.InlineKeyboardMarkup()
+		Support = types.InlineKeyboardButton(_("Спасибо, все хорошо!"), callback_data = "delete_message")
+		
+		Menu.add(Support)
+
+		return Menu
+
+def ButtonsDecorators(bot: TeleBot, users: UsersManager):
+	Settings = ReadJSON("Patch/Settings.json")
+
+	@bot.message_handler(content_types = ["text"], regexp = _("📢 Поделиться с друзьями"))
+	def Button(Message: types.Message):
+		User = users.auth(Message.from_user)
+		bot.send_photo(
+			Message.chat.id,
+			photo = Settings["share_image"],
+			caption = "@%s\n@%s\n@%s\n\n" % (BOT_NAME, BOT_NAME, BOT_NAME) + Settings["bot_title"] + "\n" + _("Лучший бот для скачивания видео 🎬 и аудио 🎵 с VK, YouTube, TikTok, Instagram и всех других медиа площадок!"),
+			reply_markup = PatchInlineKeyboards().share(),
+			parse_mode = "HTML"
+		)
+
+	@bot.message_handler(content_types = ["text"], regexp = _("ℹ️ Инфа"))
+	def Button(Message: types.Message):
+		User = users.auth(Message.from_user)
+		bot.send_message(
+			Message.chat.id,
+			text = _("@%s предназначен для скачивания видео 📺 и аудио 📻 с самых популярных медиа площадок, таких как: VK, YouTube, TikTok, Instagram и др.\n\nДля использования просто отправьте боту нужную ссылку и дождитесь, пока он предоставит вам уже готовый ролик! 🦾\n\nТеперь качать трендовые видео с YouTube (в условиях его замедления 😁), а также вирусные аудио с TikTok стало намного проще!\n\n<b><i>Наслаждайтесь, и делитесь с друзьями!</i></b>") % BOT_NAME,
+			parse_mode = "HTML",
+			reply_markup = PatchInlineKeyboards().ok()
+		)
+
+	@bot.message_handler(content_types = ["text"], regexp = _("♻️ Изменить имя"))
+	def Text(Message: types.Message):
+		User = users.auth(Message.from_user)
+		bot.send_message(User.id, _("Ну и какое на этот раз?) Удиви! 😄"))
+		User.set_expected_type("user_name")
+
+	@bot.message_handler(content_types = ["text"], regexp = _("💬 Поддержка"))
+	def Text(Message: types.Message):
+		User = users.auth(Message.from_user)
+		bot.send_message(
+			chat_id = Message.chat.id,
+			text = _("Друзья, если у вас вдруг возникают какие-то проблемы при скачивании, то не стесняйтесь, делайте скриншот и пишите вот сюда 👇👇👇\n\n@%s\n\nСделаем наш сервис для вас еще лучше! 😉") % SUPPORT,
+			reply_markup = PatchInlineKeyboards().support()
+		)
+
+def InlineDecorators(bot: TeleBot, users: UsersManager):
+
+	@bot.callback_query_handler(func = lambda Callback: Callback.data == "delete_message")
+	def InlineButton(Call: types.CallbackQuery):
+		User = users.auth(Call.from_user)
+		bot.delete_message(User.id, Call.message.id)
+
+	@bot.callback_query_handler(func = lambda Callback: Callback.data.startswith("device_"))
+	def InlineButton(Call: types.CallbackQuery):
+		User = users.auth(Call.from_user)
+		Device = Call.data.split("_")[-1]
+		User.set_property("option_recoding", False if Device == "android" else True)
+
+		try:
+			MessageID = User.get_property("remove_message")
+			bot.delete_messages(User.id, [MessageID, Call.message.id])
+
+		except: bot.delete_message(User.id, Call.message.id)
+
+		bot.send_message(User.id, _("Спасибо! Это для лучшей адаптации видео под тебя!"))
+		sleep(0.5)
+		bot.send_message(User.id, _("Кидай мне ссылку, и я тебе скачаю любой видос! 👌"), reply_markup = PatchReplyKeyboards().main())

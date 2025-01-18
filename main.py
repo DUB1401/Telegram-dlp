@@ -6,11 +6,15 @@ from Source.Core.GetText import GetText
 from Source.Core.Storage import Storage
 from Source.Core.YtDlp import YtDlp
 
+from Patch.Menu import ButtonsDecorators, InlineDecorators
+from Patch.Data import INTERVAL, GenerateStartAnimation
+from Patch.Hello import AnswerName, Hello
+from Patch import Menu
+
+from dublib.Methods.Filesystem import MakeRootDirectories, ReadJSON
 from dublib.Methods.System import CheckPythonMinimalVersion, Clear
 from dublib.CLI.Terminalyzer import Command, Terminalyzer
-from dublib.Methods.Filesystem import MakeRootDirectories
 from dublib.TelebotUtils import UsersManager
-from dublib.Methods.Filesystem import ReadJSON
 
 from telebot import types, TeleBot
 from urllib.parse import urlparse
@@ -26,9 +30,13 @@ Clear()
 
 Settings = ReadJSON("Settings.json")
 Bot = TeleBot(Settings["token"])
+LANGUAGE = Settings["language"]
 
 GetText.initialize("Telegram-dlp", Settings["language"])
 _ = GetText.gettext
+
+Menu.BOT_NAME = Bot.get_me().username
+Menu.SUPPORT = Settings["support_contact"]
 
 #==========================================================================================#
 # >>>>> НАСТРОЙКА ОБРАБОТЧИКА КОМАНД <<<<< #
@@ -127,12 +135,7 @@ else:
 		User.set_property("option_archive", True, force = False)
 		User.set_property("option_storage", True, force = False)
 		User.set_property("is_downloading", False)
-		Bot.send_message(
-			chat_id = Message.chat.id,
-			text = _("<b>Telegram-dlp</b> поможет вам скачать видео или извлечь из них аудиодорожки. Поддерживается широкий список <a href=\"https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md\">источников</a>."),
-			parse_mode = "HTML",
-			disable_web_page_preview = True
-		)
+		Hello(Bot, User)
 		
 	@Bot.message_handler(commands = ["support"])
 	def CommandAbout(Message: types.Message):
@@ -149,6 +152,7 @@ else:
 	#==========================================================================================#
 
 	AdminPanel.decorators.reply_keyboards(Bot, Users)
+	ButtonsDecorators(Bot, Users)
 
 	#==========================================================================================#
 	# >>>>> ОБРАБОТКА ВВОДА ТЕКСТА <<<<< #
@@ -157,6 +161,7 @@ else:
 	@Bot.message_handler(content_types = ["text"])
 	def Text(Message: types.Message):
 		User = Users.auth(Message.from_user)
+		if AnswerName(Bot, User, Message): return
 		if AdminPanel.procedures.text(Bot, User, Message): return
 
 		if User.get_property("is_downloading"):
@@ -168,7 +173,7 @@ else:
 				chat_id = Message.chat.id,
 				text = _("Идёт получение данных...")
 			)
-
+			
 			Site = StorageBox.parse_site_name(Message.text)
 			Link = None
 			VideoID = None
@@ -176,12 +181,12 @@ else:
 
 			if Site:
 				Link = StorageBox.check_link(Site, Message.text)
-				
+
 				if StorageBox.check_for_playlist(Site, Link):
 					Bot.edit_message_text(
 						message_id = SendedMessage.id,
 						chat_id = Message.chat.id,
-						text = _("Данная ссылка ведёт к плейлисту, а не конкретному видео.")
+						text = _("Похоже это ссылка на плейлист или джем. А мне нужна именно на ролик 🙄")
 					)
 					return
 
@@ -195,9 +200,24 @@ else:
 					Bot.edit_message_text(
 						message_id = SendedMessage.id,
 						chat_id = Message.chat.id,
-						text = _("Видео слишком длинное.")
+						text = ("Видео слишком большое. Такое не поместится в Telegram 😬")
 					)
 					return
+
+				# Для TikTok обязательно пометить хотя бы однин ролик как HD.
+				if Info["webpage_url_domain"] == "tiktok.com":
+					IsHD = False
+					Mini = dict()
+					for Format in Info["formats"]: 
+						if "width" in Format.keys() and Format["width"] == 576: Mini = Format
+
+						if "width" in Format.keys() and Format["width"] == 720: 
+							IsHD = True
+							break
+
+					if not IsHD and Mini:
+						Mini["resolution"] = "720x1280"
+						Info["formats"].append(Mini)
 
 				StorageBox.save_info(Site, VideoID, Info)
 				User.set_temp_property("link", Link)
@@ -207,12 +227,17 @@ else:
 				Bot.delete_message(message_id = SendedMessage.id, chat_id = Message.chat.id)
 				InlineKeyboards().send_format_selector(Bot, Message.chat.id, Info, StorageBox, Settings)
 
-			else: Bot.edit_message_text(message_id = SendedMessage.id, chat_id = Message.chat.id,text = _("Мне не удалось обнаружить видео по этой ссылке."))
+			else:
+				Bot.edit_message_text(
+					message_id = SendedMessage.id,
+					chat_id = Message.chat.id,
+					text = _("Эта ссылка не может быть обработана, поскольку не содержит видео. Все проверьте и отправьте мне правильную! 🤌")
+				)
 
 		else:
 			Bot.send_message(
 				chat_id = Message.chat.id,
-				text = _("Ваше сообщение не является ссылкой. Попробуйте ещё раз.")
+				text = _("Эта ссылка не может быть обработана. Все проверьте и отправьте мне правильную! 🤌")
 			)
 
 	#==========================================================================================#
@@ -220,6 +245,7 @@ else:
 	#==========================================================================================#
 
 	AdminPanel.decorators.inline_keyboards(Bot, Users)
+	InlineDecorators(Bot, Users)
 
 	@Bot.callback_query_handler(func = lambda Callback: Callback.data.startswith("option_"))
 	def InlineButton(Call: types.CallbackQuery):
@@ -245,19 +271,20 @@ else:
 		Compression = User.get_property("option_compression")
 		Recoding = User.get_property("option_recoding")
 		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression, Recoding)
-		
-		ProgressAnimation = Animation()
-		ProgressAnimation.set_interval(1)
-		ProgressAnimation.add_lines(".")
-		ProgressAnimation.add_lines("..")
-		ProgressAnimation.add_lines("...")
-		ProgressAnimation.add_lines("")
 
 		Procedures = [
-			_("Скачиваю аудио%s"),
-			_("Выгружаю аудио в Telegram%s"),
-			_("Отправляю%s")
+			_("Скачиваю аудио..."),
+			_("Выгружаю аудио в Telegram..."),
+			_("Отправляю...")
 		]
+		Episodes = ReadJSON(f"Patch/Cartoons/{LANGUAGE}.json")
+		ProgressAnimation = list()
+
+		for Key in Episodes["episodes"].keys():
+			Buffer = Animation()
+			Buffer.set_interval(INTERVAL)
+			for Line in Episodes["episodes"][Key]: Buffer.add_lines(Line)
+			ProgressAnimation.append(Buffer)
 
 		SI = StepsIndicator(Bot, Call.message.chat.id, Procedures, parse_mode = "HTML")
 
@@ -265,27 +292,30 @@ else:
 			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Bot.get_me().username)
 
 		else:
+			SI.set_title(_("%s\n\n<b>Результат процесса:</b>\n"))
 			SI.send()
-			SI.start_animation(ProgressAnimation)
+			SI.start_animation(ProgressAnimation, GenerateStartAnimation(Episodes["name"]))
 			Result = Downloader.download_audio(Link, f"Temp/{User.id}/", VideoID, recoding = Recoding)
 			
 			if Result:
-				SI.next(_("Аудио скачано."))
+				SI.next(_("Аудио скачано!"))
 				Result = StorageBox.upload_file(User.id, Site, Result, Quality, Compression, Recoding, name = Name)
 
 				if Result:
-					SI.next(_("Аудио загружено в Telegram."))
+					SI.next(_("Аудио загружено в Telegram!"))
 					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression, Recoding)
 
 					if Result.code == 0:
 						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Bot.get_me().username)
-						SI.next(_("Отправлено."))
+						SI.stop_animation()
+						SI.set_footer(_("\n<b><i>Наслаждайтесь вашим аудио,") + " " + User.get_property("name") + "!</i></b> 😘")
+						SI.next(_("Отправлено!"))
 
-					else: SI.error(_("Не удалось отправить аудио."))
+					else: SI.error(_("Не удалось отправить аудио!"))
 
-				else: SI.error(_("Не удалось загрузить аудио в Telegram."))
+				else: SI.error(_("Не удалось загрузить аудио в Telegram!"))
 
-			else: SI.error(_("Не удалось скачать аудио."))
+			else: SI.error(_("Не удалось скачать аудио!"))
 
 		User.set_property("is_downloading", False)
 		User.clear_temp_properties()
@@ -306,19 +336,20 @@ else:
 		Compression = User.get_property("option_compression")
 		Recoding = User.get_property("option_recoding")
 
-		ProgressAnimation = Animation()
-		ProgressAnimation.set_interval(1)
-		ProgressAnimation.add_lines(".")
-		ProgressAnimation.add_lines("..")
-		ProgressAnimation.add_lines("...")
-		ProgressAnimation.add_lines("")
-
 		Procedures = [
-			_("Скачиваю видео%s"),
-			_("Улучшаю качество%s"),
-			_("Выгружаю видео в Telegram%s"),
-			_("Отправляю%s")
+			_("Скачиваю видео..."),
+			_("Улучшаю качество..."),
+			_("Выгружаю видео в Telegram..."),
+			_("Отправляю...")
 		]
+		Episodes = ReadJSON(f"Patch/Cartoons/{LANGUAGE}.json")
+		ProgressAnimation = list()
+
+		for Key in Episodes["episodes"].keys():
+			Buffer = Animation()
+			Buffer.set_interval(INTERVAL)
+			for Line in Episodes["episodes"][Key]: Buffer.add_lines(Line)
+			ProgressAnimation.append(Buffer)
 
 		if not Settings["quality_improvement"]: Procedures.pop(1)
 		SI = StepsIndicator(Bot, Call.message.chat.id, Procedures, parse_mode = "HTML")
@@ -331,35 +362,37 @@ else:
 
 		else:
 			User.set_property("is_downloading", True)
+			SI.set_title(_("%s\n\n<b>Результат процесса:</b>\n"))
 			SI.send()
-			SI.start_animation(ProgressAnimation)
+			SI.start_animation(ProgressAnimation, GenerateStartAnimation(Episodes["name"]))
 			Result = Downloader.download_video(Link, f"Temp/{User.id}/", VideoID, FormatID, recoding = Recoding)
-
+			
 			if Result:
 
 				if Settings["quality_improvement"]:
-					SI.next(_("Видео скачано."))
+					SI.next(_("Видео скачано!"))
 					sleep(4)
-					SI.next(_("Качество улучшено."))
+					SI.next(_("Качество улучшено!"))
 
-				else: SI.next(_("Видео скачано."))
+				else: SI.next(_("Видео скачано!"))
 
 				Result = StorageBox.upload_file(User.id, Site, Result, Quality, Compression, Recoding, watermarked = IsWatermarked, name = Name)
 
 				if Result:
-					SI.next(_("Видео загружено в Telegram."))
+					SI.next(_("Видео загружено в Telegram!"))
 					Result = StorageBox.wait_file_uploading(Site, VideoID, Quality, Compression, Recoding, watermarked = IsWatermarked)
 
 					if Result.code == 0:
 						Bot.copy_message(Call.message.chat.id, Result["chat_id"], Result["message_id"], caption = "@" + Bot.get_me().username)
 						SI.stop_animation()
-						SI.next(_("Отправлено."))
+						SI.set_footer(_("\n<b><i>Наслаждайтесь вашим видео,") + " " + User.get_property("name") + "!</i></b> 😘")
+						SI.next(_("Отправлено!"))
 
-					else: SI.error(_("Не удалось отправить видео."))
+					else: SI.error(_("Не удалось отправить видео!"))
 
-				else: SI.error(_("Не удалось загрузить видео в Telegram."))
+				else: SI.error(_("Не удалось загрузить видео в Telegram!"))
 
-			else: SI.error(_("Не удалось скачать видео."))
+			else: SI.error(_("Не удалось скачать видео!"))
 
 		User.set_property("is_downloading", False)
 		User.clear_temp_properties()
