@@ -23,7 +23,10 @@ from time import sleep
 CheckPythonMinimalVersion(3, 12)
 MakeRootDirectories(["Data/Users", "Temp", "yt-dlp"])
 Clear()
+
 Settings = ReadJSON("Settings.json")
+Bot = TeleBot(Settings["token"])
+
 GetText.initialize("Telegram-dlp", Settings["language"])
 _ = GetText.gettext
 
@@ -72,18 +75,17 @@ if ParsedCommand and ParsedCommand.name == "upload":
 	Compression = ParsedCommand.check_flag("c")
 	Recoding = ParsedCommand.check_flag("r")
 	Watermarked = ParsedCommand.check_flag("w")
-	User = TelethonUser(Settings["bot_name"])
+	User = TelethonUser(Bot.get_me().username)
 	User.initialize()
 	Result = User.upload_file(UserID, Site, Filename, Quality, Compression, Recoding, Watermarked, Name)
 	if Result: exit(0)
 	else: exit(1)
 	
 elif ParsedCommand and ParsedCommand.name == "login":
-	User = TelethonUser(Settings["bot_name"])
+	User = TelethonUser(Bot.get_me().username)
 	User.login(ParsedCommand.arguments[0], ParsedCommand.arguments[1], ParsedCommand.arguments[2])
 	
 else:
-	Bot = TeleBot(Settings["token"])
 	Users = UsersManager("Data/Users")
 	StorageBox = Storage("Storage")
 	Downloader = YtDlp(StorageBox, Settings)

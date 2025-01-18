@@ -1,16 +1,11 @@
 {
 	"token": "",
-	"bot_name": "",
-	"support_contact": "",
+	"support_contact": "@dub1401.",
 	"language": "ru",
 	"trusted_sources_id": [],
 	"password": "1234",
 	"quality_improvement": false,
 	"one_watermarked": true,
 	"lib_autoupdate": false,
-	"configs": {
-		"instagram": {
-			"cookies_generator": ""
-		}
-	}
+	"configs": {}
 }
