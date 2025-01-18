@@ -50,6 +50,14 @@ class Parameters:
 		"""
 
 		return self.__Data[key]
+	
+	def check_key(self, key: str) -> bool:
+		"""
+		Проверяет наличие ключа с валидным значением в параметрах.
+			key – ключ.
+		"""
+
+		return key in self.__Data.keys() and self.__Data[key]
 		
 class Configurator:
 	"""Опциональные параметры источников контента."""
@@ -90,3 +98,11 @@ class Configurator:
 		if type(domain) == str: domain = ExtendedSupport(domain)
 		
 		return self.__Configs[domain.value]
+	
+	def get_config(self, domain: ExtendedSupport | str) -> Parameters | None:
+		"""Возвращает контейнер параметров источника."""
+
+		if type(domain) == str: domain = ExtendedSupport(domain)
+		
+		if domain.value in self.__Configs.keys(): return self.__Configs[domain.value]
+		elif "*" in self.__Configs.keys(): return self.__Configs["*"]
