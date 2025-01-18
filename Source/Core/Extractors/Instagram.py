@@ -40,7 +40,7 @@ class Instagram(BaseExtractor):
 				Info = json.loads(Dump)
 			
 			if Info: break
-			elif Try == 0 and self._Config["cookies_generator"]: os.system(self._Config["cookies_generator"])
+			elif Try == 0 and self._Config.check_key("cookies_generator"): os.system(self._Config["cookies_generator"])
 
 		return Info
 

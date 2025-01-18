@@ -139,7 +139,7 @@ class YtDlp:
 		self.__Storage = storage
 		self.__Settings = settings.copy()
 
-		self.__Configs = Configurator(self.__Settings["configs"])
+		self.__Configurator = Configurator(self.__Settings["configs"])
 
 		self.__CheckLib()
 	
@@ -159,13 +159,11 @@ class YtDlp:
 		Path = f"{directory}/{filename}.%(ext)s"
 		IsSuccess = False
 		SourceType = None
-		Config = None
-
+		
 		try: SourceType = ExtendedSupport(Domain)
 		except: pass
 
-		try: Config = self.__Configs[SourceType]
-		except: pass
+		Config = self.__Configurator.get_config(SourceType)
 
 		try:
 
@@ -196,13 +194,11 @@ class YtDlp:
 		Path = f"{directory}{filename}.%(ext)s"
 		IsSuccess = False
 		SourceType = None
-		Config = None
 
 		try: SourceType = ExtendedSupport(Domain)
 		except: pass
 
-		try: Config = self.__Configs[SourceType]
-		except: pass
+		Config = self.__Configurator.get_config(SourceType)
 		
 		try:
 
@@ -225,13 +221,11 @@ class YtDlp:
 		Domain = self.__Storage.parse_site_name(link)
 		SourceType = None
 		Info = None
-		Config = None
 
 		try: SourceType = ExtendedSupport(Domain)
 		except: pass
 
-		try: Config = self.__Configs[SourceType]
-		except: pass
+		Config = self.__Configurator.get_config(SourceType)
 		
 		try:
 
