@@ -1,9 +1,12 @@
 from Source.Core.GetText import _
 
 from Patch.Hello import PatchReplyKeyboards
+from Patch.YouTube import Trends
 
 from dublib.Methods.Filesystem import ReadJSON
 from dublib.TelebotUtils import UsersManager
+from dublib.Polyglot import HTML
+from datetime import datetime
 
 from telebot import TeleBot, types
 from time import sleep
@@ -33,7 +36,7 @@ class PatchInlineKeyboards:
 
 		Share = types.InlineKeyboardButton(
 			"Поделиться", 
-			switch_inline_query = "\n\n" +  self.__Settings["bot_title"] + "\n" + _("Лучший бот для скачивания не только видео 🎬, но и аудио 🎵 с YouTube, TikTok, Instagram и всех других медиа площадок!")
+			switch_inline_query = "\n\n" +  HTML(self.__Settings["bot_title"]).plain_text + "\n" + _("Лучший бот для скачивания не только видео 🎬, но и аудио 🎵 с YouTube, TikTok, Instagram и всех других медиа площадок!")
 			)
 		
 		Menu.add(Share)
@@ -45,6 +48,14 @@ class PatchInlineKeyboards:
 		Support = types.InlineKeyboardButton(_("Спасибо, все хорошо!"), callback_data = "delete_message")
 		
 		Menu.add(Support)
+
+		return Menu
+	
+	def trends(self) -> types.InlineKeyboardMarkup:
+		Menu = types.InlineKeyboardMarkup()
+		News = types.InlineKeyboardButton(_("ТОП 20 ролики YouTube 📹"), callback_data = "trends_news")
+		Music = types.InlineKeyboardButton(_("ТОП 20 музыка YouTube 📹"), callback_data = "trends_music")
+		Menu.add(News, Music, row_width = 1)
 
 		return Menu
 
@@ -87,7 +98,17 @@ def ButtonsDecorators(bot: TeleBot, users: UsersManager):
 			reply_markup = PatchInlineKeyboards().support()
 		)
 
-def InlineDecorators(bot: TeleBot, users: UsersManager):
+	@bot.message_handler(content_types = ["text"], regexp = _("🔥 YouTube Тренды"))
+	def Button(Message: types.Message):
+		User = users.auth(Message.from_user)
+
+		bot.send_message(
+			Message.chat.id,
+			text = "🔥 YouTube Тренды на " + datetime.now().date().strftime("%d.%m.%Y"),
+			reply_markup = PatchInlineKeyboards().trends()
+		)
+
+def InlineDecorators(bot: TeleBot, users: UsersManager, trender: Trends):
 
 	@bot.callback_query_handler(func = lambda Callback: Callback.data == "delete_message")
 	def InlineButton(Call: types.CallbackQuery):
@@ -109,3 +130,35 @@ def InlineDecorators(bot: TeleBot, users: UsersManager):
 		bot.send_message(User.id, _("Спасибо! Это для лучшей адаптации видео под тебя!"))
 		sleep(0.5)
 		bot.send_message(User.id, _("Кидай мне ссылку, и я тебе скачаю любой видос! 👌"), reply_markup = PatchReplyKeyboards().main())
+
+	@bot.callback_query_handler(func = lambda Callback: Callback.data == "trends_news")
+	def InlineButton(Call: types.CallbackQuery):
+		User = users.auth(Call.from_user)
+		
+		News = trender.get_news()
+		Text = "<b>ТОП 20 ролики YouTube 📹</b>\n\n"
+		for Index in range(20): Text += str(Index + 1) + ". <a href=\"" + News[Index].link + "\">" + News[Index].title + "</a>\n"
+		
+		bot.send_message(
+			Call.message.chat.id,
+			text = Text,
+			parse_mode = "HTML",
+			disable_web_page_preview = True
+		)
+		bot.answer_callback_query(Call.id)
+
+	@bot.callback_query_handler(func = lambda Callback: Callback.data == "trends_music")
+	def InlineButton(Call: types.CallbackQuery):
+		User = users.auth(Call.from_user)
+
+		Music = trender.get_music()
+		Text = "<b>ТОП 20 музыка YouTube 📹</b>\n\n"
+		for Index in range(20): Text += str(Index + 1) + ". <a href=\"" + Music[Index].link + "\">" + Music[Index].title + "</a>\n"
+
+		bot.send_message(
+			Call.message.chat.id,
+			text = Text,
+			parse_mode = "HTML",
+			disable_web_page_preview = True
+		)
+		bot.answer_callback_query(Call.id)

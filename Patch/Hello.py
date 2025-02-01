@@ -15,11 +15,12 @@ class PatchReplyKeyboards:
 		"""Строит кнопочный интерфейс: главное меню."""
 
 		Menu = types.ReplyKeyboardMarkup(resize_keyboard = True)
+		Trends = types.KeyboardButton(_("🔥 YouTube Тренды"))
 		Info = types.KeyboardButton(_("ℹ️ Инфа"))
 		Rename = types.KeyboardButton(_("♻️ Изменить имя"))
 		Support = types.KeyboardButton(_("💬 Поддержка"))
 		Share = types.KeyboardButton(_("📢 Поделиться с друзьями"))
-		Menu.add(Info, Rename, Support, Share, row_width = 1)
+		Menu.add(Trends, Info, Rename, Support, Share, row_width = 1)
 
 		return Menu
 

@@ -9,6 +9,7 @@ from Source.Core.YtDlp import YtDlp
 from Patch.Menu import ButtonsDecorators, InlineDecorators
 from Patch.Data import INTERVAL, GenerateStartAnimation
 from Patch.Hello import AnswerName, Hello
+from Patch.YouTube import Trends
 from Patch import Menu
 
 from dublib.Methods.Filesystem import MakeRootDirectories, ReadJSON
@@ -37,6 +38,7 @@ _ = GetText.gettext
 
 Menu.BOT_NAME = Bot.get_me().username
 Menu.SUPPORT = Settings["support_contact"]
+TrendsObject = Trends()
 
 #==========================================================================================#
 # >>>>> НАСТРОЙКА ОБРАБОТЧИКА КОМАНД <<<<< #
@@ -245,7 +247,7 @@ else:
 	#==========================================================================================#
 
 	AdminPanel.decorators.inline_keyboards(Bot, Users)
-	InlineDecorators(Bot, Users)
+	InlineDecorators(Bot, Users, TrendsObject)
 
 	@Bot.callback_query_handler(func = lambda Callback: Callback.data.startswith("option_"))
 	def InlineButton(Call: types.CallbackQuery):
