@@ -2,7 +2,7 @@ from Source.UI.Templates import Animation, StepsIndicator
 from Source.UI.InlineKeyboards import InlineKeyboards
 from Source.Core.TelethonUser import TelethonUser
 from Source.UI.TeleBotAdminPanel import Panel
-from Source.Core.GetText import GetText
+
 from Source.Core.Storage import Storage
 from Source.Core.YtDlp import YtDlp
 
@@ -11,6 +11,7 @@ from dublib.CLI.Terminalyzer import Command, Terminalyzer
 from dublib.Methods.Filesystem import MakeRootDirectories
 from dublib.TelebotUtils import UsersManager
 from dublib.Methods.Filesystem import ReadJSON
+from dublib.Engine.GetText import GetText
 
 from telebot import types, TeleBot
 from urllib.parse import urlparse
@@ -27,7 +28,7 @@ Clear()
 Settings = ReadJSON("Settings.json")
 Bot = TeleBot(Settings["token"])
 
-GetText.initialize("Telegram-dlp", Settings["language"])
+GetText.initialize("Telegram-dlp", Settings["language"], "Locales")
 _ = GetText.gettext
 
 #==========================================================================================#
