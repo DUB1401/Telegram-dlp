@@ -1,5 +1,6 @@
 from Source.UI.Templates import Animation
-from Source.Core.GetText import _
+
+from dublib.Engine.GetText import _
 
 INTERVAL = 1.5
 

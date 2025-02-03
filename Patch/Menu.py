@@ -1,13 +1,12 @@
-from Source.Core.GetText import _
-
 from Patch.Hello import PatchReplyKeyboards
 from Patch.YouTube import Trends
 
 from dublib.Methods.Filesystem import ReadJSON
 from dublib.TelebotUtils import UsersManager
+from dublib.Engine.GetText import _
 from dublib.Polyglot import HTML
-from datetime import datetime
 
+from datetime import datetime
 from telebot import TeleBot, types
 from time import sleep
 
@@ -36,7 +35,7 @@ class PatchInlineKeyboards:
 
 		Share = types.InlineKeyboardButton(
 			"Поделиться", 
-			switch_inline_query = "\n\n" +  HTML(self.__Settings["bot_title"]).plain_text + "\n" + _("Лучший бот для скачивания не только видео 🎬, но и аудио 🎵 с YouTube, TikTok, Instagram и всех других медиа площадок!")
+			switch_inline_query = "\n\n" +  HTML(self.__Settings["bot_title"]).plain_text + "\n" + _("Лучший бот для скачивания видео 🎬 и аудио 🎵 со всех популярных медиа площадок!")
 			)
 		
 		Menu.add(Share)
@@ -53,8 +52,8 @@ class PatchInlineKeyboards:
 	
 	def trends(self) -> types.InlineKeyboardMarkup:
 		Menu = types.InlineKeyboardMarkup()
-		News = types.InlineKeyboardButton(_("ТОП 20 ролики YouTube 📹"), callback_data = "trends_news")
-		Music = types.InlineKeyboardButton(_("ТОП 20 музыка YouTube 📹"), callback_data = "trends_music")
+		News = types.InlineKeyboardButton(_("TOP 20 Videos YouTube 📹"), callback_data = "trends_news")
+		Music = types.InlineKeyboardButton(_("TOP 20 Music YouTube 🎵"), callback_data = "trends_music")
 		Menu.add(News, Music, row_width = 1)
 
 		return Menu
@@ -68,21 +67,11 @@ def ButtonsDecorators(bot: TeleBot, users: UsersManager):
 		bot.send_photo(
 			Message.chat.id,
 			photo = Settings["share_image"],
-			caption = "@%s\n@%s\n@%s\n\n" % (BOT_NAME, BOT_NAME, BOT_NAME) + Settings["bot_title"] + "\n" + _("Лучший бот для скачивания видео 🎬 и аудио 🎵 с VK, YouTube, TikTok, Instagram и всех других медиа площадок!"),
+			caption = "@%s\n@%s\n@%s\n\n" % (BOT_NAME, BOT_NAME, BOT_NAME) + Settings["bot_title"] + "\n" + _("Лучший бот для скачивания видео 🎬 и аудио 🎵 со всех популярных медиа площадок!") + "\n\n<b><i>" + _("Пользуйся и делись с друзьями!") + "</i></b>",
 			reply_markup = PatchInlineKeyboards().share(),
 			parse_mode = "HTML"
 		)
-
-	@bot.message_handler(content_types = ["text"], regexp = _("ℹ️ Инфа"))
-	def Button(Message: types.Message):
-		User = users.auth(Message.from_user)
-		bot.send_message(
-			Message.chat.id,
-			text = _("@%s предназначен для скачивания видео 📺 и аудио 📻 с самых популярных медиа площадок, таких как: VK, YouTube, TikTok, Instagram и др.\n\nДля использования просто отправьте боту нужную ссылку и дождитесь, пока он предоставит вам уже готовый ролик! 🦾\n\nТеперь качать трендовые видео с YouTube (в условиях его замедления 😁), а также вирусные аудио с TikTok стало намного проще!\n\n<b><i>Наслаждайтесь, и делитесь с друзьями!</i></b>") % BOT_NAME,
-			parse_mode = "HTML",
-			reply_markup = PatchInlineKeyboards().ok()
-		)
-
+		
 	@bot.message_handler(content_types = ["text"], regexp = _("♻️ Изменить имя"))
 	def Text(Message: types.Message):
 		User = users.auth(Message.from_user)
@@ -106,6 +95,18 @@ def ButtonsDecorators(bot: TeleBot, users: UsersManager):
 			Message.chat.id,
 			text = "🔥 YouTube Тренды на " + datetime.now().date().strftime("%d.%m.%Y"),
 			reply_markup = PatchInlineKeyboards().trends()
+		)
+
+def CommandsDecorators(bot: TeleBot, users: UsersManager):
+
+	@bot.message_handler(commands = ["info"])
+	def CommandInfo(Message: types.Message):
+		User = users.auth(Message.from_user)
+		bot.send_message(
+			Message.chat.id,
+			text = _("@%s предназначен для скачивания видео 📺 и аудио 📻 с самых популярных медиа площадок, таких как: VK, YouTube, TikTok, Instagram и др.\n\nДля использования просто отправьте боту нужную ссылку и дождитесь, пока он предоставит вам уже готовый ролик! 🦾\n\nВы можете выбрать любое качество, которое вам подходит больше всего, а также можете скачать только аудио из абсолютно любого видеоролика!\n\n<b><i>Наслаждайтесь, и делитесь с друзьями!</i></b>") % BOT_NAME,
+			parse_mode = "HTML",
+			reply_markup = PatchInlineKeyboards().ok()
 		)
 
 def InlineDecorators(bot: TeleBot, users: UsersManager, trender: Trends):
@@ -136,7 +137,7 @@ def InlineDecorators(bot: TeleBot, users: UsersManager, trender: Trends):
 		User = users.auth(Call.from_user)
 		
 		News = trender.get_news()
-		Text = "<b>ТОП 20 ролики YouTube 📹</b>\n\n"
+		Text = "<b>TOP 20 Videos YouTube 📹</b>\n\n"
 		for Index in range(20): Text += str(Index + 1) + ". <a href=\"" + News[Index].link + "\">" + News[Index].title + "</a>\n"
 		
 		bot.send_message(
@@ -152,7 +153,7 @@ def InlineDecorators(bot: TeleBot, users: UsersManager, trender: Trends):
 		User = users.auth(Call.from_user)
 
 		Music = trender.get_music()
-		Text = "<b>ТОП 20 музыка YouTube 📹</b>\n\n"
+		Text = "<b>TOP 20 Music YouTube 🎵</b>\n\n"
 		for Index in range(20): Text += str(Index + 1) + ". <a href=\"" + Music[Index].link + "\">" + Music[Index].title + "</a>\n"
 
 		bot.send_message(

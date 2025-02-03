@@ -1,6 +1,6 @@
-from Source.Core.GetText import _
-
 from dublib.TelebotUtils import UserData
+from dublib.Engine.GetText import _
+
 from telebot import TeleBot, types
 
 class PatchReplyKeyboards:
@@ -16,11 +16,10 @@ class PatchReplyKeyboards:
 
 		Menu = types.ReplyKeyboardMarkup(resize_keyboard = True)
 		Trends = types.KeyboardButton(_("🔥 YouTube Тренды"))
-		Info = types.KeyboardButton(_("ℹ️ Инфа"))
-		Rename = types.KeyboardButton(_("♻️ Изменить имя"))
 		Support = types.KeyboardButton(_("💬 Поддержка"))
+		Rename = types.KeyboardButton(_("♻️ Изменить имя"))
 		Share = types.KeyboardButton(_("📢 Поделиться с друзьями"))
-		Menu.add(Trends, Info, Rename, Support, Share, row_width = 1)
+		Menu.add(Trends, Support, Rename, Share, row_width = 1)
 
 		return Menu
 

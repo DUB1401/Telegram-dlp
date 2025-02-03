@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2025-01-18 17:44+0300\n"
-"PO-Revision-Date: 2025-01-18 17:48+0300\n"
+"POT-Creation-Date: 2025-02-01 14:24+0300\n"
+"PO-Revision-Date: 2025-02-01 14:25+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -13,23 +13,23 @@ msgstr ""
 "X-Poedit-Basepath: ..\n"
 "X-Poedit-SearchPath-0: main.py\n"
 
-#: Patch/Data.py:15
+#: Patch/Data.py:16
 msgid "А пока ждёте, посмотрите лучше наш мультик! 😉"
 msgstr ""
 
-#: Patch/Hello.py:18 Patch/Menu.py:65
-msgid "ℹ️ Инфа"
-msgstr ""
+#: Patch/Hello.py:18 Patch/Menu.py:90
+msgid "🔥 YouTube Тренды"
+msgstr "🔥 YouTube Trends"
 
-#: Patch/Hello.py:19 Patch/Menu.py:75
-msgid "♻️ Изменить имя"
-msgstr ""
-
-#: Patch/Hello.py:20 Patch/Menu.py:81
+#: Patch/Hello.py:19 Patch/Menu.py:81
 msgid "💬 Поддержка"
 msgstr ""
 
-#: Patch/Hello.py:21 Patch/Menu.py:54
+#: Patch/Hello.py:20 Patch/Menu.py:75
+msgid "♻️ Изменить имя"
+msgstr ""
+
+#: Patch/Hello.py:21 Patch/Menu.py:64
 msgid "📢 Поделиться с друзьями"
 msgstr ""
 
@@ -57,40 +57,33 @@ msgstr ""
 msgid "А устройство я надеюсь ты не сменил?"
 msgstr ""
 
-#: Patch/Menu.py:26
+#: Patch/Menu.py:28
 msgid "Всё ясно!"
 msgstr ""
 
-#: Patch/Menu.py:36
+#: Patch/Menu.py:38 Patch/Menu.py:70
 msgid ""
-"Лучший бот для скачивания не только видео 🎬, но и аудио 🎵 с YouTube, "
-"TikTok, Instagram и всех других медиа площадок!"
+"Лучший бот для скачивания видео 🎬 и аудио 🎵 со всех популярных медиа "
+"площадок!"
 msgstr ""
+"The best bot for downloading videos 🎬 and audio 🎵 from all popular media "
+"platforms!"
 
-#: Patch/Menu.py:45
+#: Patch/Menu.py:47
 msgid "Спасибо, все хорошо!"
 msgstr ""
 
-#: Patch/Menu.py:60
-msgid ""
-"Лучший бот для скачивания видео 🎬 и аудио 🎵 с VK, YouTube, TikTok, "
-"Instagram и всех других медиа площадок!"
+#: Patch/Menu.py:55
+msgid "TOP 20 Videos YouTube 📹"
+msgstr ""
+
+#: Patch/Menu.py:56
+msgid "TOP 20 Music YouTube 🎵"
 msgstr ""
 
 #: Patch/Menu.py:70
-#, python-format
-msgid ""
-"@%s предназначен для скачивания видео 📺 и аудио 📻 с самых популярных медиа "
-"площадок, таких как: VK, YouTube, TikTok, Instagram и др.\n"
-"\n"
-"Для использования просто отправьте боту нужную ссылку и дождитесь, пока он "
-"предоставит вам уже готовый ролик! 🦾\n"
-"\n"
-"Теперь качать трендовые видео с YouTube (в условиях его замедления 😁), а "
-"также вирусные аудио с TikTok стало намного проще!\n"
-"\n"
-"<b><i>Наслаждайтесь, и делитесь с друзьями!</i></b>"
-msgstr ""
+msgid "Пользуйся и делись с друзьями!"
+msgstr "Use it and share with your friends!"
 
 #: Patch/Menu.py:78
 msgid "Ну и какое на этот раз?) Удиви! 😄"
@@ -107,107 +100,132 @@ msgid ""
 "Сделаем наш сервис для вас еще лучше! 😉"
 msgstr ""
 
-#: Patch/Menu.py:109
+#: Patch/Menu.py:107
+#, python-format
+msgid ""
+"@%s предназначен для скачивания видео 📺 и аудио 📻 с самых популярных медиа "
+"площадок, таких как: VK, YouTube, TikTok, Instagram и др.\n"
+"\n"
+"Для использования просто отправьте боту нужную ссылку и дождитесь, пока он "
+"предоставит вам уже готовый ролик! 🦾\n"
+"\n"
+"Вы можете выбрать любое качество, которое вам подходит больше всего, а также "
+"можете скачать только аудио из абсолютно любого видеоролика!\n"
+"\n"
+"<b><i>Наслаждайтесь, и делитесь с друзьями!</i></b>"
+msgstr ""
+"@%s is meant for downloading video 📺  and audio 📻 from the most popular "
+"media services like VK, YouTube, TikTok, Instagram etc. \n"
+" \n"
+"Just send the link to the bot an wait for it to provide you with a ready-"
+"made video! 🦾 \n"
+" \n"
+"You can choose any quality that suits you best, and you can also download "
+"only audio from absolutely any video! \n"
+" \n"
+"<b><i>Enjoy and share it with your friends!</i></b>"
+
+#: Patch/Menu.py:131
 msgid "Спасибо! Это для лучшей адаптации видео под тебя!"
 msgstr ""
 
-#: Patch/Menu.py:111
+#: Patch/Menu.py:133
 msgid "Кидай мне ссылку, и я тебе скачаю любой видос! 👌"
 msgstr ""
 
-#: Source/UI/InlineKeyboards.py:29
+#: Source/UI/InlineKeyboards.py:30
 msgid "Сжатие:"
 msgstr "Compression:"
 
-#: Source/UI/InlineKeyboards.py:33
+#: Source/UI/InlineKeyboards.py:34
 msgid "Перекодирование:"
 msgstr "Recoding:"
 
-#: Source/UI/InlineKeyboards.py:37
+#: Source/UI/InlineKeyboards.py:38
 msgid "Архив:"
 msgstr "Archive:"
 
-#: Source/UI/InlineKeyboards.py:41
+#: Source/UI/InlineKeyboards.py:42
 msgid "Хранилище:"
 msgstr "Storage:"
 
-#: Source/UI/InlineKeyboards.py:49
+#: Source/UI/InlineKeyboards.py:50
 msgid "вкл."
 msgstr "ON"
 
-#: Source/UI/InlineKeyboards.py:49
+#: Source/UI/InlineKeyboards.py:50
 msgid "выкл."
 msgstr "OFF"
 
-#: Source/UI/InlineKeyboards.py:89
+#: Source/UI/InlineKeyboards.py:90
 msgid "с водяным знаком"
 msgstr "watermarked"
 
-#: Source/UI/InlineKeyboards.py:90
+#: Source/UI/InlineKeyboards.py:91
 msgid "С водяным знаком"
 msgstr "Watermarked"
 
-#: Source/UI/InlineKeyboards.py:97
+#: Source/UI/InlineKeyboards.py:98
 msgid "Только аудио"
 msgstr "Only audio"
 
-#: Source/UI/InlineKeyboards.py:190 Source/UI/InlineKeyboards.py:200
+#: Source/UI/InlineKeyboards.py:191 Source/UI/InlineKeyboards.py:201
 msgid "Выберите формат загрузки:"
 msgstr "Select download format:"
 
-#: main.py:47
+#: main.py:49
 msgid "Выгружает файл на сервер Telegram."
 msgstr "Uploads file to Telegram server."
 
-#: main.py:48
+#: main.py:50
 msgid "Название файла."
 msgstr "Filename."
 
-#: main.py:49
+#: main.py:51
 msgid "Домен сайта."
 msgstr "Domain."
 
-#: main.py:50
+#: main.py:52
 msgid "Идентификатор пользователя Telegram."
 msgstr "Telegram user ID."
 
-#: main.py:51
+#: main.py:53
 msgid "Название файла в Telegram."
 msgstr "Filename on Telegram."
 
-#: main.py:52
+#: main.py:54
 msgid "Качество видео."
 msgstr "Video quality."
 
-#: main.py:53
+#: main.py:55
 msgid "Включает режим сжатия файла Telegram."
 msgstr "Enable Telegram files compression mode."
 
-#: main.py:54
+#: main.py:56
 msgid "Помечает формат как перекодированный в стандартный."
 msgstr "Marks format as recoded."
 
-#: main.py:55
+#: main.py:57
 msgid "Помечает формат как имеющий водяной знак."
 msgstr "Marks format as watermarked."
 
-#: main.py:58
+#: main.py:60
 msgid "Выполняет вход в аккаунт."
 msgstr "Log in Telegram account."
 
-#: main.py:59
+#: main.py:61
 msgid "Номер телефона."
 msgstr "Phone number."
 
-#: main.py:60
+#: main.py:62
 msgid "API ID пользователя."
 msgstr "User API ID."
 
-#: main.py:61
+#: main.py:63
 msgid "API Hash пользователя."
 msgstr "User API Hash."
 
-#: main.py:66
+#: main.py:68
 msgid ""
 "Выводит список поддерживаемых команд. Добавьте название другой команды в "
 "качестве аргумента для подробностей."
@@ -215,7 +233,7 @@ msgstr ""
 "Displays a list of supported commands. Add the name of the other team as an "
 "argument for details."
 
-#: main.py:113
+#: main.py:116
 msgid ""
 "<b>Telegram-dlp</b> является Open Source проектом под лицензией Apache 2.0 "
 "за авторством <a href=\"https://github.com/DUB1401\">@DUB1401</a> и "
@@ -229,7 +247,7 @@ msgstr ""
 "source code and documentation are available in <a href=\"https://github.com/"
 "DUB1401/Telegram-dlp\">this</a> repository."
 
-#: main.py:124
+#: main.py:127
 msgid ""
 "Настройте <b>Telegram-dlp</b> под себя!\n"
 "\n"
@@ -266,11 +284,11 @@ msgstr ""
 "<b>Storage</b> – if the file has already been uploaded by someone before "
 "you, you can get it instantly from the storage."
 
-#: main.py:145
+#: main.py:148
 msgid "Возникли проблемы? Сообщите о них сюда:"
 msgstr "Problems with bot? Contact us:"
 
-#: main.py:168
+#: main.py:171
 msgid ""
 "Кажется, вы уже скачиваете файл. Если это не так, перезапустите бот "
 "командой /start для проверки."
@@ -278,45 +296,39 @@ msgstr ""
 "It seems that you are already downloading the file. If this is not the case, "
 "restart the bot with the /start command to check."
 
-#: main.py:174
+#: main.py:177
 msgid "Идёт получение данных..."
 msgstr "Receiving data..."
 
-#: main.py:189
+#: main.py:192
 msgid "Похоже это ссылка на плейлист или джем. А мне нужна именно на ролик 🙄"
 msgstr ""
 
-#: main.py:234
+#: main.py:237
 msgid ""
 "Эта ссылка не может быть обработана, поскольку не содержит видео. Все "
 "проверьте и отправьте мне правильную! 🤌"
 msgstr ""
 
-#: main.py:240
+#: main.py:243
 msgid ""
 "Эта ссылка не может быть обработана. Все проверьте и отправьте мне "
 "правильную! 🤌"
 msgstr ""
 
-#: main.py:276
-#, fuzzy
-#| msgid "Скачиваю аудио%s"
+#: main.py:279
 msgid "Скачиваю аудио..."
-msgstr "Downloading audio%s"
+msgstr "Downloading audio..."
 
-#: main.py:277
-#, fuzzy
-#| msgid "Выгружаю аудио в Telegram%s"
+#: main.py:280
 msgid "Выгружаю аудио в Telegram..."
-msgstr "Uploading audio%s"
+msgstr "Uploading audio..."
 
-#: main.py:278 main.py:343
-#, fuzzy
-#| msgid "Отправляю%s"
+#: main.py:281 main.py:346
 msgid "Отправляю..."
-msgstr "Sending%s"
+msgstr "Sending..."
 
-#: main.py:295 main.py:365
+#: main.py:298 main.py:368
 #, python-format
 msgid ""
 "%s\n"
@@ -324,111 +336,86 @@ msgid ""
 "<b>Результат процесса:</b>\n"
 msgstr ""
 
-#: main.py:301
-#, fuzzy
-#| msgid "Аудио скачано."
+#: main.py:304
 msgid "Аудио скачано!"
-msgstr "Audio downloaded."
+msgstr "Audio downloaded!"
 
-#: main.py:305
-#, fuzzy
-#| msgid "Аудио загружено в Telegram."
+#: main.py:308
 msgid "Аудио загружено в Telegram!"
-msgstr "Audio uploaded to Telegram."
+msgstr "Audio uploaded to Telegram!"
 
-#: main.py:311
-#, fuzzy
-#| msgid "Не удалось скачать аудио."
+#: main.py:314
 msgid ""
 "\n"
 "<b><i>Наслаждайтесь вашим аудио,"
-msgstr "Unable to download audio."
+msgstr ""
+"\n"
+"<b><i>Enjoy your audio,"
 
-#: main.py:312 main.py:389
-#, fuzzy
-#| msgid "Отправлено."
+#: main.py:315 main.py:392
 msgid "Отправлено!"
-msgstr "Sended."
+msgstr "Sended!"
 
-#: main.py:314
-#, fuzzy
-#| msgid "Не удалось отправить аудио."
+#: main.py:317
 msgid "Не удалось отправить аудио!"
-msgstr "Unable to send audio."
+msgstr "Unable to send audio!"
 
-#: main.py:316
-#, fuzzy
-#| msgid "Не удалось загрузить аудио в Telegram."
+#: main.py:319
 msgid "Не удалось загрузить аудио в Telegram!"
-msgstr "Unable to upload audio to Telegram."
+msgstr "Unable to upload audio to Telegram!"
 
-#: main.py:318
-#, fuzzy
-#| msgid "Не удалось скачать аудио."
+#: main.py:321
 msgid "Не удалось скачать аудио!"
-msgstr "Unable to download audio."
+msgstr "Unable to download audio!"
 
-#: main.py:340
-#, fuzzy
-#| msgid "Скачиваю видео%s"
+#: main.py:343
 msgid "Скачиваю видео..."
-msgstr "Downloading video%s"
+msgstr "Downloading video..."
 
-#: main.py:341
-#, fuzzy
-#| msgid "Улучшаю качество%s"
+#: main.py:344
 msgid "Улучшаю качество..."
-msgstr "Improving quality%s"
+msgstr "Improving quality..."
 
-#: main.py:342
-#, fuzzy
-#| msgid "Выгружаю видео в Telegram%s"
+#: main.py:345
 msgid "Выгружаю видео в Telegram..."
-msgstr "Uploading video to Telegram%s"
+msgstr "Uploading video to Telegram..."
 
-#: main.py:373 main.py:377
-#, fuzzy
-#| msgid "Видео скачано."
+#: main.py:376 main.py:380
 msgid "Видео скачано!"
-msgstr "Video downloaded."
+msgstr "Video downloaded!"
 
-#: main.py:375
-#, fuzzy
-#| msgid "Качество улучшено."
+#: main.py:378
 msgid "Качество улучшено!"
-msgstr "Quality improved."
+msgstr "Quality improved!"
 
-#: main.py:382
-#, fuzzy
-#| msgid "Видео загружено в Telegram."
+#: main.py:385
 msgid "Видео загружено в Telegram!"
-msgstr "Video uploaded to Telegram."
+msgstr "Video uploaded to Telegram!"
 
-#: main.py:388
-#, fuzzy
-#| msgid "Не удалось скачать видео."
+#: main.py:391
 msgid ""
 "\n"
 "<b><i>Наслаждайтесь вашим видео,"
-msgstr "Unable to download video."
+msgstr ""
+"\n"
+"<b><i>Enjoy your video,"
 
-#: main.py:391
-#, fuzzy
-#| msgid "Не удалось отправить видео."
+#: main.py:394
 msgid "Не удалось отправить видео!"
-msgstr "Unable to send video."
+msgstr "Unable to send video!"
 
-#: main.py:393
-#, fuzzy
-#| msgid "Не удалось загрузить видео в Telegram."
+#: main.py:396
 msgid "Не удалось загрузить видео в Telegram!"
-msgstr "Unable to upload video to Telegram."
+msgstr "Unable to upload video to Telegram!"
 
-#: main.py:395
-#, fuzzy
-#| msgid "Не удалось скачать видео."
+#: main.py:398
 msgid "Не удалось скачать видео!"
-msgstr "Unable to download video."
+msgstr "Unable to download video!"
+
+#~ msgid ""
+#~ "Лучший бот для скачивания не только видео 🎬, но и аудио 🎵 с YouTube, "
+#~ "TikTok, Instagram и всех других медиа площадок!"
+#~ msgstr "from dublib.Engine.GetText import _"
 
 #~ msgid ""
 #~ "<b>Telegram-dlp</b> поможет вам скачать видео или извлечь из них "

@@ -2,11 +2,10 @@ from Source.UI.Templates import Animation, StepsIndicator
 from Source.UI.InlineKeyboards import InlineKeyboards
 from Source.Core.TelethonUser import TelethonUser
 from Source.UI.TeleBotAdminPanel import Panel
-from Source.Core.GetText import GetText
 from Source.Core.Storage import Storage
 from Source.Core.YtDlp import YtDlp
 
-from Patch.Menu import ButtonsDecorators, InlineDecorators
+from Patch.Menu import ButtonsDecorators, CommandsDecorators, InlineDecorators
 from Patch.Data import INTERVAL, GenerateStartAnimation
 from Patch.Hello import AnswerName, Hello
 from Patch.YouTube import Trends
@@ -106,6 +105,7 @@ else:
 	#==========================================================================================#
 
 	AdminPanel.decorators.commands(Bot, Users, Settings["password"])
+	CommandsDecorators(Bot, Users)
 
 	@Bot.message_handler(commands = ["about"])
 	def CommandAbout(Message: types.Message):
