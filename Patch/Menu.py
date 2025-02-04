@@ -52,8 +52,8 @@ class PatchInlineKeyboards:
 	
 	def trends(self) -> types.InlineKeyboardMarkup:
 		Menu = types.InlineKeyboardMarkup()
-		News = types.InlineKeyboardButton(_("TOP 20 Videos YouTube 📹"), callback_data = "trends_news")
-		Music = types.InlineKeyboardButton(_("TOP 20 Music YouTube 🎵"), callback_data = "trends_music")
+		News = types.InlineKeyboardButton(_("TOP 20 Videos YouTube") + " 📹", callback_data = "trends_news")
+		Music = types.InlineKeyboardButton(_("TOP 20 Music YouTube") + " 🎵", callback_data = "trends_music")
 		Menu.add(News, Music, row_width = 1)
 
 		return Menu
@@ -87,7 +87,7 @@ def ButtonsDecorators(bot: TeleBot, users: UsersManager):
 			reply_markup = PatchInlineKeyboards().support()
 		)
 
-	@bot.message_handler(content_types = ["text"], regexp = _("🔥 YouTube Тренды"))
+	@bot.message_handler(content_types = ["text"], regexp = _("🔥 YouTube Trends"))
 	def Button(Message: types.Message):
 		User = users.auth(Message.from_user)
 
@@ -135,9 +135,8 @@ def InlineDecorators(bot: TeleBot, users: UsersManager, trender: Trends):
 	@bot.callback_query_handler(func = lambda Callback: Callback.data == "trends_news")
 	def InlineButton(Call: types.CallbackQuery):
 		User = users.auth(Call.from_user)
-		
 		News = trender.get_news()
-		Text = "<b>TOP 20 Videos YouTube 📹</b>\n\n"
+		Text = "<b>" + _("TOP 20 Videos YouTube") + "</b> 📹\n" + _("● Нажми на позицию\n● Скопируй ссылку\n● Отправь её боту 😉") + "\n\n"
 		for Index in range(20): Text += str(Index + 1) + ". <a href=\"" + News[Index].link + "\">" + News[Index].title + "</a>\n"
 		
 		bot.send_message(
@@ -151,9 +150,8 @@ def InlineDecorators(bot: TeleBot, users: UsersManager, trender: Trends):
 	@bot.callback_query_handler(func = lambda Callback: Callback.data == "trends_music")
 	def InlineButton(Call: types.CallbackQuery):
 		User = users.auth(Call.from_user)
-
 		Music = trender.get_music()
-		Text = "<b>TOP 20 Music YouTube 🎵</b>\n\n"
+		Text = "<b>" + _("TOP 20 Music YouTube") + "</b> 🎵\n" + _("● Нажми на позицию\n● Скопируй ссылку\n● Отправь её боту 😉") + "\n\n"
 		for Index in range(20): Text += str(Index + 1) + ". <a href=\"" + Music[Index].link + "\">" + Music[Index].title + "</a>\n"
 
 		bot.send_message(

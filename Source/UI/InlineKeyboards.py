@@ -1,9 +1,10 @@
 from Source.Core.Storage import Storage
 from Source.Core.YtDlp import YtDlp
-from Source.Core.GetText import _
 
 from dublib.TelebotUtils import UserData
 from dublib.Polyglot import Markdown
+from dublib.Engine.GetText import _
+
 from telebot import TeleBot, types
 
 import telebot

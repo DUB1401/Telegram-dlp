@@ -15,10 +15,13 @@ from dublib.Methods.Filesystem import MakeRootDirectories, ReadJSON
 from dublib.Methods.System import CheckPythonMinimalVersion, Clear
 from dublib.CLI.Terminalyzer import Command, Terminalyzer
 from dublib.TelebotUtils import UsersManager
+from dublib.Engine.GetText import GetText
 
 from telebot import types, TeleBot
 from urllib.parse import urlparse
 from time import sleep
+
+import re
 
 #==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ СКРИПТА <<<<< #
@@ -32,7 +35,7 @@ Settings = ReadJSON("Settings.json")
 Bot = TeleBot(Settings["token"])
 LANGUAGE = Settings["language"]
 
-GetText.initialize("Telegram-dlp", Settings["language"])
+GetText.initialize("Telegram-dlp", Settings["language"], "Locales")
 _ = GetText.gettext
 
 Menu.BOT_NAME = Bot.get_me().username
@@ -148,6 +151,18 @@ else:
 			parse_mode = "HTML",
 			disable_web_page_preview = True
 		)
+
+	@Bot.message_handler(func = lambda Message: re.match(r"^/dm([1-9]|1[0-9]|20)$", Message.text))
+	def CommandDownloadMusic(Message: types.Message):
+		Index = int(Message.text[3:]) - 1
+		Message.text = TrendsObject.get_music()[Index].link
+		Text(Message)
+
+	@Bot.message_handler(func = lambda Message: re.match(r"^/dn([1-9]|1[0-9]|20)$", Message.text))
+	def CommandDownloadMusic(Message: types.Message):
+		Index = int(Message.text[3:]) - 1
+		Message.text = TrendsObject.get_news()[Index].link
+		Text(Message)
 
 	#==========================================================================================#
 	# >>>>> ОБРАБОТКА REPLY-КНОПОК <<<<< #
