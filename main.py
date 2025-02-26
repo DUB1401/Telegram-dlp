@@ -1,16 +1,3 @@
-from Source.UI.Templates import Animation, StepsIndicator
-from Source.UI.InlineKeyboards import InlineKeyboards
-from Source.Core.TelethonUser import TelethonUser
-from Source.UI.TeleBotAdminPanel import Panel
-from Source.Core.Storage import Storage
-from Source.Core.YtDlp import YtDlp
-
-from Patch.Menu import ButtonsDecorators, CommandsDecorators, InlineDecorators
-from Patch.Data import INTERVAL, GenerateStartAnimation
-from Patch.Hello import AnswerName, Hello
-from Patch.YouTube import Trends
-from Patch import Menu
-
 from dublib.Methods.Filesystem import MakeRootDirectories, ReadJSON
 from dublib.Methods.System import CheckPythonMinimalVersion, Clear
 from dublib.CLI.Terminalyzer import Command, Terminalyzer
@@ -35,12 +22,25 @@ Settings = ReadJSON("Settings.json")
 Bot = TeleBot(Settings["token"])
 LANGUAGE = Settings["language"]
 
-GetText.initialize("Telegram-dlp", Settings["language"], "Locales")
+GetText.initialize("Telegram-dlp", LANGUAGE, "Locales")
 _ = GetText.gettext
+
+from Source.UI.Templates import Animation, StepsIndicator
+from Source.UI.InlineKeyboards import InlineKeyboards
+from Source.Core.TelethonUser import TelethonUser
+from Source.UI.TeleBotAdminPanel import Panel
+from Source.Core.Storage import Storage
+from Source.Core.YtDlp import YtDlp
+
+from Patch.Menu import ButtonsDecorators, CommandsDecorators, InlineDecorators
+from Patch.Data import INTERVAL, GenerateStartAnimation
+from Patch.Hello import AnswerName, Hello
+from Patch.YouTube import Trends
+from Patch import Menu
 
 Menu.BOT_NAME = Bot.get_me().username
 Menu.SUPPORT = Settings["support_contact"]
-TrendsObject = Trends()
+TrendsObject = Trends(LANGUAGE != "ru")
 
 #==========================================================================================#
 # >>>>> НАСТРОЙКА ОБРАБОТЧИКА КОМАНД <<<<< #

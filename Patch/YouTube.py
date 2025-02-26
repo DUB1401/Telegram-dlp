@@ -44,8 +44,10 @@ class Trends:
 
 		Data = list()
 		CurrentData = self.__NewsData if trend is TrendsTypes.News else self.__MusicData
-		RenderData = CurrentData["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][trend.value]["tabRenderer"]["content"]["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"][0]["shelfRenderer"]["content"]["expandedShelfContentsRenderer"]["items"]
+		Index = 3 if self.__English and trend is TrendsTypes.News else 0
 
+		RenderData = CurrentData["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][trend.value]["tabRenderer"]["content"]["sectionListRenderer"]["contents"][Index]["itemSectionRenderer"]["contents"][0]["shelfRenderer"]["content"]["expandedShelfContentsRenderer"]["items"]
+		
 		for Item in RenderData:
 			Item: dict
 			ItemLink = Item["videoRenderer"]["navigationEndpoint"]["commandMetadata"]["webCommandMetadata"]["url"]
@@ -60,8 +62,10 @@ class Trends:
 			trent – тип тренда.
 		"""
 
-		Request = ""
+		Request = "?bp=6gQJRkVleHBsb3Jl"
 		if trend is TrendsTypes.Music: Request = "?bp=4gINGgt5dG1hX2NoYXJ0cw%3D%3D"
+		if self.__English: Request += "&persist_gl=1&gl=US"
+
 		Response = requests.get(f"https://www.youtube.com/feed/trending{Request}")
 		Soup = BeautifulSoup(Response.content, "html.parser")
 		Scripts = Soup.find_all("script")
@@ -84,8 +88,13 @@ class Trends:
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
 	#==========================================================================================#
 
-	def __init__(self):
-		"""Парсер трендов YouTube."""
+	def __init__(self, english: bool = False):
+		"""
+		Парсер трендов YouTube.
+			english – запрашивать ли данные на английском.
+		"""
+
+		self.__English = english
 
 		self.__NewsUpdateDate = None
 		self.__MusicUpdateDate = None
@@ -101,7 +110,7 @@ class Trends:
 		if Delta.seconds / 3600 >= 1: self.__MusicData = self.__ParseTrendsPage(TrendsTypes.Music)
 		if not self.__MusicData: return self.__CachedMusic
 		self.__CachedMusic = self.__GetTrendsData(TrendsTypes.Music)
-
+		
 		return self.__CachedMusic
 
 	def get_news(self) -> tuple[TrendData]:

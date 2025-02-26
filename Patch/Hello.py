@@ -6,11 +6,6 @@ from telebot import TeleBot, types
 class PatchReplyKeyboards:
 	"""Генератор Reply-интерфейса."""
 
-	def __init__(self):
-		"""Генератор Reply-интерфейса."""
-
-		pass
-
 	def main(self) -> types.ReplyKeyboardMarkup:
 		"""Строит кнопочный интерфейс: главное меню."""
 
@@ -49,8 +44,7 @@ def AnswerName(bot: TeleBot, user: UserData, message: types.Message) -> bool:
 
 	if user.expected_type == "user_name":
 		Name = None
-		try:
-			Name = user.get_property("name")
+		try: Name = user.get_property("name")
 		except: pass
 
 		IsAnswered = True
