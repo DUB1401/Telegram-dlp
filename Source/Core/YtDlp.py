@@ -104,6 +104,11 @@ class YtDlp:
 				elif Width == 7680: PrettyName = "8K"
 				else: PrettyName = f"{Width}p"
 
+			elif name and name.endswith("p") and name[:-1].isdigit():
+				Width = int(name[:-1])
+				Width = min(SupportedResolutions, key = lambda SupportedResolution: abs(SupportedResolution - Width))
+				PrettyName = f"{Width}p"
+
 			if PrettyName and watermarked: PrettyName += "w"
 
 		return PrettyName
@@ -160,7 +165,10 @@ class YtDlp:
 		IsSuccess = False
 		SourceType = None
 		
-		try: SourceType = ExtendedSupport(Domain)
+		try: 
+			if Domain in [Element.value for Element in ExtendedSupport]: SourceType = ExtendedSupport(Domain)
+			else: SourceType = ExtendedSupport.Base
+			
 		except: pass
 
 		Config = self.__Configurator.get_config(SourceType)
@@ -195,7 +203,10 @@ class YtDlp:
 		IsSuccess = False
 		SourceType = None
 
-		try: SourceType = ExtendedSupport(Domain)
+		try: 
+			if Domain in [Element.value for Element in ExtendedSupport]: SourceType = ExtendedSupport(Domain)
+			else: SourceType = ExtendedSupport.Base
+			
 		except: pass
 
 		Config = self.__Configurator.get_config(SourceType)
@@ -222,7 +233,10 @@ class YtDlp:
 		SourceType = None
 		Info = None
 
-		try: SourceType = ExtendedSupport(Domain)
+		try: 
+			if Domain in [Element.value for Element in ExtendedSupport]: SourceType = ExtendedSupport(Domain)
+			else: SourceType = ExtendedSupport.Base
+
 		except: pass
 
 		Config = self.__Configurator.get_config(SourceType)

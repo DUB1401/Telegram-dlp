@@ -1,11 +1,3 @@
-from Source.UI.Templates import Animation, StepsIndicator
-from Source.UI.InlineKeyboards import InlineKeyboards
-from Source.Core.TelethonUser import TelethonUser
-from Source.UI.TeleBotAdminPanel import Panel
-
-from Source.Core.Storage import Storage
-from Source.Core.YtDlp import YtDlp
-
 from dublib.Methods.System import CheckPythonMinimalVersion, Clear
 from dublib.CLI.Terminalyzer import Command, Terminalyzer
 from dublib.Methods.Filesystem import MakeRootDirectories
@@ -30,6 +22,14 @@ Bot = TeleBot(Settings["token"])
 
 GetText.initialize("Telegram-dlp", Settings["language"], "Locales")
 _ = GetText.gettext
+
+# Импорт модулей должен происходить после инициализации gettext.
+from Source.UI.Templates import Animation, StepsIndicator
+from Source.UI.InlineKeyboards import InlineKeyboards
+from Source.Core.TelethonUser import TelethonUser
+from Source.UI.TeleBotAdminPanel import Panel
+from Source.Core.Storage import Storage
+from Source.Core.YtDlp import YtDlp
 
 #==========================================================================================#
 # >>>>> НАСТРОЙКА ОБРАБОТЧИКА КОМАНД <<<<< #

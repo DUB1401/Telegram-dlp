@@ -187,6 +187,7 @@ class Storage:
 			if Site == "vt.tiktok" or Site == "vm.tiktok.com": Site = "tiktok"
 			if "pornhub" in Site: Site = "pornhub"
 			if Site == "vkvideo.ru": Site = "vk"
+			if Site == "rutube.ru": Site = "rutube"
 			
 		except: pass
 		
@@ -233,6 +234,11 @@ class Storage:
 			elif "clip" in link:
 				VideoID = link.split("?")[0].split("/")[-1].replace("clip", "")
 			
+		if site == "rutube":
+			URL = link.split("?")[0]
+			URL = URL.rstrip("/")
+			VideoID = URL.split("/")[-1]
+
 		return VideoID
 
 	def register_file(self, site: str, id: str, quality: str | None, compression: bool, recoding: bool, watermarked: bool, message_id: int, chat_id: int):

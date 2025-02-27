@@ -5,10 +5,11 @@
 * [ВКонтакте](https://vk.com/)
 * [YouTube](https://www.youtube.com/)
 * [PornHub](https://www.pornhub.com/)
+* [Rutube](https://rutube.ru/)
 * [TikTok](https://www.tiktok.com/)
 * [Instagram](https://www.instagram.com/)
 
-Со списком остальных сайтов, работа с которыми также теоретически поддерживается, но не горантируется, можно ознакомится [здесь](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md).
+Со списком остальных сайтов, работа с которыми также теоретически поддерживается, но не гарантируется, можно ознакомится [здесь](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md).
 
 Для вывода дополнительных режимов загрузки выполните команду `/settings`.
 
