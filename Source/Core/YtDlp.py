@@ -107,7 +107,12 @@ class YtDlp:
 			elif name and name.endswith("p") and name[:-1].isdigit():
 				Width = int(name[:-1])
 				Width = min(SupportedResolutions, key = lambda SupportedResolution: abs(SupportedResolution - Width))
-				PrettyName = f"{Width}p"
+				if Width == 720: PrettyName = "HD"
+				elif Width == 1080: PrettyName = "Full HD"
+				elif Width == 2560: PrettyName = "2K"
+				elif Width == 3840: PrettyName = "4K"
+				elif Width == 7680: PrettyName = "8K"
+				else: PrettyName = f"{Width}p"
 
 			if PrettyName and watermarked: PrettyName += "w"
 
