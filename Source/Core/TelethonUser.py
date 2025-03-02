@@ -103,13 +103,9 @@ class TelethonUser:
 			Recoding = "recoding: on" if recoding else "recoding: off"
 			Watermarked = "watermarked: on" if watermarked else "watermarked: off"
 			Caption = f"{site}\n{VideoID}\n{quality}\n{Compression}\n{Recoding}\n{Watermarked}"
-
-			if name:
-				if quality != "audio": name += ".mp4"
-				os.rename(f"Temp/{user_id}/{filename}", f"Temp/{user_id}/{name}")
-
-			else:
-				name = filename
+			
+			if name: os.rename(f"Temp/{user_id}/{filename}", f"Temp/{user_id}/{name}")
+			else: name = filename
 
 			self.__Client.send_message(self.__BotName, message = Caption, file = f"Temp/{user_id}/{name}", force_document = not compression)
 			RemoveDirectoryContent(f"Temp/{user_id}")

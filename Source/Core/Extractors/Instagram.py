@@ -56,6 +56,29 @@ class Instagram(BaseExtractor):
 			f"--format {format_id}+bestaudio",
 			"--cookies yt-dlp/instagram.cookies"
 		]
-		if self._Recoding: Parameters.append("--recode mp4")
+
+		if self._Recoding:
+			Encoder = "libopenh264"
+			if self._Config.check_key("libx264") and self._Config["libx264"]: Encoder = "libx264"
+
+			RecodeCommand = [
+				"ffmpeg",
+				"-i", path,
+				"-c:v", Encoder,
+				"-preset", "ultrafast",
+				"-c:a", "aac",  
+				"-movflags", "+faststart",
+				path + ".mp4"
+			]
+
+			CleanCommand = [
+				"&&",
+				"rm", path,
+				"&&"
+				"mv", path + ".mp4", path
+			]
+
+			Command = " ".join(RecodeCommand + CleanCommand)
+			Parameters.append(f"--exec \"{Command}\"")
 
 		return not bool(self._ExecuteYtDlpCommand(Parameters))
