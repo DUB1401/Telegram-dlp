@@ -11,7 +11,8 @@ class YouTube(BaseExtractor):
 
 		Parameters = [
 			f"-o \"{path}\"",
-			f"--format {format_id}+bestaudio"
+			f"--format {format_id}+bestaudio",
+			"--cookies yt-dlp/youtube.cookies"
 		]
 		if self._Recoding: Parameters.append("--recode mp4")
 

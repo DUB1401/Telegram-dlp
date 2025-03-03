@@ -66,7 +66,8 @@ class Instagram(BaseExtractor):
 				"-i", path,
 				"-c:v", Encoder,
 				"-preset", "ultrafast",
-				"-c:a", "aac",  
+				"-c:a", "aac",
+				"-b:a", "128k",
 				"-movflags", "+faststart",
 				path + ".mp4"
 			]
