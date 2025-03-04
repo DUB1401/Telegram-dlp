@@ -5,6 +5,11 @@ import os
 
 class Instagram(BaseExtractor):
 
+	def _PostInitMethod(self):
+		"""Метод, выполняющийся после инициализации объекта."""
+
+		self._UseCookies()
+
 	def audio(self, path: str) -> bool:
 		"""
 		Получает аудиодорожку из видеоролика. Возвращает состояние успеха.
@@ -13,8 +18,7 @@ class Instagram(BaseExtractor):
 
 		Parameters = [
 			f"-o \"{path}\"",
-			"--extract-audio",
-			"--cookies yt-dlp/instagram.cookies"
+			"--extract-audio"
 		]
 		if self._Recoding: Parameters.append("--recode m4a")
 
@@ -30,8 +34,7 @@ class Instagram(BaseExtractor):
 				"--dump-json",
 				"--quiet",
 				"--no-warnings",
-				"--skip-download",
-				"--cookies yt-dlp/instagram.cookies"
+				"--skip-download"
 			]
 			Dump = self._GetYtDlpOutput(Parameters)
 			
@@ -53,8 +56,7 @@ class Instagram(BaseExtractor):
 
 		Parameters = [
 			f"-o \"{path}\"",
-			f"--format {format_id}+bestaudio",
-			"--cookies yt-dlp/instagram.cookies"
+			f"--format {format_id}+bestaudio"
 		]
 
 		if self._Recoding:
