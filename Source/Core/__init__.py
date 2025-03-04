@@ -9,3 +9,4 @@ class ExtendedSupport(enum.Enum):
 	YouTube = "youtube"
 	TikTok = "tiktok"
 	Instagram = "instagram"
+	Rutube = "rutube"

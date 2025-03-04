@@ -10,5 +10,6 @@ EXTRACTORS: dict[ExtendedSupport, BaseExtractor] = {
 	ExtendedSupport.Instagram: Instagram,
 	ExtendedSupport.TikTok: TikTok,
 	ExtendedSupport.YouTube: YouTube,
-	ExtendedSupport.VK: VK
+	ExtendedSupport.VK: VK,
+	ExtendedSupport.Rutube: BaseExtractor
 }

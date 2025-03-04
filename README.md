@@ -5,6 +5,7 @@
 * [ВКонтакте](https://vk.com/)
 * [YouTube](https://www.youtube.com/)
 * [PornHub](https://www.pornhub.com/)
+* [Rutube](https://rutube.ru/)
 * [TikTok](https://www.tiktok.com/)
 * [Instagram](https://www.instagram.com/)
 

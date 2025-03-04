@@ -1,5 +1,6 @@
 from dublib.Methods.Filesystem import ReadJSON, WriteJSON
 from dublib.Engine.Bus import ExecutionStatus
+from dublib.Methods.Data import Zerotify
 
 from urllib.parse import urlparse, parse_qs, urlencode
 from time import sleep
@@ -157,6 +158,31 @@ class Storage:
 
 		return [ChatID, MessageID]
 
+	def get_filesize_from_info(self, site: str, video_id: str, format_id: str) -> int | None:
+		"""
+		Возвращает примерный размер видео.
+			site – название сайта;
+			id – идентификатор видео.
+		"""
+
+		Info = self.get_info(site, video_id)
+		
+		Size = None
+		if not Info: return
+
+		for Format in Info["formats"]:
+			Format: dict
+
+			if Format["format_id"] == format_id and "filesize" in Format.keys():
+				Size = Zerotify(Format["filesize"])
+				break
+
+		if Size: 
+			Size /= 1024 * 1000
+			Size = int(Size)
+
+		return Size
+ 
 	def get_info(self, site: str, id: str | None) -> dict | None:
 		"""
 		Вовзаращает сохранённые данные видео, если поддерживается.
@@ -187,6 +213,7 @@ class Storage:
 			if Site == "vt.tiktok" or Site == "vm.tiktok.com": Site = "tiktok"
 			if "pornhub" in Site: Site = "pornhub"
 			if Site == "vkvideo.ru": Site = "vk"
+			if Site == "rutube.ru": Site = "rutube"
 			
 		except: pass
 		
@@ -233,6 +260,11 @@ class Storage:
 			elif "clip" in link:
 				VideoID = link.split("?")[0].split("/")[-1].replace("clip", "")
 			
+		if site == "rutube":
+			URL = link.split("?")[0]
+			URL = URL.rstrip("/")
+			VideoID = URL.split("/")[-1]
+
 		return VideoID
 
 	def register_file(self, site: str, id: str, quality: str | None, compression: bool, recoding: bool, watermarked: bool, message_id: int, chat_id: int):

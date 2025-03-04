@@ -2,6 +2,11 @@ from .Base import BaseExtractor
 
 class YouTube(BaseExtractor):
 
+	def _PostInitMethod(self):
+		"""Метод, выполняющийся после инициализации объекта."""
+
+		self._UseCookies()
+
 	def video(self, path: str, format_id: str) -> bool:
 		"""
 		Скачивает видеоролик. Возвращает состояние успеха.

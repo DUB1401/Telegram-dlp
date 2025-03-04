@@ -39,7 +39,7 @@ from Patch.YouTube import Trends
 from Patch import Menu
 
 Menu.BOT_NAME = Bot.get_me().username
-Menu.SUPPORT = Settings["support_contact"]
+Menu.SETTINGS = Settings
 TrendsObject = Trends(LANGUAGE != "ru")
 
 #==========================================================================================#

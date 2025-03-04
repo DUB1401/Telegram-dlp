@@ -1,8 +1,8 @@
 from Patch.Hello import PatchReplyKeyboards
 from Patch.YouTube import Trends
 
+from dublib.TelebotUtils import TeleCache, UsersManager
 from dublib.Methods.Filesystem import ReadJSON
-from dublib.TelebotUtils import UsersManager
 from dublib.Engine.GetText import _
 from dublib.Polyglot import HTML
 
@@ -11,7 +11,9 @@ from telebot import TeleBot, types
 from time import sleep
 
 BOT_NAME = ""
-SUPPORT = ""
+SETTINGS = None
+
+Cacher = TeleCache()
 
 class PatchInlineKeyboards:
 	"""Генератор кнопочного интерфейса."""
@@ -64,9 +66,16 @@ def ButtonsDecorators(bot: TeleBot, users: UsersManager):
 	@bot.message_handler(content_types = ["text"], regexp = _("📢 Поделиться с друзьями"))
 	def Button(Message: types.Message):
 		User = users.auth(Message.from_user)
+		File = Settings["share_image"]
+
+		if not Settings["share_image"].startswith("http"):
+			Cacher.set_options(SETTINGS["token"], SETTINGS["trusted_sources_id"][0])
+			CachedFile = Cacher.get_cached_file(Settings["share_image"], type = types.InputMediaPhoto)
+			File = CachedFile.id
+
 		bot.send_photo(
 			Message.chat.id,
-			photo = Settings["share_image"],
+			photo = File,
 			caption = "@%s\n@%s\n@%s\n\n" % (BOT_NAME, BOT_NAME, BOT_NAME) + Settings["bot_title"] + "\n" + _("Лучший бот для скачивания видео 🎬 и аудио 🎵 со всех популярных медиа площадок!") + "\n\n<b><i>" + _("Пользуйся и делись с друзьями!") + "</i></b>",
 			reply_markup = PatchInlineKeyboards().share(),
 			parse_mode = "HTML"
@@ -83,7 +92,7 @@ def ButtonsDecorators(bot: TeleBot, users: UsersManager):
 		User = users.auth(Message.from_user)
 		bot.send_message(
 			chat_id = Message.chat.id,
-			text = _("Друзья, если у вас вдруг возникают какие-то проблемы при скачивании, то не стесняйтесь, делайте скриншот и пишите вот сюда 👇👇👇\n\n@%s\n\nСделаем наш сервис для вас еще лучше! 😉") % SUPPORT,
+			text = _("Друзья, если у вас вдруг возникают какие-то проблемы при скачивании, то не стесняйтесь, делайте скриншот и пишите вот сюда 👇👇👇\n\n@%s\n\nСделаем наш сервис для вас еще лучше! 😉") % SETTINGS["support_contact"],
 			reply_markup = PatchInlineKeyboards().support()
 		)
 
@@ -136,7 +145,7 @@ def InlineDecorators(bot: TeleBot, users: UsersManager, trender: Trends):
 	def InlineButton(Call: types.CallbackQuery):
 		User = users.auth(Call.from_user)
 		News = trender.get_news()
-		Text = "<b>" + _("TOP 20 Videos YouTube") + "</b> 📹\n" + _("● Нажми на позицию\n● Скопируй ссылку\n● Отправь её боту 😉") + "\n\n"
+		Text = "<b>" + _("TOP 20 Videos YouTube") + "</b> 📹\n\n" + _("● Нажми на позицию\n● Скопируй ссылку\n● Отправь её боту 😉") + "\n\n"
 		Count = 20 if len(News) > 20 else len(News)
 		for Index in range(20): Text += str(Index + 1) + ". <a href=\"" + News[Index].link + "\">" + News[Index].title + "</a>\n"
 		
@@ -152,7 +161,7 @@ def InlineDecorators(bot: TeleBot, users: UsersManager, trender: Trends):
 	def InlineButton(Call: types.CallbackQuery):
 		User = users.auth(Call.from_user)
 		Music = trender.get_music()
-		Text = "<b>" + _("TOP 20 Music YouTube") + "</b> 🎵\n" + _("● Нажми на позицию\n● Скопируй ссылку\n● Отправь её боту 😉") + "\n\n"
+		Text = "<b>" + _("TOP 20 Music YouTube") + "</b> 🎵\n\n" + _("● Нажми на позицию\n● Скопируй ссылку\n● Отправь её боту 😉") + "\n\n"
 		Count = 20 if len(Music) > 20 else len(Music)
 		for Index in range(Count): Text += str(Index + 1) + ". <a href=\"" + Music[Index].link + "\">" + Music[Index].title + "</a>\n"
 

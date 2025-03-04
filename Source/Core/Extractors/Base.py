@@ -19,10 +19,16 @@ class BaseExtractor:
 		"""
 
 		AdditionalParameters = " ".join(parameters)
-		Command = f"python3.{sys.version_info[1]} yt-dlp/yt-dlp \"{self._Link}\" {self._Proxy} {AdditionalParameters}" 
+		Command = f"python3.{sys.version_info[1]} yt-dlp/yt-dlp \"{self._Link}\" {self._Proxy} {self._Cookies} {AdditionalParameters}" 
 
 		return subprocess.getoutput(Command)
 	
+	def _UseCookies(self):
+		"""Включает использование файла куков в базовых методах."""
+
+		Domain = type(self).__name__.lower()
+		if Domain != "baseextractor": self._Cookies = f"--cookies yt-dlp/{Domain}.cookies"
+
 	def _ExecuteYtDlpCommand(self, parameters: list[str] = list()) -> int:
 		"""
 		Выполняет команду при помощи yt-dlp. Возвращает код завершения процесса.
@@ -30,9 +36,18 @@ class BaseExtractor:
 		"""
 
 		AdditionalParameters = " ".join(parameters)
-		Command = f"python3.{sys.version_info[1]} yt-dlp/yt-dlp \"{self._Link}\" {self._Proxy} {AdditionalParameters}" 
+		Command = f"python3.{sys.version_info[1]} yt-dlp/yt-dlp \"{self._Link}\" {self._Proxy} {self._Cookies} {AdditionalParameters}" 
 
 		return os.system(Command)
+
+	#==========================================================================================#
+	# >>>>> ПЕРЕОПРЕДЕЛЯЕМЫЕ МЕТОДЫ <<<<< #
+	#==========================================================================================#
+
+	def _PostInitMethod(self):
+		"""Метод, выполняющийся после инициализации объекта."""
+
+		pass
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -53,6 +68,9 @@ class BaseExtractor:
 		self._Recoding = recoding
 
 		self._Proxy = f"--proxy {self._Config.proxy}" if self._Config.proxy else ""
+		self._Cookies = ""
+
+		self._PostInitMethod()
 
 	#==========================================================================================#
 	# >>>>> ПЕРЕОПРЕДЕЛЯЕМЫЕ МЕТОДЫ <<<<< #

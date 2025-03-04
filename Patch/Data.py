@@ -2,7 +2,7 @@ from Source.UI.Templates import Animation
 
 from dublib.Engine.GetText import _
 
-INTERVAL = 1.0
+INTERVAL = 1.1
 
 def GenerateStartAnimation(name: str) -> Animation:
 	"""
