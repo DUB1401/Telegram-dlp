@@ -16,7 +16,7 @@ class YouTube(BaseExtractor):
 
 		Parameters = [
 			f"-o \"{path}\"",
-			f"--format {format_id}+bestaudio"
+			f"--format {format_id}+ba[ext=m4a]/ba[ext=mp4]/bestaudio"
 		]
 		if self._Recoding: Parameters.append("--recode mp4")
 
