@@ -268,7 +268,7 @@ else:
 		else:
 			SI.send()
 			SI.start_animation(ProgressAnimation)
-			Result = Downloader.download_audio(Link, f"Temp/{User.id}/", VideoID, recoding = Recoding)
+			Result = Downloader.download_audio(Link, f"Temp/{User.id}", VideoID, recoding = Recoding)
 			
 			if Result:
 				SI.next(_("Аудио скачано."))
@@ -334,7 +334,7 @@ else:
 			User.set_property("is_downloading", True)
 			SI.send()
 			SI.start_animation(ProgressAnimation)
-			Result = Downloader.download_video(Link, f"Temp/{User.id}/", VideoID, FormatID, recoding = Recoding)
+			Result = Downloader.download_video(Link, f"Temp/{User.id}", VideoID, FormatID, recoding = Recoding)
 
 			if Result:
 
