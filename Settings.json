@@ -6,6 +6,7 @@
 	"password": "1234",
 	"quality_improvement": false,
 	"one_watermarked": true,
+	"max_file_size": 3950,
 	"lib_autoupdate": false,
 	"configs": {}
 }

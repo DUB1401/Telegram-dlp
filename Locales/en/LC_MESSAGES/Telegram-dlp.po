@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2025-02-26 21:17+0300\n"
-"PO-Revision-Date: 2025-02-26 21:20+0300\n"
+"POT-Creation-Date: 2025-03-26 20:34+0300\n"
+"PO-Revision-Date: 2025-03-26 20:35+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en\n"
@@ -17,19 +17,19 @@ msgstr ""
 msgid "А пока ждёте, посмотрите лучше наш мультик! 😉"
 msgstr "Enjoy our cartoon while waiting! 😉"
 
-#: Patch/Hello.py:13 Patch/Menu.py:90 Patch/Menu.py:96
+#: Patch/Hello.py:13 Patch/Menu.py:99 Patch/Menu.py:105
 msgid "🔥 YouTube Trends"
 msgstr ""
 
-#: Patch/Hello.py:14 Patch/Menu.py:81
+#: Patch/Hello.py:14 Patch/Menu.py:90
 msgid "💬 Поддержка"
 msgstr "💬 Support"
 
-#: Patch/Hello.py:15 Patch/Menu.py:75
+#: Patch/Hello.py:15 Patch/Menu.py:84
 msgid "♻️ Изменить имя"
 msgstr "♻️ Change name"
 
-#: Patch/Hello.py:16 Patch/Menu.py:64
+#: Patch/Hello.py:16 Patch/Menu.py:66
 msgid "📢 Поделиться с друзьями"
 msgstr "📢 Share with friends"
 
@@ -57,15 +57,15 @@ msgstr "Nice to meet you,"
 msgid "А устройство я надеюсь ты не сменил?"
 msgstr "I hope you haven`t changed your device?"
 
-#: Patch/Menu.py:28
+#: Patch/Menu.py:30
 msgid "Всё ясно!"
 msgstr "I get it!"
 
-#: Patch/Menu.py:37
+#: Patch/Menu.py:39
 msgid "Поделиться"
 msgstr "Share"
 
-#: Patch/Menu.py:38 Patch/Menu.py:70
+#: Patch/Menu.py:40 Patch/Menu.py:79
 msgid ""
 "Лучший бот для скачивания видео 🎬 и аудио 🎵 со всех популярных медиа "
 "площадок!"
@@ -73,27 +73,27 @@ msgstr ""
 "The best bot for downloading videos 🎬 and audio 🎵 from all popular media "
 "platforms!"
 
-#: Patch/Menu.py:47
+#: Patch/Menu.py:49
 msgid "Спасибо, все хорошо!"
 msgstr "Everything`s fine, thanks!"
 
-#: Patch/Menu.py:55 Patch/Menu.py:139
+#: Patch/Menu.py:57 Patch/Menu.py:148
 msgid "TOP 20 Videos YouTube"
 msgstr ""
 
-#: Patch/Menu.py:56 Patch/Menu.py:154
+#: Patch/Menu.py:58 Patch/Menu.py:164
 msgid "TOP 20 Music YouTube"
 msgstr ""
 
-#: Patch/Menu.py:70
+#: Patch/Menu.py:79
 msgid "Пользуйся и делись с друзьями!"
 msgstr "Use it and share with your friends!"
 
-#: Patch/Menu.py:78
+#: Patch/Menu.py:87
 msgid "Ну и какое на этот раз?) Удиви! 😄"
 msgstr "What will it be this time?) Surprise me! 😄"
 
-#: Patch/Menu.py:86
+#: Patch/Menu.py:95
 #, python-format
 msgid ""
 "Друзья, если у вас вдруг возникают какие-то проблемы при скачивании, то не "
@@ -110,7 +110,7 @@ msgstr ""
 "\n"
 "We`ll improve the service performance for you! 😉"
 
-#: Patch/Menu.py:107
+#: Patch/Menu.py:116
 #, python-format
 msgid ""
 "@%s предназначен для скачивания видео 📺 и аудио 📻 с самых популярных медиа "
@@ -135,15 +135,15 @@ msgstr ""
 " \n"
 "<b><i>Enjoy and share it with your friends!</i></b>"
 
-#: Patch/Menu.py:131
+#: Patch/Menu.py:140
 msgid "Спасибо! Это для лучшей адаптации видео под тебя!"
 msgstr "Thanks! It`s meant to make the video to your liking!"
 
-#: Patch/Menu.py:133
+#: Patch/Menu.py:142
 msgid "Кидай мне ссылку, и я тебе скачаю любой видос! 👌"
 msgstr "Send me the link, and I`ll download any video for you! 👌"
 
-#: Patch/Menu.py:139 Patch/Menu.py:154
+#: Patch/Menu.py:148 Patch/Menu.py:164
 msgid ""
 "● Нажми на позицию\n"
 "● Скопируй ссылку\n"
@@ -349,11 +349,11 @@ msgstr "Downloading audio..."
 msgid "Выгружаю аудио в Telegram..."
 msgstr "Uploading audio to Telegram..."
 
-#: main.py:295 main.py:360
+#: main.py:295 main.py:365
 msgid "Отправляю..."
 msgstr "Sending..."
 
-#: main.py:312 main.py:382
+#: main.py:312 main.py:387
 #, python-format
 msgid ""
 "%s\n"
@@ -380,7 +380,7 @@ msgstr ""
 "\n"
 "<b><i>Enjoy your audio,"
 
-#: main.py:329 main.py:406
+#: main.py:329 main.py:411
 msgid "Отправлено!"
 msgstr "Sent!"
 
@@ -396,31 +396,35 @@ msgstr "Failed to upload the audio to Telegram!"
 msgid "Не удалось скачать аудио!"
 msgstr "Failed to download the audio!"
 
-#: main.py:357
+#: main.py:358
+msgid "Видео слишком большое. Такое не поместится в Telegram 😬"
+msgstr ""
+
+#: main.py:362
 msgid "Скачиваю видео..."
 msgstr "Downloading the video..."
 
-#: main.py:358
+#: main.py:363
 msgid "Улучшаю качество..."
 msgstr "Improving quality..."
 
-#: main.py:359
+#: main.py:364
 msgid "Выгружаю видео в Telegram..."
 msgstr "Uploading the video to Telegram..."
 
-#: main.py:390 main.py:394
+#: main.py:395 main.py:399
 msgid "Видео скачано!"
 msgstr "Video downloaded!"
 
-#: main.py:392
+#: main.py:397
 msgid "Качество улучшено!"
 msgstr "Quality improved!"
 
-#: main.py:399
+#: main.py:404
 msgid "Видео загружено в Telegram!"
 msgstr "Video uploaded to Telegram!"
 
-#: main.py:405
+#: main.py:410
 msgid ""
 "\n"
 "<b><i>Наслаждайтесь вашим видео,"
@@ -428,15 +432,15 @@ msgstr ""
 "\n"
 "<b><i>Enjoy your video,"
 
-#: main.py:408
+#: main.py:413
 msgid "Не удалось отправить видео!"
 msgstr "Failed to send the video!"
 
-#: main.py:410
+#: main.py:415
 msgid "Не удалось загрузить видео в Telegram!"
 msgstr "Failed to upload the video to Telegram!"
 
-#: main.py:412
+#: main.py:417
 msgid "Не удалось скачать видео!"
 msgstr "Failed to download the video!"
 

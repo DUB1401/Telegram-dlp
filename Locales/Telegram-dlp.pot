@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2025-02-26 21:17+0300\n"
+"POT-Creation-Date: 2025-03-26 20:34+0300\n"
 "PO-Revision-Date: 2024-12-08 09:11+0300\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -20,19 +20,19 @@ msgstr ""
 msgid "А пока ждёте, посмотрите лучше наш мультик! 😉"
 msgstr ""
 
-#: Patch/Hello.py:13 Patch/Menu.py:90 Patch/Menu.py:96
+#: Patch/Hello.py:13 Patch/Menu.py:99 Patch/Menu.py:105
 msgid "🔥 YouTube Trends"
 msgstr ""
 
-#: Patch/Hello.py:14 Patch/Menu.py:81
+#: Patch/Hello.py:14 Patch/Menu.py:90
 msgid "💬 Поддержка"
 msgstr ""
 
-#: Patch/Hello.py:15 Patch/Menu.py:75
+#: Patch/Hello.py:15 Patch/Menu.py:84
 msgid "♻️ Изменить имя"
 msgstr ""
 
-#: Patch/Hello.py:16 Patch/Menu.py:64
+#: Patch/Hello.py:16 Patch/Menu.py:66
 msgid "📢 Поделиться с друзьями"
 msgstr ""
 
@@ -60,39 +60,39 @@ msgstr ""
 msgid "А устройство я надеюсь ты не сменил?"
 msgstr ""
 
-#: Patch/Menu.py:28
+#: Patch/Menu.py:30
 msgid "Всё ясно!"
 msgstr ""
 
-#: Patch/Menu.py:37
+#: Patch/Menu.py:39
 msgid "Поделиться"
 msgstr ""
 
-#: Patch/Menu.py:38 Patch/Menu.py:70
+#: Patch/Menu.py:40 Patch/Menu.py:79
 msgid "Лучший бот для скачивания видео 🎬 и аудио 🎵 со всех популярных медиа площадок!"
 msgstr ""
 
-#: Patch/Menu.py:47
+#: Patch/Menu.py:49
 msgid "Спасибо, все хорошо!"
 msgstr ""
 
-#: Patch/Menu.py:55 Patch/Menu.py:139
+#: Patch/Menu.py:57 Patch/Menu.py:148
 msgid "TOP 20 Videos YouTube"
 msgstr ""
 
-#: Patch/Menu.py:56 Patch/Menu.py:154
+#: Patch/Menu.py:58 Patch/Menu.py:164
 msgid "TOP 20 Music YouTube"
 msgstr ""
 
-#: Patch/Menu.py:70
+#: Patch/Menu.py:79
 msgid "Пользуйся и делись с друзьями!"
 msgstr ""
 
-#: Patch/Menu.py:78
+#: Patch/Menu.py:87
 msgid "Ну и какое на этот раз?) Удиви! 😄"
 msgstr ""
 
-#: Patch/Menu.py:86
+#: Patch/Menu.py:95
 #, python-format
 msgid ""
 "Друзья, если у вас вдруг возникают какие-то проблемы при скачивании, то не стесняйтесь, делайте скриншот и пишите вот сюда 👇👇👇\n"
@@ -102,7 +102,7 @@ msgid ""
 "Сделаем наш сервис для вас еще лучше! 😉"
 msgstr ""
 
-#: Patch/Menu.py:107
+#: Patch/Menu.py:116
 #, python-format
 msgid ""
 "@%s предназначен для скачивания видео 📺 и аудио 📻 с самых популярных медиа площадок, таких как: VK, YouTube, TikTok, Instagram и др.\n"
@@ -114,15 +114,15 @@ msgid ""
 "<b><i>Наслаждайтесь, и делитесь с друзьями!</i></b>"
 msgstr ""
 
-#: Patch/Menu.py:131
+#: Patch/Menu.py:140
 msgid "Спасибо! Это для лучшей адаптации видео под тебя!"
 msgstr ""
 
-#: Patch/Menu.py:133
+#: Patch/Menu.py:142
 msgid "Кидай мне ссылку, и я тебе скачаю любой видос! 👌"
 msgstr ""
 
-#: Patch/Menu.py:139 Patch/Menu.py:154
+#: Patch/Menu.py:148 Patch/Menu.py:164
 msgid ""
 "● Нажми на позицию\n"
 "● Скопируй ссылку\n"
@@ -274,11 +274,11 @@ msgstr ""
 msgid "Выгружаю аудио в Telegram..."
 msgstr ""
 
-#: main.py:295 main.py:360
+#: main.py:295 main.py:365
 msgid "Отправляю..."
 msgstr ""
 
-#: main.py:312 main.py:382
+#: main.py:312 main.py:387
 #, python-format
 msgid ""
 "%s\n"
@@ -300,7 +300,7 @@ msgid ""
 "<b><i>Наслаждайтесь вашим аудио,"
 msgstr ""
 
-#: main.py:329 main.py:406
+#: main.py:329 main.py:411
 msgid "Отправлено!"
 msgstr ""
 
@@ -316,44 +316,48 @@ msgstr ""
 msgid "Не удалось скачать аудио!"
 msgstr ""
 
-#: main.py:357
+#: main.py:358
+msgid "Видео слишком большое. Такое не поместится в Telegram 😬"
+msgstr ""
+
+#: main.py:362
 msgid "Скачиваю видео..."
 msgstr ""
 
-#: main.py:358
+#: main.py:363
 msgid "Улучшаю качество..."
 msgstr ""
 
-#: main.py:359
+#: main.py:364
 msgid "Выгружаю видео в Telegram..."
 msgstr ""
 
-#: main.py:390 main.py:394
+#: main.py:395 main.py:399
 msgid "Видео скачано!"
 msgstr ""
 
-#: main.py:392
+#: main.py:397
 msgid "Качество улучшено!"
 msgstr ""
 
-#: main.py:399
+#: main.py:404
 msgid "Видео загружено в Telegram!"
 msgstr ""
 
-#: main.py:405
+#: main.py:410
 msgid ""
 "\n"
 "<b><i>Наслаждайтесь вашим видео,"
 msgstr ""
 
-#: main.py:408
+#: main.py:413
 msgid "Не удалось отправить видео!"
 msgstr ""
 
-#: main.py:410
+#: main.py:415
 msgid "Не удалось загрузить видео в Telegram!"
 msgstr ""
 
-#: main.py:412
+#: main.py:417
 msgid "Не удалось скачать видео!"
 msgstr ""

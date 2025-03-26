@@ -1,4 +1,4 @@
 -r Source/UI/TeleBotAdminPanel/requirements.txt
 -r Patch/requirements.txt
 Telethon
-dublib==0.16.2
+dublib==0.17.0

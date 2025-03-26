@@ -69,20 +69,16 @@ class Trends:
 		Response = requests.get(f"https://www.youtube.com/feed/trending{Request}")
 		Soup = BeautifulSoup(Response.content, "html.parser")
 		Scripts = Soup.find_all("script")
-		Pattern = re.compile(r"var ytInitialData = (.*?);")
 
 		for Script in Scripts:
 			Script: BeautifulSoup
 			ScriptContent = Script.get_text()
-			
-			if ScriptContent:
-				Match = Pattern.search(ScriptContent)
 
-				if Match:
-					if trend is TrendsTypes.News: self.__NewsUpdateDate = datetime.now()
-					elif trend is TrendsTypes.Music: self.__MusicUpdateDate = datetime.now()
-					
-					return json.loads(Match.group(1))
+			if ScriptContent and "var ytInitialData =" in ScriptContent:
+				if trend is TrendsTypes.News: self.__NewsUpdateDate = datetime.now()
+				elif trend is TrendsTypes.Music: self.__MusicUpdateDate = datetime.now()
+				
+				return json.loads(ScriptContent[20:-1])
 
 	#==========================================================================================#
 	# >>>>> ПУБЛИЧНЫЕ МЕТОДЫ <<<<< #
@@ -98,13 +94,23 @@ class Trends:
 
 		self.__NewsUpdateDate = None
 		self.__MusicUpdateDate = None
-		self.__NewsData = self.__ParseTrendsPage(TrendsTypes.News)
-		self.__MusicData = self.__ParseTrendsPage(TrendsTypes.Music)
+
+		self.__NewsData = None
+		self.__MusicData = None
+
+		try: self.__NewsData = self.__ParseTrendsPage(TrendsTypes.News)
+		except: pass
+
+		try: self.__MusicData = self.__ParseTrendsPage(TrendsTypes.Music)
+		except: pass
+
 		self.__CachedNews = tuple()
 		self.__CachedMusic = tuple()
 
 	def get_music(self) -> tuple[TrendData]:
 		"""Возвращает кортеж данных трендов музыки."""
+
+		if not self.__MusicUpdateDate: self.__MusicData = self.__ParseTrendsPage(TrendsTypes.Music)
 
 		Delta = datetime.now() - self.__MusicUpdateDate
 		if Delta.seconds / 3600 >= 1: self.__MusicData = self.__ParseTrendsPage(TrendsTypes.Music)
@@ -115,6 +121,8 @@ class Trends:
 
 	def get_news(self) -> tuple[TrendData]:
 		"""Возвращает кортеж данных трендов новостей."""
+
+		if not self.__NewsUpdateDate: self.__NewsData = self.__ParseTrendsPage(TrendsTypes.News)
 
 		Delta = datetime.now() - self.__NewsUpdateDate
 		if Delta.seconds / 3600 >= 1: self.__NewsData = self.__ParseTrendsPage(TrendsTypes.News)

@@ -19,7 +19,7 @@ class YtDlp:
 	def version(self) -> str:
 		"""Версия библиотеки yt-dlp по умолчанию."""
 
-		return "2025.01.15"
+		return "2025.03.26"
 
 	#==========================================================================================#
 	# >>>>> ПРИВАТНЫЕ МЕТОДЫ <<<<< #
@@ -204,7 +204,7 @@ class YtDlp:
 		else: RemoveDirectoryContent(directory)
 
 		Domain = self.__Storage.parse_site_name(link)
-		Path = f"{directory}{filename}.%(ext)s"
+		Path = f"{directory}/{filename}.%(ext)s"
 		IsSuccess = False
 		SourceType = None
 
@@ -225,7 +225,7 @@ class YtDlp:
 			else: IsSuccess = BaseExtractor(link, Config, recoding).video(Path, format_id)
 
 		except Exception as ExceptionData: print(ExceptionData)
-		
+
 		if IsSuccess: return self.__GetFilename(directory)
 
 	def get_info(self, link: str) -> dict | None:

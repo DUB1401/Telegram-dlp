@@ -312,7 +312,7 @@ else:
 			SI.set_title(_("%s\n\n<b>Результат процесса:</b>\n"))
 			SI.send()
 			SI.start_animation(ProgressAnimation, GenerateStartAnimation(Episodes["name"]))
-			Result = Downloader.download_audio(Link, f"Temp/{User.id}/", VideoID, recoding = Recoding)
+			Result = Downloader.download_audio(Link, f"Temp/{User.id}", VideoID, recoding = Recoding)
 			
 			if Result:
 				SI.next(_("Аудио скачано!"))
@@ -350,8 +350,13 @@ else:
 		FormatID = Query.split("+")[1]
 		Site = User.get_property("site")
 		Name = User.get_property("filename")
+		Size = StorageBox.get_filesize_from_info(Site, VideoID, FormatID)
 		Compression = User.get_property("option_compression")
 		Recoding = User.get_property("option_recoding")
+		
+		if Size and Size > Settings["max_file_size"]:
+			Bot.send_message(User.id, _("Видео слишком большое. Такое не поместится в Telegram 😬"))
+			return
 
 		Procedures = [
 			_("Скачиваю видео..."),
@@ -382,7 +387,7 @@ else:
 			SI.set_title(_("%s\n\n<b>Результат процесса:</b>\n"))
 			SI.send()
 			SI.start_animation(ProgressAnimation, GenerateStartAnimation(Episodes["name"]))
-			Result = Downloader.download_video(Link, f"Temp/{User.id}/", VideoID, FormatID, recoding = Recoding)
+			Result = Downloader.download_video(Link, f"Temp/{User.id}", VideoID, FormatID, recoding = Recoding)
 			
 			if Result:
 

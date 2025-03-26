@@ -160,7 +160,7 @@ class Storage:
 
 	def get_filesize_from_info(self, site: str, video_id: str, format_id: str) -> int | None:
 		"""
-		Возвращает примерный размер видео.
+		Возвращает примерный размер видео в MB.
 			site – название сайта;
 			id – идентификатор видео.
 		"""
@@ -173,13 +173,25 @@ class Storage:
 		for Format in Info["formats"]:
 			Format: dict
 
-			if Format["format_id"] == format_id and "filesize" in Format.keys():
-				Size = Zerotify(Format["filesize"])
-				break
+			if Format["format_id"] == format_id:
 
-		if Size: 
-			Size /= 1024 * 1000
-			Size = int(Size)
+				if "filesize" in Format.keys():
+					Size = Zerotify(Format["filesize"])
+
+					if Size: 
+						Size /= 1024 * 1000
+						Size = int(Size)
+
+					break
+
+				elif "filesize_approx" in Format.keys():
+					Size = Zerotify(Format["filesize_approx"])
+
+					if Size: 
+						Size /= 1024 * 1000
+						Size = int(Size)
+
+					break
 
 		return Size
  

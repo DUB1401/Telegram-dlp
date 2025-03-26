@@ -70,8 +70,8 @@ def ButtonsDecorators(bot: TeleBot, users: UsersManager):
 
 		if not Settings["share_image"].startswith("http"):
 			Cacher.set_options(SETTINGS["token"], SETTINGS["trusted_sources_id"][0])
-			CachedFile = Cacher.get_cached_file(Settings["share_image"], type = types.InputMediaPhoto)
-			File = CachedFile.id
+			CachedFile = Cacher.get_real_cached_file(Settings["share_image"], autoupload_type = types.InputMediaPhoto)
+			File = CachedFile.file_id
 
 		bot.send_photo(
 			Message.chat.id,
