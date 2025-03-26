@@ -304,8 +304,13 @@ else:
 		FormatID = Query.split("+")[1]
 		Site = User.get_property("site")
 		Name = User.get_property("filename")
+		Size = StorageBox.get_filesize_from_info(Site, VideoID, FormatID)
 		Compression = User.get_property("option_compression")
 		Recoding = User.get_property("option_recoding")
+		
+		if Size and Size > Settings["max_file_size"]:
+			Bot.send_message(User.id, _("Видео слишком большое."))
+			return
 
 		ProgressAnimation = Animation()
 		ProgressAnimation.set_interval(1)
