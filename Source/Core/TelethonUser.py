@@ -1,10 +1,10 @@
-from dublib.Methods.Filesystem import RemoveDirectoryContent
 from dublib.Methods.Filesystem import ReadJSON, WriteJSON
 from dublib.CLI.TextStyler import TextStyler, Styles
 
-from telethon.sync import TelegramClient
-
 import os
+
+from telethon.sync import TelegramClient
+from sqlite3 import OperationalError
 
 class TelethonUser:
 	"""Имитатор пользователя."""
@@ -36,9 +36,13 @@ class TelethonUser:
 	def initialize(self) -> TelegramClient:
 		"""Инициализирует пользователя."""
 
-		SessionData = ReadJSON("Data/Account.json")
-		self.__Client = TelegramClient("Data/Account.session", SessionData["api_id"], SessionData["api_hash"], system_version = "4.16.30-vxCUSTOM")
-		self.__Client.connect()
+		while not self.__Client:
+			try:
+				SessionData = ReadJSON("Data/Account.json")
+				self.__Client = TelegramClient("Data/Account.session", SessionData["api_id"], SessionData["api_hash"], system_version = "4.16.30-vxCUSTOM")
+				self.__Client.connect()
+
+			except (OperationalError, OSError, RuntimeError): self.__Client = None
 
 		return self.__Client
 
@@ -104,12 +108,10 @@ class TelethonUser:
 			Watermarked = "watermarked: on" if watermarked else "watermarked: off"
 			Caption = f"{site}\n{VideoID}\n{quality}\n{Compression}\n{Recoding}\n{Watermarked}"
 			
-			if name: os.rename(f"Temp/{user_id}/{filename}", f"Temp/{user_id}/{name}")
+			if name: os.rename(f"Temp/{user_id}/{quality}/{filename}", f"Temp/{user_id}/{quality}/{name}")
 			else: name = filename
 
-			self.__Client.send_message(self.__BotName, message = Caption, file = f"Temp/{user_id}/{name}", force_document = not compression)
-			RemoveDirectoryContent(f"Temp/{user_id}")
-			os.rmdir(f"Temp/{user_id}")
+			self.__Client.send_message(self.__BotName, message = Caption, file = f"Temp/{user_id}/{quality}/{name}", force_document = not compression)
 			IsSuccess = True
 
 		except Exception as ExceptionData: print(ExceptionData)

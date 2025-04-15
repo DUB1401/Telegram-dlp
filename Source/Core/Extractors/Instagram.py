@@ -56,7 +56,8 @@ class Instagram(BaseExtractor):
 
 		Parameters = [
 			f"-o \"{path}\"",
-			f"--format {format_id}+bestaudio"
+			f"--format {format_id}+bestaudio",
+			"--no-playlist"
 		]
 
 		if self._Recoding:
@@ -65,20 +66,20 @@ class Instagram(BaseExtractor):
 
 			RecodeCommand = [
 				"ffmpeg",
-				"-i", path,
+				"-i", f"\'{path}\'",
 				"-c:v", Encoder,
 				"-preset", "ultrafast",
 				"-c:a", "aac",
 				"-b:a", "128k",
 				"-movflags", "+faststart",
-				path + ".mp4"
+				f"\'{path}.mp4\'"
 			]
 
 			CleanCommand = [
 				"&&",
-				"rm", path,
-				"&&"
-				"mv", path + ".mp4", path
+				"rm", f"\'{path}\'",
+				"&&",
+				"mv", f"\'{path}.mp4\'", f"\'{path}\'"
 			]
 
 			Command = " ".join(RecodeCommand + CleanCommand)

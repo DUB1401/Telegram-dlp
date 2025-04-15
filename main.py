@@ -1,3 +1,8 @@
+from Source.Core.TelethonUser import TelethonUser
+from Source.Core.Uploader import Uploader
+from Source.Core.Storage import Storage
+from Source.Core.YtDlp import YtDlp
+
 from dublib.Methods.System import CheckPythonMinimalVersion, Clear
 from dublib.CLI.Terminalyzer import Command, Terminalyzer
 from dublib.Methods.Filesystem import MakeRootDirectories
@@ -5,9 +10,11 @@ from dublib.TelebotUtils import UsersManager
 from dublib.Methods.Filesystem import ReadJSON
 from dublib.Engine.GetText import GetText
 
-from telebot import types, TeleBot
+from threading import Thread
 from urllib.parse import urlparse
 from time import sleep
+
+from telebot import types, TeleBot
 
 #==========================================================================================#
 # >>>>> ИНИЦИАЛИЗАЦИЯ СКРИПТА <<<<< #
@@ -23,13 +30,10 @@ Bot = TeleBot(Settings["token"])
 GetText.initialize("Telegram-dlp", Settings["language"], "Locales")
 _ = GetText.gettext
 
-# Импорт модулей должен происходить после инициализации gettext.
-from Source.UI.Templates import Animation, StepsIndicator
+# Импорт модулей, требующих перевода, должен происходить после инициализации gettext.
+from Source.UI.Templates import StepsIndicator
 from Source.UI.InlineKeyboards import InlineKeyboards
-from Source.Core.TelethonUser import TelethonUser
 from Source.UI.TeleBotAdminPanel import Panel
-from Source.Core.Storage import Storage
-from Source.Core.YtDlp import YtDlp
 
 #==========================================================================================#
 # >>>>> НАСТРОЙКА ОБРАБОТЧИКА КОМАНД <<<<< #
@@ -90,6 +94,7 @@ else:
 	Users = UsersManager("Data/Users")
 	StorageBox = Storage("Storage")
 	Downloader = YtDlp(StorageBox, Settings)
+	UploaderObject = Uploader(Downloader, StorageBox)
 	AdminPanel = Panel()
 
 	#==========================================================================================#
@@ -114,7 +119,7 @@ else:
 
 		Bot.send_message(
 			chat_id = Message.chat.id,
-			text = _("Настройте <b>Telegram-dlp</b> под себя!\n\n<b>Сжатие</b> – управляет сжатием видеофайлов на стороне Telegram. При отключённом состоянии все видео будут отправляться как документы.\n\n<b>Перекодирование</b> – преобразует все форматы мультимедиа в <i>MP4</i> и <i>M4A</i>. При отключённом состоянии будут отправляться нативные файлы (зачастую гораздо быстрее, особенно для <a href=\"https://www.youtube.com\">YouTube</a>.\n\n<b>Архив</b> – для некоторых источников бот сохраняет параметры для загрузки видео. Вы можете воспользоваться архивными данными для моментального перехода к выбору скачиваемого файла, но эти сведения время от времени устаревают.\n\n<b>Хранилище</b> – если файл уже загружался кем-либо до вас, вы можете получить его моментально из хранилища."),
+			text = _("Настройте <b>Telegram-dlp</b> под себя!\n\n<b>Сжатие</b> – управляет сжатием видеофайлов на стороне Telegram. При отключённом состоянии все видео будут отправляться как документы.\n\n<b>Перекодирование</b> – преобразует все форматы мультимедиа в <i>MP4</i> и <i>M4A</i>. При отключённом состоянии будут отправляться нативные файлы (зачастую гораздо быстрее, особенно для <a href=\"https://www.youtube.com\">YouTube</a>.\n\n<b>Архив</b> – для некоторых источников бот сохраняет параметры для загрузки видео. Вы можете воспользоваться архивными данными для моментального перехода к выбору скачиваемого файла, но эти сведения время от времени устаревают.\n\n<b>Хранилище</b> – если файл уже загружался кем-либо до вас, вы можете получить его моментально из хранилища. Отключение хранилища также не позволяет использовать параллельную загрузку."),
 			parse_mode = "HTML",
 			disable_web_page_preview = True,
 			reply_markup = InlineKeyboards().options(User)
@@ -128,6 +133,7 @@ else:
 		User.set_property("option_archive", True, force = False)
 		User.set_property("option_storage", True, force = False)
 		User.set_property("is_downloading", False)
+
 		Bot.send_message(
 			chat_id = Message.chat.id,
 			text = _("<b>Telegram-dlp</b> поможет вам скачать видео или извлечь из них аудиодорожки. Поддерживается широкий список <a href=\"https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md\">источников</a>."),
@@ -165,10 +171,10 @@ else:
 			return
 
 		if urlparse(Message.text).scheme:
-			SendedMessage = Bot.send_message(
-				chat_id = Message.chat.id,
-				text = _("Идёт получение данных...")
-			)
+			Procedures = (_("Идёт получение данных...") + " ",)
+			PI = StepsIndicator(Bot, Message.chat.id, Procedures, parse_mode = "HTML")
+			PI.invert_emoji(True)
+			PI.start_animation()
 
 			Site = StorageBox.parse_site_name(Message.text)
 			Link = None
@@ -180,7 +186,7 @@ else:
 				
 				if StorageBox.check_for_playlist(Site, Link):
 					Bot.edit_message_text(
-						message_id = SendedMessage.id,
+						message_id = PI.message_id,
 						chat_id = Message.chat.id,
 						text = _("Данная ссылка ведёт к плейлисту, а не конкретному видео.")
 					)
@@ -194,7 +200,7 @@ else:
 
 				if "duration" in Info.keys() and type(Info["duration"]) == int and Info["duration"] >= 14400: 
 					Bot.edit_message_text(
-						message_id = SendedMessage.id,
+						message_id = PI.message_id,
 						chat_id = Message.chat.id,
 						text = _("Видео слишком длинное.")
 					)
@@ -205,10 +211,20 @@ else:
 				User.set_temp_property("site", Site)
 				User.set_temp_property("video_id", Info["id"])
 				User.set_temp_property("filename", Info["title"])
-				Bot.delete_message(message_id = SendedMessage.id, chat_id = Message.chat.id)
+
+				PI.stop_animation()
+				Bot.delete_message(message_id = PI.message_id, chat_id = Message.chat.id)
+				
+				for Quality in Settings["parallel_download_qualities"]:
+					DownloaderThread = Thread(target = UploaderObject.download_video, args = [User, Link, Info, Quality])
+					DownloaderThread.start()
+					User.set_object(Quality, DownloaderThread)
+
 				InlineKeyboards().send_format_selector(Bot, Message.chat.id, Info, StorageBox, Settings)
 
-			else: Bot.edit_message_text(message_id = SendedMessage.id, chat_id = Message.chat.id,text = _("Мне не удалось обнаружить видео по этой ссылке."))
+			else:
+				PI.stop_animation()
+				Bot.edit_message_text(message_id = PI.message_id, chat_id = Message.chat.id,text = _("Мне не удалось обнаружить видео по этой ссылке."))
 
 		else:
 			Bot.send_message(
@@ -246,18 +262,11 @@ else:
 		Compression = User.get_property("option_compression")
 		Recoding = User.get_property("option_recoding")
 		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression, Recoding)
-		
-		ProgressAnimation = Animation()
-		ProgressAnimation.set_interval(1)
-		ProgressAnimation.add_lines(".")
-		ProgressAnimation.add_lines("..")
-		ProgressAnimation.add_lines("...")
-		ProgressAnimation.add_lines("")
 
 		Procedures = [
-			_("Скачиваю аудио%s"),
-			_("Выгружаю аудио в Telegram%s"),
-			_("Отправляю%s")
+			_("Скачиваю аудио..."),
+			_("Выгружаю аудио в Telegram..."),
+			_("Отправляю...")
 		]
 
 		SI = StepsIndicator(Bot, Call.message.chat.id, Procedures, parse_mode = "HTML")
@@ -266,8 +275,7 @@ else:
 			Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Bot.get_me().username)
 
 		else:
-			SI.send()
-			SI.start_animation(ProgressAnimation)
+			SI.start_animation()
 			Result = Downloader.download_audio(Link, f"Temp/{User.id}", VideoID, recoding = Recoding)
 			
 			if Result:
@@ -312,24 +320,53 @@ else:
 			Bot.send_message(User.id, _("Видео слишком большое."))
 			return
 
-		ProgressAnimation = Animation()
-		ProgressAnimation.set_interval(1)
-		ProgressAnimation.add_lines(".")
-		ProgressAnimation.add_lines("..")
-		ProgressAnimation.add_lines("...")
-		ProgressAnimation.add_lines("")
-
 		Procedures = [
-			_("Скачиваю видео%s"),
-			_("Улучшаю качество%s"),
-			_("Выгружаю видео в Telegram%s"),
-			_("Отправляю%s")
+			_("Скачиваю видео..."),
+			_("Улучшаю качество..."),
+			_("Выгружаю видео в Telegram..."),
+			_("Отправляю...")
 		]
 
 		if not Settings["quality_improvement"]: Procedures.pop(1)
 		SI = StepsIndicator(Bot, Call.message.chat.id, Procedures, parse_mode = "HTML")
 
 		if Quality == "null": Quality = None
+
+		#---> Попытка присоединения к текущему потоку параллельной загрузки.
+		#==========================================================================================#
+
+		if User.has_object(Quality):
+			DownloaderThread: Thread = User.get_object(Quality)
+
+			if DownloaderThread and DownloaderThread.is_alive():
+				User.set_property("is_downloading", True)
+				SI.start_animation()
+
+				while DownloaderThread.is_alive(): pass
+				FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression, Recoding, watermarked = IsWatermarked)
+
+				if FileMessageID[0]:
+
+					if Settings["quality_improvement"]:
+						SI.next(_("Видео скачано."))
+						sleep(4)
+						SI.next(_("Качество улучшено."))
+
+					else: SI.next(_("Видео скачано."))
+
+					Bot.copy_message(Call.message.chat.id, FileMessageID[0], FileMessageID[1], caption = "@" + Bot.get_me().username)
+					SI.next(_("Видео загружено в Telegram."))
+					SI.stop_animation()
+					SI.next(_("Отправлено."))
+					return
+
+				else: SI.error(_("Не удалось загрузить видео в Telegram."))
+
+			else: User.remove_object(Quality)
+
+		#---> Выполнение загрузки в штатном режиме.
+		#==========================================================================================#
+
 		FileMessageID = StorageBox.get_file_message_id(Site, VideoID, Quality, Compression, Recoding, watermarked = IsWatermarked)
 
 		if FileMessageID[0] and User.get_property("option_storage"):
@@ -337,9 +374,9 @@ else:
 
 		else:
 			User.set_property("is_downloading", True)
-			SI.send()
-			SI.start_animation(ProgressAnimation)
-			Result = Downloader.download_video(Link, f"Temp/{User.id}", VideoID, FormatID, recoding = Recoding)
+			SI.start_animation()
+
+			Result = Downloader.download_video(Link, f"Temp/{User.id}/{Quality}", VideoID, FormatID, recoding = Recoding)
 
 			if Result:
 

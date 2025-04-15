@@ -1,10 +1,12 @@
+from Source.Core import ExtendedSupport
+
+from dublib.Methods.Filesystem import RemoveDirectoryContent
 from dublib.Methods.Filesystem import ReadJSON, WriteJSON
 from dublib.Engine.Bus import ExecutionStatus
 from dublib.Methods.Data import Zerotify
 
 from urllib.parse import urlparse, parse_qs, urlencode
 from time import sleep
-
 import base64
 import sys
 import os
@@ -120,7 +122,7 @@ class Storage:
 
 		return link
 
-	def get_file_message_id(self, site: str, id: str, quality: str, compression: bool, recoding: bool, watermarked: bool = False) -> list[int, None]:
+	def get_file_message_id(self, site: str, id: str, quality: str, compression: bool, recoding: bool, watermarked: bool = False) -> list[int | None]:
 		"""
 		Возвращает идентификаторы чата и сообщения с файлом.
 			site – название сайта;
@@ -210,7 +212,7 @@ class Storage:
 
 		return Info
 
-	def parse_site_name(self, link: str) -> str:
+	def parse_site_name(self, link: str) -> str | None:
 		"""
 		Получает название сайта из ссылки.
 			link – ссылка.
@@ -220,9 +222,12 @@ class Storage:
 
 		try:
 			Site = urlparse(link).hostname.replace("www.", "")
+
 			if Site.endswith(".com"): Site = Site[:-4]
+			if Site.startswith("m."): Site = Site[2:]
+
 			if Site == "youtu.be": Site = "youtube"
-			if Site == "vt.tiktok" or Site == "vm.tiktok.com": Site = "tiktok"
+			if Site == "vt.tiktok" or Site == "vm.tiktok": Site = "tiktok"
 			if "pornhub" in Site: Site = "pornhub"
 			if Site == "vkvideo.ru": Site = "vk"
 			if Site == "rutube.ru": Site = "rutube"
@@ -262,6 +267,9 @@ class Storage:
 			Buffer = link.split("?")[0].split("/")[-1]
 			if Buffer.isdigit(): VideoID = Buffer
 
+			if not VideoID:
+				VideoID = link.rstrip("/").split("/")[-1]
+
 		if site == "vk":
 			
 			if "video" in link:
@@ -281,7 +289,7 @@ class Storage:
 
 	def register_file(self, site: str, id: str, quality: str | None, compression: bool, recoding: bool, watermarked: bool, message_id: int, chat_id: int):
 		"""
-		Добавляет видео в хранилище.
+		Добавляет видео из источника с расширенной поддержкой в хранилище.
 			site – название сайта;
 			id – идентификатор видео;
 			quality – качество;
@@ -291,6 +299,8 @@ class Storage:
 			message_id – идентификатор сообщения с файлом;
 			chat_id – идентификатор чата с сообщением.
 		"""
+
+		if site not in [Support.value for Support in ExtendedSupport]: return
 
 		Path = f"{self.__StorageDirectory}/Files/{site}"
 		if not os.path.exists(Path): os.makedirs(Path)
@@ -354,17 +364,18 @@ class Storage:
 			if not os.path.exists(SaveDirectory): os.makedirs(SaveDirectory)
 			WriteJSON(f"{SaveDirectory}/{id}.json", info)
 
-	def upload_file(self, user_id: int, site: str, filename: str, quality: str, compression: bool, recoding: bool, watermarked: bool = False, name: str | None = None) -> bool:
+	def upload_file(self, user_id: int, site: str, filename: str, quality: str, compression: bool, recoding: bool, watermarked: bool = False, name: str | None = None, clear: bool = True) -> bool:
 		"""
 		Выгружает файл в Telegram.
-			user_id – идентификатор пользователя;
-			site – название сайта;
-			filename – название файла;
-			quality – качество видео;
-			compression – указывает, нужно ли использовать сжатие;
-			recoding – указывает, перекодирован ли файл;
-			watermarked – указывает, имеет ли видео водяной знак;
-			name – новое название файла.
+			user_id – идентификатор пользователя;\n
+			site – название сайта;\n
+			filename – название файла;\n
+			quality – качество видео;\n
+			compression – указывает, нужно ли использовать сжатие;\n
+			recoding – указывает, перекодирован ли файл;\n
+			watermarked – указывает, имеет ли видео водяной знак;\n
+			name – новое название файла;\n
+			clear – очищать ли директорию.
 		"""
 
 		IsSuccess = False
@@ -377,6 +388,12 @@ class Storage:
 		name = f"--name \"{self.__StringToFilename(name)}.{Filetype}\"" if name else ""
 		Result = os.system(f"{Venv} python3.{PythonMinorVersion} main.py upload --user {user_id} --site {site} --file {filename} --quality \"{quality}\" {name} {compression} {recoding} {watermarked}")
 		if Result == 0: IsSuccess = True
+
+		Folder = f"Temp/{user_id}/{quality}"
+
+		if clear and os.path.exists(Folder):
+			RemoveDirectoryContent(Folder)
+			os.rmdir(Folder)
 
 		return IsSuccess
 	

@@ -17,6 +17,21 @@ class TikTok(BaseExtractor):
 			Info["formats"] = Formats
 			Info["formats"][0]["resolution"] = "480x720"
 
+
+		if self._Config.check_key("fake_hd") and self._Config["fake_hd"]:
+			IsHD = False
+			Mini = dict()
+			for Format in Info["formats"]: 
+				if "width" in Format.keys() and Format["width"] == 576: Mini = Format
+
+				if "width" in Format.keys() and Format["width"] == 720: 
+					IsHD = True
+					break
+
+			if not IsHD and Mini:
+				Mini["resolution"] = "720x1280"
+				Info["formats"].append(Mini)
+
 		return Info
 	
 	def video(self, path: str, format_id: str) -> bool:
